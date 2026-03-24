@@ -1,50 +1,16 @@
-# Radar Data Platform
+# React + Vite
 
-Professional data platform for radar data processing and analysis.
+This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
-## Project Structure
+Currently, two official plugins are available:
 
-- `agents/`: Independent processing agents.
-- `catalog/`: Data catalog and metadata.
-- `config/`: Configuration files (YAML, JSON, etc.).
-- `data/`:
-    - `raw/`: Immutable source data.
-    - `staging/`: Intermediate data transformations.
-    - `processed/`: Final, cleaned data ready for analysis.
-- `docs/`: Project documentation.
-- `logs/`: Application and processing logs.
-- `scripts/`: Utility scripts for automation.
-- `sql/`: SQL migrations and queries.
-- `tests/`: Unit and integration tests.
+- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
+- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
 
-## Setup
+## React Compiler
 
-1. Clone the repository.
-2. Create a virtual environment: `python -m venv .venv`.
-3. Activate the environment:
-   - Windows: `.venv\Scripts\activate`
-   - Unix/macOS: `source .venv/bin/activate`
-4. Install dependencies: `pip install .` or `make install`.
-5. Configure environment: `cp .env.example .env` and edit `.env`.
+The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
 
-## Usage
+## Expanding the ESLint configuration
 
-Use the `Makefile` for common tasks:
-- `make install`: Install dependencies.
-- `make test`: Run tests.
-- `make lint`: Run code linting.
-
-## Core Dataset Roadmap (Prioridad de Integración)
-
-El desarrollo del paquete núcleo inicial seguirá este orden estricto de precedencia (identidad antes que volumen):
-
-1.  **Directorio de Establecimientos** (Identidad Base)
-2.  **Directorio de Sostenedores** (Identidad Administrativa)
-3.  **Matrícula** (Volumen de Demanda)
-4.  **Asistencia** (Continuidad de Proceso)
-5.  **Dotación** (Capacidad Instalada)
-6.  **SEP / Prioritarios / Preferentes** (Segmentación Crítica)
-7.  **Simce** (Resultados de Calidad)
-8.  **IDPS** (Indicadores de Desarrollo Social)
-
-*Nota: No se alterará este orden salvo inaccesibilidad crítica de la fuente.*
+If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.

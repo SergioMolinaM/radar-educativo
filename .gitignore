@@ -1,49 +1,24 @@
-# --- Python & Environments ---
-__pycache__/
-*.py[cod]
-*$py.class
-*.so
-.Python
-env/
-venv/
-.env
-.venv/
-pip-log.txt
-pip-delete-this-directory.txt
-.tox/
-.coverage
-.cache
-nosetests.xml
-coverage.xml
-*.cover
-*.py,cover
-.mypy_cache/
-.pytest_cache/
-
-# --- Tools & IDEs ---
-.vscode/
-.idea/
-*.swp
-*.swo
-.DS_Store
-Thumbs.db
-
-# --- Data Discipline (Exclude Data, Keep Structure) ---
-# We ignore the contents of data folders but keep the folders themselves via .gitkeep
-data/raw/*
-!data/raw/.gitkeep
-
-data/staging/*
-!data/staging/.gitkeep
-
-data/processed/*
-!data/processed/.gitkeep
-
-# --- Logs ---
-logs/*
-!logs/.gitkeep
-
-# --- Other heavy/temporary files ---
+# Logs
+logs
 *.log
-*.sqlite
-*.db
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+node_modules
+dist
+dist-ssr
+*.local
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
