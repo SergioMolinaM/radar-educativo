@@ -1,0 +1,164 @@
+# Reglas de Normalización y Validación
+
+naming_convention: snake_case
+
+analytics_targets:
+  mineduc_directorio: dim_establecimiento
+  mineduc_sostenedores: dim_sostenedor
+  mineduc_matricula: fact_matricula
+  mineduc_asistencia_abril: fact_asistencia_abril
+  mineduc_asistencia_julio: fact_asistencia_julio
+  mineduc_sep_prioritarios: fact_sep_prioritarios
+
+requires_mapping:
+  - mineduc
+
+required_fields_by_dataset:
+  mineduc_directorio:
+    - rbd
+    - nombre_establecimiento
+    - codigo_comuna
+    - codigo_region
+    - dependencia
+  mineduc_sostenedores:
+    - rut_sostenedor
+    - nombre_sostenedor
+    - codigo_region
+    - codigo_comuna
+  mineduc_matricula:
+    - agno
+    - rbd
+    - nombre_establecimiento
+    - mrun
+    - codigo_region
+    - codigo_comuna
+  mineduc_asistencia_abril:
+    - agno
+    - mes_escolar
+    - rbd
+    - mrun
+    - dias_asistidos
+    - dias_trabajados
+  mineduc_asistencia_julio:
+    - agno
+    - mes_escolar
+    - rbd
+    - mrun
+    - dias_asistidos
+    - dias_trabajados
+  mineduc_sep_prioritarios:
+    - agno
+    - mrun
+    - prioritario
+    - preferente
+
+validation_rules:
+  schema_consistency: true
+  mineduc_directorio:
+    rbd_range: [1, 99999]
+    check_nulls: [rbd, nombre_establecimiento, codigo_comuna]
+  mineduc_sostenedores:
+    check_nulls: [rut_sostenedor, nombre_sostenedor]
+  mineduc_matricula:
+    check_nulls: [agno, rbd, mrun]
+  mineduc_asistencia_abril:
+    - agno
+    - mes_escolar
+    - rbd
+    - mrun
+    - dias_asistidos
+    - dias_trabajados
+  mineduc_asistencia_julio:
+    check_nulls: [agno, mes_escolar, rbd, mrun]
+  mineduc_sep_prioritarios:
+    check_nulls: [agno, mrun] # RBD se excluye de nulos porque el 12.8% carece de establecimiento asignado en el registro SEP
+
+# Mapping rules for Directorio (Mineduc)
+mappings:
+  mineduc_directorio:
+    RBD: rbd
+    NOM_RBD: nombre_establecimiento
+    COD_COM_RBD: codigo_comuna
+    COD_REG_RBD: codigo_region
+    COD_DEPE: dependencia # Usamos COD_DEPE como clasificación administrativa estándar
+
+  mineduc_sostenedores:
+    MRUN: mrun
+    RUT_SOST: rut_sostenedor
+    NOMBRE_SOST: nombre_sostenedor
+    COD_REG_SOST: codigo_region
+    COD_COM_SOST: codigo_comuna
+    NOM_COM_SOST: nombre_comuna
+    NUM_RBD: num_rbd
+    MAT_TOTAL: matricula_total
+    NUM_C_DOC: num_docentes
+    NUM_C_ASIS: num_asistentes
+
+  mineduc_matricula:
+    AGNO: agno
+    RBD: rbd
+    NOM_RBD: nombre_establecimiento
+    COD_REG_RBD: codigo_region
+    COD_COM_RBD: codigo_comuna
+    COD_DEPE: dependencia
+    NOMBRE_SLEP: nombre_slep
+    MRUN: mrun
+    GEN_ALU: genero
+    FEC_NAC_ALU: fecha_nacimiento
+    EDAD_ALU: edad
+    COD_REG_ALU: codigo_region_alumno
+    COD_COM_ALU: codigo_comuna_alumno
+    COD_ENSE: cod_ense
+    COD_GRADO: cod_grado
+    LET_CUR: letra_curso
+    COD_JOR: cod_jornada
+
+  mineduc_asistencia_abril:
+    AGNO: agno
+    MES_ESCOLAR: mes_escolar
+    RBD: rbd
+    NOM_RBD: nombre_establecimiento
+    COD_REG_RBD: codigo_region
+    COD_COM_RBD: codigo_comuna
+    MRUN: mrun
+    GEN_ALU: genero
+    FEC_NAC_ALU: fecha_nacimiento
+    COD_ENSE: cod_ense
+    COD_GRADO: cod_grado
+    LET_CUR: letra_curso
+    DIAS_ASISTIDOS: dias_asistidos
+    DIAS_TRABAJADOS: dias_trabajados
+    ASIS_PROMEDIO: asistencia_promedio
+
+  mineduc_asistencia_julio:
+    AGNO: agno
+    MES_ESCOLAR: mes_escolar
+    RBD: rbd
+    NOM_RBD: nombre_establecimiento
+    COD_REG_RBD: codigo_region
+    COD_COM_RBD: codigo_comuna
+    MRUN: mrun
+    GEN_ALU: genero
+    FEC_NAC_ALU: fecha_nacimiento
+    COD_ENSE: cod_ense
+    COD_GRADO: cod_grado
+    LET_CUR: letra_curso
+    DIAS_ASISTIDOS: dias_asistidos
+    DIAS_TRABAJADOS: dias_trabajados
+    ASIS_PROMEDIO: asistencia_promedio
+
+  mineduc_sep_prioritarios:
+    AGNO: agno
+    MRUN: mrun
+    RBD: rbd
+    NOM_RBD: nombre_establecimiento
+    COD_REG_RBD: codigo_region
+    COD_COM_RBD: codigo_comuna
+    PRIORITARIO_ALU: prioritario
+    PREFERENTE_ALU: preferente
+    BEN_SEP: beneficiario_sep
+    CRITERIO_SEP: criterio_sep
+
+formats:
+  date: "YYYY-MM-DD"
+  numeric_precision: 2

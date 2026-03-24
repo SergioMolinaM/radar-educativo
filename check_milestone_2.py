@@ -6,19 +6,19 @@ from rich.table import Table
 
 console = Console()
 
-def check_milestone_5():
+def check_milestone_2():
     load_dotenv()
     db_url = os.getenv("DATABASE_URL")
     
     tables_to_check = [
-        ("raw", "mineduc_asistencia_abril"),
-        ("staging", "fact_asistencia_abril"),
-        ("analytics", "fact_asistencia_abril")
+        ("raw", "mineduc_sostenedores"),
+        ("staging", "stg_sostenedor"),
+        ("analytics", "dim_sostenedor")
     ]
     
-    console.print("[bold blue]Verificando Hito 5: Asistencia Abril (Cruce Analítico)[/bold blue]\n")
+    console.print("[bold blue]Verificando Hito 2: Sostenedores (E2E)[/bold blue]\n")
     
-    results_table = Table(title="Estado de Tablas Milestone 5")
+    results_table = Table(title="Estado de Tablas Milestone 2")
     results_table.add_column("Esquema", style="cyan")
     results_table.add_column("Tabla", style="magenta")
     results_table.add_column("Existe", style="green")
@@ -51,10 +51,10 @@ def check_milestone_5():
                     )
                     
         console.print(results_table)
-        console.print("\n[bold green]Hito 5 Verificado Exitosamente.[/bold green]")
+        console.print("\n[bold green]Hito 2 Verificado Exitosamente.[/bold green]")
         
     except Exception as e:
         console.print(f"[bold red]Error en verificación:[/bold red] {e}")
 
 if __name__ == "__main__":
-    check_milestone_5()
+    check_milestone_2()
