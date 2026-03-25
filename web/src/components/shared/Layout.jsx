@@ -1,5 +1,5 @@
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, AlertTriangle, School, DollarSign, LogOut } from 'lucide-react';
+import { LayoutDashboard, AlertTriangle, School, DollarSign, LogOut, Scale } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 
 const NAV = [
@@ -7,6 +7,7 @@ const NAV = [
   { to: '/alertas', icon: AlertTriangle, label: 'Alertas' },
   { to: '/establecimientos', icon: School, label: 'Establecimientos' },
   { to: '/financiero', icon: DollarSign, label: 'Financiero' },
+  { to: '/comparador', icon: Scale, label: 'Comparador' },
 ];
 
 export default function Layout() {

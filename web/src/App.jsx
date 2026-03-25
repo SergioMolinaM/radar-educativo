@@ -7,6 +7,7 @@ import Alertas from './pages/Alertas';
 import Establecimientos from './pages/Establecimientos';
 import EstablecimientoDetalle from './pages/EstablecimientoDetalle';
 import Financiero from './pages/Financiero';
+import Comparador from './pages/Comparador';
 
 function ProtectedRoute({ children }) {
   const { user } = useAuth();
@@ -26,6 +27,7 @@ function AppRoutes() {
         <Route path="establecimientos" element={<Establecimientos />} />
         <Route path="establecimientos/:rbd" element={<EstablecimientoDetalle />} />
         <Route path="financiero" element={<Financiero />} />
+        <Route path="comparador" element={<Comparador />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

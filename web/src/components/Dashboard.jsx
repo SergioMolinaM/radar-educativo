@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Users, GraduationCap, CalendarCheck, DollarSign, AlertTriangle } from 'lucide-react';
+import { Users, GraduationCap, CalendarCheck, DollarSign, AlertTriangle, Download } from 'lucide-react';
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import { dashboardApi } from '../services/api';
 import KpiCard from './shared/KpiCard';
@@ -44,10 +44,28 @@ export default function Dashboard() {
 
   return (
     <div className="animate-fade-in">
-      <h2 style={{ fontSize: 22, fontWeight: 700, marginBottom: 4 }}>Dashboard</h2>
-      <p style={{ color: 'var(--text-muted)', fontSize: 14, marginBottom: 24 }}>
-        Resumen operativo del SLEP &middot; {new Date().toLocaleDateString('es-CL', { month: 'long', year: 'numeric' })}
-      </p>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 24 }}>
+        <div>
+          <h2 style={{ fontSize: 22, fontWeight: 700, marginBottom: 4 }}>Dashboard</h2>
+          <p style={{ color: 'var(--text-muted)', fontSize: 14 }}>
+            Resumen operativo del SLEP &middot; {new Date().toLocaleDateString('es-CL', { month: 'long', year: 'numeric' })}
+          </p>
+        </div>
+        <button
+          onClick={() => {
+            const token = localStorage.getItem('token');
+            window.open(`/api/exports/excel?token=${token}`, '_blank');
+          }}
+          style={{
+            display: 'flex', alignItems: 'center', gap: 8,
+            padding: '8px 16px', background: 'rgba(59, 130, 246, 0.15)',
+            color: 'var(--accent-primary)', border: '1px solid rgba(59, 130, 246, 0.3)',
+            borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: 'pointer',
+          }}
+        >
+          <Download size={15} /> Exportar Excel
+        </button>
+      </div>
 
       {/* KPI Cards */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16, marginBottom: 24 }}>

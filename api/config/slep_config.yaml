@@ -1,13 +1,127 @@
 sleps:
-- id: slep_barrancas
-  name: Servicio Local de Educación Pública Barrancas
-  rut: 72.899.900-8
-  codigo_organismo: MOCK_TEMP
-  region: RM
-  modo_financiero: mock
-- id: slep_puerto_cordillera
-  name: Servicio Local de Educación Pública Puerto Cordillera
-  rut: PENDIENTE
-  codigo_organismo: MOCK_TEMP
-  region: COQUIMBO
-  modo_financiero: mock
+  # SLEPs con código de organismo real de Mercado Público (ChileCompra)
+  - id: barrancas
+    name: Servicio Local de Educación Pública Barrancas
+    rut: 72.899.900-8
+    codigo_organismo: "1593370"
+    region: RM
+    modo_financiero: api
+
+  - id: puerto_cordillera
+    name: Servicio Local de Educación Pública Puerto Cordillera
+    rut: PENDIENTE
+    codigo_organismo: "1593366"
+    region: COQUIMBO
+    modo_financiero: api
+
+  - id: huasco
+    name: Servicio Local de Educación Pública Huasco
+    rut: PENDIENTE
+    codigo_organismo: "1622793"
+    region: ATACAMA
+    modo_financiero: api
+
+  - id: costa_araucania
+    name: Servicio Local de Educación Pública Costa Araucanía
+    rut: PENDIENTE
+    codigo_organismo: "1622818"
+    region: ARAUCANIA
+    modo_financiero: api
+
+  - id: chinchorro
+    name: Servicio Local de Educación Pública Chinchorro
+    rut: PENDIENTE
+    codigo_organismo: "1675210"
+    region: ARICA
+    modo_financiero: api
+
+  - id: andalien_sur
+    name: Servicio Local de Educación Pública Andalién Sur
+    rut: PENDIENTE
+    codigo_organismo: "1675218"
+    region: BIOBIO
+    modo_financiero: api
+
+  - id: colchagua
+    name: Servicio Local de Educación Pública Colchagua
+    rut: PENDIENTE
+    codigo_organismo: "1717135"
+    region: OHIGGINS
+    modo_financiero: api
+
+  - id: gabriela_mistral
+    name: Servicio Local de Educación Pública Gabriela Mistral
+    rut: PENDIENTE
+    codigo_organismo: "1675231"
+    region: RM
+    modo_financiero: api
+
+  - id: llanquihue
+    name: Servicio Local de Educación Pública Llanquihue
+    rut: PENDIENTE
+    codigo_organismo: "1717137"
+    region: LOS LAGOS
+    modo_financiero: api
+
+  - id: valparaiso
+    name: Servicio Local de Educación Pública Valparaíso
+    rut: PENDIENTE
+    codigo_organismo: "1722523"
+    region: VALPARAISO
+    modo_financiero: api
+
+  - id: atacama
+    name: Servicio Local de Educación Pública Atacama
+    rut: PENDIENTE
+    codigo_organismo: "1723291"
+    region: ATACAMA
+    modo_financiero: api
+
+  - id: aconcagua
+    name: Servicio Local de Educación Pública Aconcagua
+    rut: PENDIENTE
+    codigo_organismo: "1959820"
+    region: VALPARAISO
+    modo_financiero: api
+
+  - id: antofagasta
+    name: Servicio Local de Educación Pública Antofagasta
+    rut: PENDIENTE
+    codigo_organismo: "1959810"
+    region: ANTOFAGASTA
+    modo_financiero: api
+
+  - id: aysen
+    name: Servicio Local de Educación Pública Aysén
+    rut: PENDIENTE
+    codigo_organismo: "1820914"
+    region: AYSEN
+    modo_financiero: api
+
+  - id: chiloe
+    name: Servicio Local de Educación Pública Chiloé
+    rut: PENDIENTE
+    codigo_organismo: "1975701"
+    region: LOS LAGOS
+    modo_financiero: api
+
+  - id: magallanes
+    name: Servicio Local de Educación Pública Magallanes
+    rut: PENDIENTE
+    codigo_organismo: "1820911"
+    region: MAGALLANES
+    modo_financiero: api
+
+  - id: maule_costa
+    name: Servicio Local de Educación Pública Maule Costa
+    rut: PENDIENTE
+    codigo_organismo: "1820918"
+    region: MAULE
+    modo_financiero: api
+
+  - id: petorca
+    name: Servicio Local de Educación Pública Petorca
+    rut: PENDIENTE
+    codigo_organismo: "1959831"
+    region: VALPARAISO
+    modo_financiero: api
