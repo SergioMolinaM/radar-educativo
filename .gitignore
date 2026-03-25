@@ -34,5 +34,12 @@ data/
 *.sln
 *.sw?
 
+# Large files
+*.pptx
+*.mp4
+*.rar
+*.zip
+docs/buenas_practicas_slep/
+
 # OS
 Thumbs.db

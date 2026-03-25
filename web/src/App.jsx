@@ -12,6 +12,7 @@ import ResumenEjecutivo from './pages/ResumenEjecutivo';
 import MiSlep from './pages/MiSlep';
 import EstablecimientoReal from './pages/EstablecimientoReal';
 import Ranking from './pages/Ranking';
+import PlanAnual from './pages/PlanAnual';
 
 function ProtectedRoute({ children }) {
   const { user } = useAuth();
@@ -36,6 +37,7 @@ function AppRoutes() {
         <Route path="mi-slep" element={<MiSlep />} />
         <Route path="mi-slep/:rbd" element={<EstablecimientoReal />} />
         <Route path="ranking" element={<Ranking />} />
+        <Route path="plan-anual" element={<PlanAnual />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

@@ -55,4 +55,10 @@ export const slepApi = {
   establecimiento: (rbd) => api.get(`/slep/establecimiento/${rbd}`),
 };
 
+export const palApi = {
+  documentos: () => api.get('/pal/documentos'),
+  documento: (id) => api.get(`/pal/documento/${id}`),
+  resumen: () => api.get('/pal/resumen'),
+};
+
 export default api;
