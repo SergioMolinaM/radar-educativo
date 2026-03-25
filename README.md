@@ -1,16 +1,81 @@
-# React + Vite
+# Radar Educativo
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Plataforma de gestion educativa, financiera y operativa para Servicios Locales de Educacion Publica (SLEPs).
 
-Currently, two official plugins are available:
+## Que hace
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- **Alertas tempranas**: semaforos rojo/naranja/verde por establecimiento basados en asistencia, matricula, dotacion y ejecucion presupuestaria
+- **Monitoreo financiero**: seguimiento de ejecucion presupuestaria e integracion con Mercado Publico
+- **Datos integrados**: pipeline automatizado que consolida datos de Mineduc, Mercado Publico, Transparencia y PAL
+- **Dashboard operativo**: vision unificada para directores SLEP con indicadores accionables
 
-## React Compiler
+## Arquitectura
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+```
+web/          React + Vite (dashboard SPA)
+api/          FastAPI + Python (backend, pipeline de datos, alertas)
+database/     PostgreSQL schemas, views, marts
+infra/        Docker, nginx, CI/CD
+```
 
-## Expanding the ESLint configuration
+## Inicio rapido
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+```bash
+# 1. Clonar y configurar
+cp .env.example .env
+# Editar .env con tus credenciales
+
+# 2. Levantar con Docker
+cd infra
+docker compose up -d
+
+# 3. Verificar
+curl http://localhost:8000/health
+# Frontend en http://localhost:3000
+```
+
+## Desarrollo local (sin Docker)
+
+```bash
+# Backend
+pip install -e ".[dev]"
+pip install fastapi uvicorn[standard]
+uvicorn api.main:app --reload
+
+# Frontend
+cd web
+npm install
+npm run dev
+```
+
+## Pipeline de datos
+
+```bash
+# CLI para operaciones de datos
+python api/cli.py catalog          # Descubrir datasets disponibles
+python api/cli.py profile <id>     # Perfilar estructura de un dataset
+python api/cli.py validate <id>    # Validar calidad
+python api/cli.py load <id>        # Cargar a base de datos (raw->staging->analytics)
+```
+
+## Estructura de datos
+
+```
+raw/        -> Datos originales sin modificar
+staging/    -> Datos limpiados y normalizados
+analytics/  -> Modelos dimensionales listos para consulta
+```
+
+Dimensiones: `dim_establecimiento`, `dim_sostenedor`
+Hechos: `fact_matricula`, `fact_asistencia`, `fact_sep_prioritarios`
+Vista: `vh_radar_integral` (vista tridimensional integrada)
+
+## Tests
+
+```bash
+pytest tests/
+```
+
+## Licencia
+
+Propietario - Tercera Letra SpA
