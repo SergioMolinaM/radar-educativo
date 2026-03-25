@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Users, GraduationCap, CalendarCheck, ShieldAlert, AlertTriangle, Download } from 'lucide-react';
+import { Users, GraduationCap, CalendarCheck, ShieldAlert, AlertTriangle, Download, Search, ArrowUpDown } from 'lucide-react';
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import { slepApi } from '../services/api';
 import { useAuth } from '../hooks/useAuth';
@@ -16,6 +16,10 @@ export default function MiSlep() {
   const [establecimientos, setEstablecimientos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [search, setSearch] = useState('');
+  const [sortBy, setSortBy] = useState('asistencia');
+  const [sortAsc, setSortAsc] = useState(true);
+  const [filterSemaforo, setFilterSemaforo] = useState('');
 
   useEffect(() => {
     setLoading(true);
@@ -113,47 +117,104 @@ export default function MiSlep() {
         </div>
       </div>
 
-      {/* Tabla de establecimientos */}
+      {/* Tabla con búsqueda, filtros y ordenamiento */}
       <div className="glass-panel" style={{ padding: 24 }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-          <h3 style={{ fontSize: 15, fontWeight: 600, margin: 0 }}>Todos los establecimientos</h3>
-          <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{establecimientos.length} establecimientos</span>
+        {/* Controls */}
+        <div style={{ display: 'flex', gap: 12, marginBottom: 16, flexWrap: 'wrap', alignItems: 'center' }}>
+          <div style={{ flex: 1, minWidth: 200, position: 'relative' }}>
+            <Search size={14} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+            <input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Buscar por nombre o RBD..."
+              style={{ width: '100%', padding: '8px 12px 8px 34px', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border-color)', borderRadius: 8, color: 'var(--text-main)', fontSize: 13, outline: 'none', boxSizing: 'border-box' }}
+            />
+          </div>
+          {['', 'rojo', 'naranja', 'verde'].map((f) => (
+            <button key={f} onClick={() => setFilterSemaforo(f)} style={{
+              padding: '6px 12px', borderRadius: 8, fontSize: 12, cursor: 'pointer',
+              border: '1px solid var(--border-color)',
+              background: filterSemaforo === f ? 'var(--accent-primary)' : 'transparent',
+              color: filterSemaforo === f ? 'white' : 'var(--text-muted)',
+            }}>
+              {f || 'Todos'}
+            </button>
+          ))}
+          <select
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value)}
+            style={{ padding: '6px 10px', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border-color)', borderRadius: 8, color: 'var(--text-main)', fontSize: 12 }}
+          >
+            <option value="asistencia">Ordenar: Asistencia</option>
+            <option value="matricula">Ordenar: Matrícula</option>
+            <option value="vulnerabilidad_pct">Ordenar: Vulnerabilidad</option>
+            <option value="nombre">Ordenar: Nombre</option>
+          </select>
+          <button onClick={() => setSortAsc(!sortAsc)} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: 4 }}>
+            <ArrowUpDown size={16} />
+          </button>
         </div>
-        <div style={{ maxHeight: 500, overflowY: 'auto' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-            <thead style={{ position: 'sticky', top: 0, background: 'rgba(15, 23, 42, 0.95)' }}>
-              <tr>
-                {['RBD', 'Nombre', 'Matrícula', 'Asistencia', 'Vulnerab.', 'Semáforo'].map((h) => (
-                  <th key={h} style={thStyle}>{h}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {establecimientos.map((e) => (
-                <tr
-                  key={e.rbd}
-                  onClick={() => navigate(`/mi-slep/${e.rbd}`)}
-                  style={{ cursor: 'pointer', transition: 'background 0.2s' }}
-                  onMouseEnter={(ev) => (ev.currentTarget.style.background = 'rgba(255,255,255,0.03)')}
-                  onMouseLeave={(ev) => (ev.currentTarget.style.background = 'transparent')}
-                >
-                  <td style={tdStyle}>{e.rbd}</td>
-                  <td style={tdStyle}>{e.nombre}</td>
-                  <td style={tdStyle}>{e.matricula.toLocaleString('es-CL')}</td>
-                  <td style={{ ...tdStyle, color: e.asistencia < 85 ? 'var(--alert-red)' : e.asistencia < 90 ? 'var(--alert-orange)' : 'var(--text-main)', fontWeight: e.asistencia < 85 ? 700 : 400 }}>
-                    {e.asistencia}%
-                  </td>
-                  <td style={{ ...tdStyle, color: e.vulnerabilidad_pct > 70 ? 'var(--alert-red)' : 'var(--text-muted)' }}>
-                    {e.vulnerabilidad_pct}%
-                  </td>
-                  <td style={tdStyle}>
-                    <SemaforoTag value={e.semaforo === 'roj' ? 'rojo' : e.semaforo === 'naranj' ? 'naranja' : e.semaforo} size="sm" />
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+
+        {(() => {
+          let filtered = establecimientos;
+          if (search) {
+            const q = search.toLowerCase();
+            filtered = filtered.filter((e) => e.nombre.toLowerCase().includes(q) || String(e.rbd).includes(q));
+          }
+          if (filterSemaforo) {
+            filtered = filtered.filter((e) => {
+              const s = e.semaforo === 'roj' ? 'rojo' : e.semaforo === 'naranj' ? 'naranja' : e.semaforo;
+              return s === filterSemaforo;
+            });
+          }
+          filtered = [...filtered].sort((a, b) => {
+            const va = sortBy === 'nombre' ? a.nombre : a[sortBy];
+            const vb = sortBy === 'nombre' ? b.nombre : b[sortBy];
+            if (typeof va === 'string') return sortAsc ? va.localeCompare(vb) : vb.localeCompare(va);
+            return sortAsc ? va - vb : vb - va;
+          });
+
+          return (
+            <>
+              <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 8 }}>
+                Mostrando {filtered.length} de {establecimientos.length} establecimientos
+              </div>
+              <div style={{ maxHeight: 500, overflowY: 'auto' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                  <thead style={{ position: 'sticky', top: 0, background: 'rgba(15, 23, 42, 0.95)' }}>
+                    <tr>
+                      {['RBD', 'Nombre', 'Matrícula', 'Asistencia', 'Vulnerab.', 'Semáforo'].map((h) => (
+                        <th key={h} style={thStyle}>{h}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filtered.map((e) => (
+                      <tr key={e.rbd} onClick={() => navigate(`/mi-slep/${e.rbd}`)}
+                        style={{ cursor: 'pointer', transition: 'background 0.2s' }}
+                        onMouseEnter={(ev) => (ev.currentTarget.style.background = 'rgba(255,255,255,0.03)')}
+                        onMouseLeave={(ev) => (ev.currentTarget.style.background = 'transparent')}
+                      >
+                        <td style={tdStyle}>{e.rbd}</td>
+                        <td style={tdStyle}>{e.nombre}</td>
+                        <td style={tdStyle}>{e.matricula.toLocaleString('es-CL')}</td>
+                        <td style={{ ...tdStyle, color: e.asistencia < 85 ? 'var(--alert-red)' : e.asistencia < 90 ? 'var(--alert-orange)' : 'var(--text-main)', fontWeight: e.asistencia < 85 ? 700 : 400 }}>
+                          {e.asistencia}%
+                        </td>
+                        <td style={{ ...tdStyle, color: e.vulnerabilidad_pct > 70 ? 'var(--alert-red)' : 'var(--text-muted)' }}>
+                          {e.vulnerabilidad_pct}%
+                        </td>
+                        <td style={tdStyle}>
+                          <SemaforoTag value={e.semaforo === 'roj' ? 'rojo' : e.semaforo === 'naranj' ? 'naranja' : e.semaforo} size="sm" />
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </>
+          );
+        })()}
       </div>
     </div>
   );

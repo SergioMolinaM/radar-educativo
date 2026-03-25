@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, GraduationCap, CalendarCheck, ShieldAlert, AlertTriangle } from 'lucide-react';
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, LineChart, Line, Legend } from 'recharts';
 import { slepApi } from '../services/api';
 import KpiCard from '../components/shared/KpiCard';
 import SemaforoTag from '../components/shared/SemaforoTag';
@@ -121,6 +121,45 @@ export default function EstablecimientoReal() {
           </div>
         </div>
       </div>
+
+      {/* SIMCE Trend Chart */}
+      {data.simce?.length > 1 && (() => {
+        const niveles = [...new Set(data.simce.map(s => s.nivel))];
+        const anios = [...new Set(data.simce.map(s => s.anio))].sort();
+        const trendData = anios.map(anio => {
+          const row = { anio: String(anio) };
+          niveles.forEach(nivel => {
+            const entry = data.simce.find(s => s.anio === anio && s.nivel === nivel);
+            if (entry?.lectura) row[`${nivel} Lectura`] = entry.lectura;
+            if (entry?.matematica) row[`${nivel} Matemática`] = entry.matematica;
+          });
+          return row;
+        });
+        const COLORS = ['#3b82f6', '#8b5cf6', '#10b981', '#f59e0b', '#ef4444', '#ec4899'];
+        const lines = [];
+        niveles.forEach((nivel, i) => {
+          lines.push({ key: `${nivel} Lectura`, color: COLORS[i * 2] || COLORS[0] });
+          lines.push({ key: `${nivel} Matemática`, color: COLORS[i * 2 + 1] || COLORS[1] });
+        });
+
+        return (
+          <div className="glass-panel" style={{ padding: 24, marginBottom: 16 }}>
+            <h3 style={{ fontSize: 15, fontWeight: 600, marginBottom: 16 }}>Evolución SIMCE</h3>
+            <ResponsiveContainer width="100%" height={250}>
+              <LineChart data={trendData}>
+                <XAxis dataKey="anio" tick={{ fill: '#94a3b8', fontSize: 12 }} axisLine={false} tickLine={false} />
+                <YAxis domain={[200, 320]} tick={{ fill: '#94a3b8', fontSize: 11 }} axisLine={false} tickLine={false} />
+                <Tooltip contentStyle={{ background: '#1e293b', border: 'none', borderRadius: 8, fontSize: 12 }} />
+                <Legend wrapperStyle={{ fontSize: 11 }} />
+                {lines.map(l => (
+                  <Line key={l.key} type="monotone" dataKey={l.key} stroke={l.color} strokeWidth={2}
+                    dot={{ fill: l.color, r: 4 }} connectNulls />
+                ))}
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        );
+      })()}
 
       {/* SIMCE */}
       {data.simce?.length > 0 && (
