@@ -1,12 +1,15 @@
 import { useState, useEffect } from 'react';
-import { DollarSign, ShoppingCart } from 'lucide-react';
+import { DollarSign, ShoppingCart, Wifi } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import { financialApi } from '../services/api';
+import api from '../services/api';
 import KpiCard from '../components/shared/KpiCard';
 
 export default function Financiero() {
   const [execution, setExecution] = useState(null);
   const [orders, setOrders] = useState(null);
+  const [liveOrders, setLiveOrders] = useState(null);
+  const [liveLoading, setLiveLoading] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -87,6 +90,67 @@ export default function Financiero() {
             ))}
           </div>
         </div>
+      </div>
+
+      {/* Mercado Público en vivo */}
+      <div className="glass-panel" style={{ padding: 24, marginTop: 16 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+          <h3 style={{ fontSize: 15, fontWeight: 600, margin: 0 }}>
+            <Wifi size={16} style={{ marginRight: 8, verticalAlign: 'middle', color: 'var(--alert-green)' }} />
+            Mercado Público - Consulta en vivo
+          </h3>
+          <button
+            onClick={() => {
+              setLiveLoading(true);
+              api.get('/financial/mercado-publico-live')
+                .then(({ data }) => setLiveOrders(data))
+                .catch(() => {})
+                .finally(() => setLiveLoading(false));
+            }}
+            disabled={liveLoading}
+            style={{
+              padding: '6px 14px', background: 'var(--accent-primary)',
+              color: 'white', border: 'none', borderRadius: 8,
+              fontSize: 13, cursor: 'pointer', opacity: liveLoading ? 0.7 : 1,
+            }}
+          >
+            {liveLoading ? 'Consultando API...' : 'Consultar ahora'}
+          </button>
+        </div>
+
+        {liveOrders?.error && (
+          <div style={{ padding: 12, background: 'var(--alert-red-bg)', color: 'var(--alert-red)', borderRadius: 8, fontSize: 13 }}>
+            {liveOrders.error}
+          </div>
+        )}
+
+        {liveOrders?.ordenes?.length > 0 && (
+          <>
+            <p style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 12 }}>
+              {liveOrders.total} órdenes encontradas para código {liveOrders.codigo_organismo}
+            </p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              {liveOrders.ordenes.map((o, i) => (
+                <div key={i} style={{
+                  padding: '12px 14px', background: 'rgba(255,255,255,0.03)',
+                  borderRadius: 8, border: '1px solid var(--border-color)',
+                }}>
+                  <div style={{ fontWeight: 600, fontSize: 13 }}>{o.id}</div>
+                  <div style={{ fontSize: 13, marginTop: 4 }}>{o.nombre}</div>
+                  <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 4 }}>
+                    {o.tipo} &middot; {o.estado} &middot; {o.fecha}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </>
+        )}
+
+        {!liveOrders && !liveLoading && (
+          <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>
+            Presiona "Consultar ahora" para obtener las órdenes de compra directamente desde la API de Mercado Público.
+          </p>
+        )}
       </div>
     </div>
   );

@@ -5,7 +5,7 @@ FastAPI backend for SLEP education management platform.
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from api.routers import auth, dashboard, alerts, establishments, financial, exports, compare
+from api.routers import auth, dashboard, alerts, establishments, financial, exports, compare, sleps
 
 app = FastAPI(
     title="Radar Educativo API",
@@ -34,3 +34,4 @@ app.include_router(establishments.router, prefix="/api/establishments", tags=["e
 app.include_router(financial.router, prefix="/api/financial", tags=["financial"])
 app.include_router(exports.router, prefix="/api/exports", tags=["exports"])
 app.include_router(compare.router, prefix="/api/compare", tags=["compare"])
+app.include_router(sleps.router, prefix="/api/sleps", tags=["sleps"])

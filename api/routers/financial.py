@@ -1,10 +1,16 @@
 """Financial router - Budget execution and Mercado Público endpoints."""
 import logging
+import os
 
+import requests as http_requests
+import yaml
+from dotenv import load_dotenv
 from fastapi import APIRouter, Depends
 
 from api.db.connection import query_all, check_table_exists
 from api.routers.auth import get_current_user
+
+load_dotenv()
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -104,3 +110,65 @@ def get_mercado_publico(current_user: dict = Depends(get_current_user)):
     except Exception as e:
         logger.warning("Falling back to demo orders: %s", e)
         return {"slep_id": slep_id, "ordenes_recientes": DEMO_ORDERS}
+
+
+def _get_slep_codigo(slep_id: str) -> str | None:
+    """Get Mercado Público organism code for a SLEP from config."""
+    config_paths = ["api/config/slep_config.yaml", "config/slep_config.yaml"]
+    for path in config_paths:
+        try:
+            with open(path) as f:
+                config = yaml.safe_load(f)
+            for slep in config.get("sleps", []):
+                if slep.get("id") == slep_id:
+                    return slep.get("codigo_organismo")
+        except FileNotFoundError:
+            continue
+    return None
+
+
+@router.get("/mercado-publico-live")
+def get_mercado_publico_live(current_user: dict = Depends(get_current_user)):
+    """Query Mercado Público API in real-time for the user's SLEP."""
+    slep_id = current_user["slep_id"]
+    ticket = os.getenv("MERCADO_PUBLICO_TICKET")
+
+    if not ticket or ticket == "ingresar_ticket_aqui":
+        return {"slep_id": slep_id, "error": "API ticket no configurado", "ordenes": []}
+
+    codigo = _get_slep_codigo(slep_id)
+    if not codigo:
+        return {"slep_id": slep_id, "error": f"Código organismo no encontrado para SLEP {slep_id}", "ordenes": []}
+
+    try:
+        url = "https://api.mercadopublico.cl/servicios/v1/publico/ordenesdecompra.json"
+        resp = http_requests.get(url, params={
+            "ticket": ticket,
+            "CodigoOrganismo": codigo,
+            "estado": "todos",
+        }, timeout=30)
+
+        if resp.status_code != 200:
+            return {"slep_id": slep_id, "error": f"API respondió {resp.status_code}", "ordenes": []}
+
+        data = resp.json()
+        ordenes = []
+        for oc in data.get("Listado", []):
+            ordenes.append({
+                "id": oc.get("Codigo", ""),
+                "nombre": oc.get("Nombre", "")[:80],
+                "estado": oc.get("Estado") or "Sin estado",
+                "fecha": oc.get("Fechas", {}).get("FechaCreacion", ""),
+                "tipo": oc.get("Tipo", ""),
+            })
+
+        return {
+            "slep_id": slep_id,
+            "codigo_organismo": codigo,
+            "total": data.get("Cantidad", 0),
+            "ordenes": ordenes,
+        }
+
+    except Exception as e:
+        logger.error("Error consultando Mercado Público: %s", e)
+        return {"slep_id": slep_id, "error": str(e), "ordenes": []}
