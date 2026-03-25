@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, AlertTriangle, School, DollarSign, LogOut, Scale, FileText, ChevronDown } from 'lucide-react';
+import { LayoutDashboard, AlertTriangle, School, DollarSign, LogOut, Scale, FileText, ChevronDown, Building2 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import api from '../../services/api';
 
 const NAV = [
   { to: '/', icon: LayoutDashboard, label: 'Panel general' },
+  { to: '/mi-slep', icon: Building2, label: 'Mi SLEP' },
   { to: '/alertas', icon: AlertTriangle, label: 'Alertas' },
   { to: '/establecimientos', icon: School, label: 'Establecimientos' },
   { to: '/financiero', icon: DollarSign, label: 'Financiero' },

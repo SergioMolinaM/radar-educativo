@@ -1,127 +1,157 @@
 sleps:
-  # SLEPs con código de organismo real de Mercado Público (ChileCompra)
+  # SLEPs con RUT sostenedor real (de la DB) + código organismo Mercado Público
   - id: barrancas
-    name: Servicio Local de Educación Pública Barrancas
-    rut: 72.899.900-8
+    name: SLEP Las Barrancas
+    rut_sostenedor: "65154021"
     codigo_organismo: "1593370"
     region: RM
-    modo_financiero: api
 
   - id: puerto_cordillera
-    name: Servicio Local de Educación Pública Puerto Cordillera
-    rut: PENDIENTE
+    name: SLEP Puerto Cordillera
+    rut_sostenedor: "61999320"
     codigo_organismo: "1593366"
     region: COQUIMBO
-    modo_financiero: api
 
   - id: huasco
-    name: Servicio Local de Educación Pública Huasco
-    rut: PENDIENTE
+    name: SLEP Huasco
+    rut_sostenedor: "61999330"
     codigo_organismo: "1622793"
     region: ATACAMA
-    modo_financiero: api
 
   - id: costa_araucania
-    name: Servicio Local de Educación Pública Costa Araucanía
-    rut: PENDIENTE
+    name: SLEP Costa Araucanía
+    rut_sostenedor: "65154272"
     codigo_organismo: "1622818"
     region: ARAUCANIA
-    modo_financiero: api
 
   - id: chinchorro
-    name: Servicio Local de Educación Pública Chinchorro
-    rut: PENDIENTE
+    name: SLEP Chinchorro
+    rut_sostenedor: "62000660"
     codigo_organismo: "1675210"
     region: ARICA
-    modo_financiero: api
 
   - id: andalien_sur
-    name: Servicio Local de Educación Pública Andalién Sur
-    rut: PENDIENTE
+    name: SLEP Andalién Sur
+    rut_sostenedor: "65181672"
     codigo_organismo: "1675218"
     region: BIOBIO
-    modo_financiero: api
 
   - id: colchagua
-    name: Servicio Local de Educación Pública Colchagua
-    rut: PENDIENTE
+    name: SLEP Colchagua
+    rut_sostenedor: "62000790"
     codigo_organismo: "1717135"
     region: OHIGGINS
-    modo_financiero: api
 
   - id: gabriela_mistral
-    name: Servicio Local de Educación Pública Gabriela Mistral
-    rut: PENDIENTE
+    name: SLEP Gabriela Mistral
+    rut_sostenedor: "62000650"
     codigo_organismo: "1675231"
     region: RM
-    modo_financiero: api
 
   - id: llanquihue
-    name: Servicio Local de Educación Pública Llanquihue
-    rut: PENDIENTE
+    name: SLEP Llanquihue
+    rut_sostenedor: "62000800"
     codigo_organismo: "1717137"
     region: LOS LAGOS
-    modo_financiero: api
 
   - id: valparaiso
-    name: Servicio Local de Educación Pública Valparaíso
-    rut: PENDIENTE
+    name: SLEP Valparaíso
+    rut_sostenedor: "62000820"
     codigo_organismo: "1722523"
     region: VALPARAISO
-    modo_financiero: api
 
   - id: atacama
-    name: Servicio Local de Educación Pública Atacama
-    rut: PENDIENTE
+    name: SLEP Atacama
+    rut_sostenedor: "62000810"
     codigo_organismo: "1723291"
     region: ATACAMA
-    modo_financiero: api
-
-  - id: aconcagua
-    name: Servicio Local de Educación Pública Aconcagua
-    rut: PENDIENTE
-    codigo_organismo: "1959820"
-    region: VALPARAISO
-    modo_financiero: api
-
-  - id: antofagasta
-    name: Servicio Local de Educación Pública Antofagasta
-    rut: PENDIENTE
-    codigo_organismo: "1959810"
-    region: ANTOFAGASTA
-    modo_financiero: api
 
   - id: aysen
-    name: Servicio Local de Educación Pública Aysén
-    rut: PENDIENTE
+    name: SLEP Aysén
+    rut_sostenedor: "61980950"
     codigo_organismo: "1820914"
     region: AYSEN
-    modo_financiero: api
 
   - id: chiloe
-    name: Servicio Local de Educación Pública Chiloé
-    rut: PENDIENTE
+    name: SLEP Chiloé
+    rut_sostenedor: "61981360"
     codigo_organismo: "1975701"
     region: LOS LAGOS
-    modo_financiero: api
 
   - id: magallanes
-    name: Servicio Local de Educación Pública Magallanes
-    rut: PENDIENTE
+    name: SLEP Magallanes
+    rut_sostenedor: "61980960"
     codigo_organismo: "1820911"
     region: MAGALLANES
-    modo_financiero: api
 
   - id: maule_costa
-    name: Servicio Local de Educación Pública Maule Costa
-    rut: PENDIENTE
+    name: SLEP Maule Costa
+    rut_sostenedor: "61980930"
     codigo_organismo: "1820918"
     region: MAULE
-    modo_financiero: api
 
-  - id: petorca
-    name: Servicio Local de Educación Pública Petorca
-    rut: PENDIENTE
-    codigo_organismo: "1959831"
+  - id: costa_central
+    name: SLEP Costa Central
+    rut_sostenedor: "61981120"
+    codigo_organismo: ""
     region: VALPARAISO
-    modo_financiero: api
+
+  - id: elqui
+    name: SLEP El Elqui
+    rut_sostenedor: "61981040"
+    codigo_organismo: ""
+    region: COQUIMBO
+
+  - id: andalien_costa
+    name: SLEP Andalién Costa
+    rut_sostenedor: "61981100"
+    codigo_organismo: ""
+    region: BIOBIO
+
+  - id: valdivia
+    name: SLEP Valdivia
+    rut_sostenedor: "61981110"
+    codigo_organismo: ""
+    region: LOS RIOS
+
+  - id: del_pino
+    name: SLEP Del Pino
+    rut_sostenedor: "61981090"
+    codigo_organismo: ""
+    region: RM
+
+  - id: licancabur
+    name: SLEP Licancabur
+    rut_sostenedor: "61980920"
+    codigo_organismo: ""
+    region: ANTOFAGASTA
+
+  - id: punilla_cordillera
+    name: SLEP Punilla Cordillera
+    rut_sostenedor: "61980940"
+    codigo_organismo: ""
+    region: NUBLE
+
+  - id: iquique
+    name: SLEP Iquique
+    rut_sostenedor: "61980910"
+    codigo_organismo: ""
+    region: TARAPACA
+
+  - id: los_libertadores
+    name: SLEP Los Libertadores
+    rut_sostenedor: "61981060"
+    codigo_organismo: ""
+    region: VALPARAISO
+
+  - id: santa_corina
+    name: SLEP Santa Corina
+    rut_sostenedor: "61981080"
+    codigo_organismo: ""
+    region: RM
+
+  - id: santa_rosa
+    name: SLEP Santa Rosa
+    rut_sostenedor: "61981070"
+    codigo_organismo: ""
+    region: RM

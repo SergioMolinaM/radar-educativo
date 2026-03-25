@@ -49,4 +49,10 @@ export const financialApi = {
   mercadoPublico: () => api.get('/financial/mercado-publico'),
 };
 
+export const slepApi = {
+  overview: () => api.get('/slep/overview'),
+  establecimientos: () => api.get('/slep/establecimientos'),
+  establecimiento: (rbd) => api.get(`/slep/establecimiento/${rbd}`),
+};
+
 export default api;

@@ -9,6 +9,8 @@ import EstablecimientoDetalle from './pages/EstablecimientoDetalle';
 import Financiero from './pages/Financiero';
 import Comparador from './pages/Comparador';
 import ResumenEjecutivo from './pages/ResumenEjecutivo';
+import MiSlep from './pages/MiSlep';
+import EstablecimientoReal from './pages/EstablecimientoReal';
 
 function ProtectedRoute({ children }) {
   const { user } = useAuth();
@@ -30,6 +32,8 @@ function AppRoutes() {
         <Route path="financiero" element={<Financiero />} />
         <Route path="comparador" element={<Comparador />} />
         <Route path="resumen" element={<ResumenEjecutivo />} />
+        <Route path="mi-slep" element={<MiSlep />} />
+        <Route path="mi-slep/:rbd" element={<EstablecimientoReal />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
