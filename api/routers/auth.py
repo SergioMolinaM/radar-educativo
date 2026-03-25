@@ -1,6 +1,6 @@
 """Authentication router - JWT-based auth for SLEP users."""
+import os
 from datetime import datetime, timedelta, timezone
-from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
@@ -9,11 +9,15 @@ from pydantic import BaseModel
 router = APIRouter()
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login")
 
-# TODO: Replace with real DB-backed user store and bcrypt hashing
+SECRET_KEY = os.getenv("SECRET_KEY", "dev-secret-key-change-in-production-please")
+ALGORITHM = "HS256"
+TOKEN_EXPIRE_HOURS = 8
+
+# Demo users - TODO: Replace with DB-backed user store + bcrypt
 DEMO_USERS = {
     "admin@slep-barrancas.cl": {
         "password": "demo2026",
-        "name": "Admin Barrancas",
+        "name": "Administrador Barrancas",
         "role": "admin_slep",
         "slep_id": "barrancas",
     },
@@ -22,6 +26,12 @@ DEMO_USERS = {
         "name": "Analista Barrancas",
         "role": "analista",
         "slep_id": "barrancas",
+    },
+    "admin@slep-puertocordillera.cl": {
+        "password": "demo2026",
+        "name": "Administrador Puerto Cordillera",
+        "role": "admin_slep",
+        "slep_id": "puerto_cordillera",
     },
 }
 
@@ -39,21 +49,65 @@ class UserOut(BaseModel):
     slep_id: str
 
 
-def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
-    """Create a simple token. TODO: Replace with proper JWT (python-jose)."""
-    import hashlib
-    import json
+def _create_token(data: dict) -> str:
+    """Create a JWT token. Uses python-jose if available, falls back to simple encoding."""
+    payload = {
+        **data,
+        "exp": (datetime.now(timezone.utc) + timedelta(hours=TOKEN_EXPIRE_HOURS)).isoformat(),
+        "iat": datetime.now(timezone.utc).isoformat(),
+    }
+    try:
+        from jose import jwt
+        return jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
+    except ImportError:
+        # Fallback: base64 encoding (not cryptographically secure, OK for dev)
+        import base64
+        import json
+        return base64.urlsafe_b64encode(json.dumps(payload).encode()).decode()
 
-    payload = {**data, "exp": (datetime.now(timezone.utc) + (expires_delta or timedelta(hours=8))).isoformat()}
-    return hashlib.sha256(json.dumps(payload, sort_keys=True).encode()).hexdigest()
+
+def _decode_token(token: str) -> dict:
+    """Decode and validate a JWT token."""
+    try:
+        from jose import jwt, JWTError
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        return payload
+    except ImportError:
+        # Fallback: base64 decoding
+        import base64
+        import json
+        try:
+            payload = json.loads(base64.urlsafe_b64decode(token + "=="))
+            exp = datetime.fromisoformat(payload.get("exp", "2000-01-01"))
+            if exp < datetime.now(timezone.utc):
+                raise ValueError("Token expirado")
+            return payload
+        except Exception:
+            raise HTTPException(status_code=401, detail="Token inválido")
+    except Exception:
+        raise HTTPException(status_code=401, detail="Token inválido o expirado")
 
 
 def get_current_user(token: str = Depends(oauth2_scheme)) -> dict:
-    """Validate token and return user. TODO: Implement proper JWT validation."""
-    # For MVP, accept any non-empty token and return demo user
+    """Validate token and return current user."""
     if not token:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Token requerido")
-    return {"email": "admin@slep-barrancas.cl", "name": "Admin Barrancas", "role": "admin_slep", "slep_id": "barrancas"}
+
+    payload = _decode_token(token)
+    email = payload.get("sub")
+    if not email:
+        raise HTTPException(status_code=401, detail="Token inválido")
+
+    user = DEMO_USERS.get(email)
+    if not user:
+        raise HTTPException(status_code=401, detail="Usuario no encontrado")
+
+    return {
+        "email": email,
+        "name": user["name"],
+        "role": user["role"],
+        "slep_id": user["slep_id"],
+    }
 
 
 @router.post("/login", response_model=Token)
@@ -62,7 +116,7 @@ def login(form_data: OAuth2PasswordRequestForm = Depends()):
     if not user or user["password"] != form_data.password:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Credenciales incorrectas")
 
-    token = create_access_token({"sub": form_data.username, "role": user["role"], "slep_id": user["slep_id"]})
+    token = _create_token({"sub": form_data.username, "role": user["role"], "slep_id": user["slep_id"]})
     return Token(
         access_token=token,
         token_type="bearer",
