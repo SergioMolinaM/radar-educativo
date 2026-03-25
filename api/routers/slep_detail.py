@@ -177,9 +177,65 @@ def slep_establecimiento_detalle(rbd: str, current_user: dict = Depends(get_curr
                 "asistencia": bool(abril.get("riesgo_asistencia")),
                 "vulnerabilidad": bool(abril.get("riesgo_vulnerabilidad")),
             },
+            "simce": _get_simce(rbd),
+            "rendimiento": _get_rendimiento(rbd),
         }
     except HTTPException:
         raise
     except Exception as e:
         logger.error("Error getting establishment detail: %s", e)
         raise HTTPException(status_code=500, detail=str(e))
+
+
+def _get_simce(rbd: str) -> list:
+    """Get SIMCE scores for an establishment across years."""
+    try:
+        rows = query_all("""
+            SELECT anio, nivel, estado_resultado,
+                   prom_lectura, prom_matematica
+            FROM analytics.fact_simce
+            WHERE rbd = %s
+            ORDER BY anio DESC, nivel
+        """, (int(rbd),))
+        return [
+            {
+                "anio": r["anio"],
+                "nivel": r["nivel"],
+                "estado": r["estado_resultado"],
+                "lectura": float(r["prom_lectura"]) if r.get("prom_lectura") else None,
+                "matematica": float(r["prom_matematica"]) if r.get("prom_matematica") else None,
+            }
+            for r in rows
+        ]
+    except Exception:
+        return []
+
+
+def _get_rendimiento(rbd: str) -> list:
+    """Get academic performance for an establishment across years."""
+    try:
+        rows = query_all("""
+            SELECT anio,
+                   aprobados_hom + aprobados_muj AS aprobados,
+                   reprobados_hom + reprobados_muj AS reprobados,
+                   retirados_hom + retirados_muj AS retirados,
+                   prom_asistencia
+            FROM analytics.fact_rendimiento
+            WHERE rbd = %s
+            ORDER BY anio DESC
+        """, (int(rbd),))
+        result = []
+        for r in rows:
+            total = int(r["aprobados"] or 0) + int(r["reprobados"] or 0) + int(r["retirados"] or 0)
+            result.append({
+                "anio": r["anio"],
+                "aprobados": int(r["aprobados"] or 0),
+                "reprobados": int(r["reprobados"] or 0),
+                "retirados": int(r["retirados"] or 0),
+                "tasa_aprobacion": round(int(r["aprobados"] or 0) / total * 100, 1) if total > 0 else 0,
+                "tasa_retiro": round(int(r["retirados"] or 0) / total * 100, 1) if total > 0 else 0,
+                "prom_asistencia": float(r["prom_asistencia"]) if r.get("prom_asistencia") else None,
+            })
+        return result
+    except Exception:
+        return []

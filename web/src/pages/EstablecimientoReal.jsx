@@ -121,9 +121,92 @@ export default function EstablecimientoReal() {
           </div>
         </div>
       </div>
+
+      {/* SIMCE */}
+      {data.simce?.length > 0 && (
+        <div className="glass-panel" style={{ padding: 24, marginBottom: 16 }}>
+          <h3 style={{ fontSize: 15, fontWeight: 600, marginBottom: 4 }}>Resultados SIMCE</h3>
+          <p style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 16 }}>
+            Fuente: Agencia de Calidad de la Educación. Datos 2024 son preliminares.
+          </p>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 12 }}>
+            {data.simce.map((s, i) => (
+              <div key={i} style={{
+                padding: 16,
+                background: 'rgba(255,255,255,0.03)',
+                borderRadius: 10,
+                border: '1px solid var(--border-color)',
+              }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
+                  <span style={{ fontWeight: 600, fontSize: 14 }}>{s.nivel} - {s.anio}</span>
+                  <span style={{ fontSize: 10, color: 'var(--text-muted)', padding: '2px 6px', background: s.estado === 'preliminar' ? 'var(--alert-orange-bg)' : 'var(--alert-green-bg)', borderRadius: 8, color: s.estado === 'preliminar' ? 'var(--alert-orange)' : 'var(--alert-green)' }}>
+                    {s.estado}
+                  </span>
+                </div>
+                <div style={{ display: 'flex', gap: 16 }}>
+                  <div>
+                    <div style={{ fontSize: 22, fontWeight: 700, color: s.lectura && s.lectura < 250 ? 'var(--alert-red)' : 'var(--text-main)' }}>
+                      {s.lectura || '—'}
+                    </div>
+                    <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>Lectura</div>
+                  </div>
+                  <div>
+                    <div style={{ fontSize: 22, fontWeight: 700, color: s.matematica && s.matematica < 250 ? 'var(--alert-red)' : 'var(--text-main)' }}>
+                      {s.matematica || '—'}
+                    </div>
+                    <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>Matemática</div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Rendimiento académico */}
+      {data.rendimiento?.length > 0 && (
+        <div className="glass-panel" style={{ padding: 24, marginBottom: 16 }}>
+          <h3 style={{ fontSize: 15, fontWeight: 600, marginBottom: 4 }}>Rendimiento académico</h3>
+          <p style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 16 }}>
+            Fuente: MINEDUC Datos Abiertos. Incluye aprobación, reprobación y retiro.
+          </p>
+          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+            <thead>
+              <tr>
+                {['Año', 'Aprobados', 'Reprobados', 'Retirados', 'Tasa aprob.', 'Tasa retiro', 'Asistencia prom.'].map((h) => (
+                  <th key={h} style={{ textAlign: 'left', padding: '8px 10px', fontSize: 12, fontWeight: 600, color: 'var(--text-muted)', borderBottom: '1px solid var(--border-color)' }}>{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {data.rendimiento.map((r) => (
+                <tr key={r.anio}>
+                  <td style={tdS}><strong>{r.anio}</strong></td>
+                  <td style={tdS}>{r.aprobados.toLocaleString('es-CL')}</td>
+                  <td style={{ ...tdS, color: r.reprobados > 0 ? 'var(--alert-orange)' : 'inherit' }}>{r.reprobados}</td>
+                  <td style={{ ...tdS, color: r.retirados > 0 ? 'var(--alert-red)' : 'inherit' }}>{r.retirados}</td>
+                  <td style={tdS}>{r.tasa_aprobacion}%</td>
+                  <td style={{ ...tdS, color: r.tasa_retiro > 5 ? 'var(--alert-red)' : 'var(--text-muted)' }}>{r.tasa_retiro}%</td>
+                  <td style={tdS}>{r.prom_asistencia ? `${r.prom_asistencia}%` : '—'}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {/* Disclosure */}
+      <div style={{ fontSize: 11, color: 'var(--text-muted)', lineHeight: 1.6, padding: '16px 0' }}>
+        <strong>Fuentes de datos:</strong> SIMCE - Agencia de Calidad de la Educación (resultados 2024 son preliminares).
+        Rendimiento - MINEDUC Datos Abiertos. Matrícula y asistencia - MINEDUC SIGE.
+        Alertas y semáforos calculados por Radar Educativo en base a umbrales definidos por el SLEP.
+        &middot; Tercera Letra SpA
+      </div>
     </div>
   );
 }
+
+const tdS = { padding: '10px', fontSize: 13, borderBottom: '1px solid var(--border-color)' };
 
 function RiskIndicator({ label, active, detail }) {
   return (
