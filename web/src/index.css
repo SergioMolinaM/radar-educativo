@@ -75,5 +75,27 @@ body {
   border-radius: 10px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(255,255,255,0.2); 
+  background: rgba(255,255,255,0.2);
+}
+
+/* Print styles */
+@media print {
+  body {
+    background: white !important;
+    color: #1a1a1a !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  aside { display: none !important; }
+  main { padding: 0 !important; }
+  .glass-panel {
+    background: white !important;
+    border: 1px solid #e5e7eb !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+  }
+  .text-gradient {
+    -webkit-text-fill-color: #1e40af !important;
+  }
+  button { display: none !important; }
 }

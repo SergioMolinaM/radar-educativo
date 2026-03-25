@@ -8,6 +8,7 @@ import Establecimientos from './pages/Establecimientos';
 import EstablecimientoDetalle from './pages/EstablecimientoDetalle';
 import Financiero from './pages/Financiero';
 import Comparador from './pages/Comparador';
+import ResumenEjecutivo from './pages/ResumenEjecutivo';
 
 function ProtectedRoute({ children }) {
   const { user } = useAuth();
@@ -28,6 +29,7 @@ function AppRoutes() {
         <Route path="establecimientos/:rbd" element={<EstablecimientoDetalle />} />
         <Route path="financiero" element={<Financiero />} />
         <Route path="comparador" element={<Comparador />} />
+        <Route path="resumen" element={<ResumenEjecutivo />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
