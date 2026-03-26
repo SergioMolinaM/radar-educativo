@@ -27,7 +27,7 @@ export default function IndicadoresPedagogicos() {
     <div className="animate-fade-in">
       <h2 style={{ fontSize: 24, fontWeight: 700, marginBottom: 4 }}>
         <BookOpen size={22} style={{ verticalAlign: 'middle', marginRight: 8 }} />
-        Indicadores Pedagogicos
+        Indicadores Pedagógicos
       </h2>
       <p style={{ color: 'var(--text-muted)', fontSize: 15, marginBottom: 20 }}>
         SIMCE, rendimiento academico y resultados de aprendizaje

@@ -20,7 +20,7 @@ const NAV_MODULES = [
       { to: '/mi-slep', icon: Building2, label: 'Resumen SLEP' },
       { to: '/alertas', icon: AlertTriangle, label: 'Alertas' },
       { to: '/establecimientos', icon: School, label: 'Establecimientos' },
-      { to: '/indicadores', icon: BookOpen, label: 'Indicadores pedagogicos' },
+      { to: '/indicadores', icon: BookOpen, label: 'Indicadores pedagógicos' },
       { to: '/plan-anual', icon: ClipboardCheck, label: 'Plan Anual' },
     ],
   },
