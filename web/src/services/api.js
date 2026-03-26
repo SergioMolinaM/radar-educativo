@@ -57,6 +57,11 @@ export const slepApi = {
   meses: () => api.get('/slep/meses'),
 };
 
+export const pedagogicoApi = {
+  simce: () => api.get('/pedagogico/simce'),
+  rendimiento: () => api.get('/pedagogico/rendimiento'),
+};
+
 export const palApi = {
   documentos: () => api.get('/pal/documentos'),
   documento: (id) => api.get(`/pal/documento/${id}`),

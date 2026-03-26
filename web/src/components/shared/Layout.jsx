@@ -3,7 +3,7 @@ import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard, AlertTriangle, School, DollarSign, LogOut,
   Scale, FileText, ChevronDown, Building2, Trophy, ClipboardCheck,
-  Map, Database, Calendar, Clock, Users, TrendingUp, ChevronRight,
+  Map, Database, Calendar, Clock, Users, TrendingUp, ChevronRight, BookOpen,
 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import api from '../../services/api';
@@ -21,6 +21,7 @@ const NAV_MODULES = [
       { to: '/alertas', icon: AlertTriangle, label: 'Alertas' },
       { to: '/establecimientos', icon: School, label: 'Establecimientos' },
       { to: '/plan-anual', icon: ClipboardCheck, label: 'Plan Anual' },
+      { to: '/indicadores', icon: BookOpen, label: 'Indicadores pedagogicos' },
     ],
   },
   {

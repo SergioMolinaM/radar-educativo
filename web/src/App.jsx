@@ -15,6 +15,7 @@ import Ranking from './pages/Ranking';
 import PlanAnual from './pages/PlanAnual';
 import MapaTerritorial from './pages/MapaTerritorial';
 import FuentesDatos from './pages/FuentesDatos';
+import IndicadoresPedagogicos from './pages/IndicadoresPedagogicos';
 
 function ProtectedRoute({ children }) {
   const { user } = useAuth();
@@ -41,6 +42,7 @@ function AppRoutes() {
         <Route path="ranking" element={<Ranking />} />
         <Route path="plan-anual" element={<PlanAnual />} />
         <Route path="mapa" element={<MapaTerritorial />} />
+        <Route path="indicadores" element={<IndicadoresPedagogicos />} />
         <Route path="fuentes" element={<FuentesDatos />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
