@@ -96,13 +96,26 @@ export default function MapaTerritorial() {
                   }}
                 >
                   <Popup>
-                    <div style={{ fontSize: 12, minWidth: 180 }}>
-                      <strong>{e.nombre}</strong><br />
-                      RBD: {e.rbd} · {e.comuna}<br />
-                      Matrícula: {e.matricula?.toLocaleString('es-CL')}<br />
-                      Asistencia: <span style={{ color: SEMAFORO_COLORS[e.semaforo], fontWeight: 600 }}>
-                        {e.asistencia_pct}%
-                      </span>
+                    <div style={{ fontSize: 13, minWidth: 220, lineHeight: 1.6 }}>
+                      <strong style={{ fontSize: 14 }}>{e.nombre}</strong><br />
+                      <span style={{ color: '#94a3b8' }}>RBD {e.rbd} · {e.comuna}</span>
+                      <hr style={{ border: 'none', borderTop: '1px solid #334155', margin: '6px 0' }} />
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2px 12px' }}>
+                        <span>Matrícula:</span><b>{e.matricula?.toLocaleString('es-CL')}</b>
+                        <span>Asistencia:</span><b style={{ color: SEMAFORO_COLORS[e.semaforo] }}>{e.asistencia_pct}%</b>
+                        {e.tasa_aprobacion > 0 && <><span>Aprobación:</span><b>{e.tasa_aprobacion}%</b></>}
+                        {e.sep > 0 && <><span>Alumnos SEP:</span><b>{e.sep}</b></>}
+                        {e.rural && <><span>Tipo:</span><b>Rural</b></>}
+                      </div>
+                      <div style={{ marginTop: 6, display: 'flex', gap: 8 }}>
+                        <a href={`/establecimientos/${e.rbd}`} style={{ fontSize: 12, color: '#3b82f6', textDecoration: 'none', fontWeight: 600 }}>
+                          Ver detalle →
+                        </a>
+                        <a href={`https://mi.mineduc.cl/mvc/mime/portada?rbd=${e.rbd}`} target="_blank" rel="noopener"
+                          style={{ fontSize: 12, color: '#94a3b8', textDecoration: 'none' }}>
+                          MIME ↗
+                        </a>
+                      </div>
                     </div>
                   </Popup>
                 </CircleMarker>
