@@ -245,114 +245,80 @@ def slep_ranking(
 
 @router.get("/establecimiento/{rbd}")
 def slep_establecimiento_detalle(rbd: str, current_user: dict = Depends(get_current_user)):
-    """Detalle de un establecimiento específico con datos abril + julio."""
+    """Detalle de un establecimiento - datos 2025 reales."""
     try:
-        # Datos de abril
-        abril = query_one("""
-            SELECT * FROM analytics.mart_alerta_temprana_abril WHERE rbd = %s
-        """, (rbd,))
+        rbd_int = int(rbd)
+    except ValueError:
+        raise HTTPException(status_code=400, detail="RBD inválido")
 
-        # Datos de julio (si existen)
-        julio = query_one("""
-            SELECT
-                ROUND(tasa_asistencia * 100, 1) AS asistencia_julio,
-                matricula_total AS matricula_julio,
-                semaforo_riesgo AS semaforo_julio
-            FROM analytics.mart_alerta_temprana_abril_julio WHERE rbd = %s
-        """, (rbd,))
+    try:
+        # Matrícula
+        mat = query_one("SELECT * FROM matricula_2025_rbd WHERE rbd = %s", (rbd_int,))
+        # Rendimiento
+        rend = query_one("SELECT * FROM rendimiento_2025_detalle WHERE rbd = %s", (rbd_int,))
+        # SEP
+        sep = query_one("SELECT * FROM sep_2025_rbd WHERE rbd = %s", (rbd_int,))
+        # Asistencia mensual (todos los meses)
+        asist_mensual = query_all(
+            "SELECT mes, pct_asistencia, total_alumnos FROM asistencia_2025_rbd WHERE rbd = %s ORDER BY mes",
+            (rbd_int,))
 
-        if not abril:
-            raise HTTPException(status_code=404, detail=f"Establecimiento RBD {rbd} no encontrado")
+        if not mat and not asist_mensual:
+            raise HTTPException(status_code=404, detail=f"RBD {rbd} sin datos 2025")
 
-        asist_abril = round(float(abril.get("tasa_asistencia") or 0) * 100, 1)
-        asist_julio = float(julio.get("asistencia_julio") or 0) if julio else None
-        mat_abril = int(abril.get("matricula_total") or 0)
-        mat_julio = int(julio.get("matricula_julio") or 0) if julio else None
+        nombre = (mat or {}).get("nom_rbd") or (asist_mensual[0]["nom_rbd"] if asist_mensual else f"RBD {rbd}")
+        comuna = (mat or {}).get("nom_com_rbd", "")
+        matricula = int((mat or {}).get("matricula_total", 0) or 0)
+
+        # Último mes de asistencia
+        ultimo = asist_mensual[-1] if asist_mensual else {}
+        asist_actual = float(ultimo.get("pct_asistencia", 0) or 0)
+        semaforo = "rojo" if asist_actual < 80 else ("naranja" if asist_actual < 88 else "verde")
+
+        # Tendencia asistencia
+        tendencia = [{"mes": MESES.get(a["mes"], str(a["mes"])), "mes_num": a["mes"],
+                      "asistencia": float(a["pct_asistencia"] or 0)} for a in asist_mensual]
+
+        # Rendimiento
+        rend_data = {}
+        if rend:
+            rend_data = {
+                "total_alumnos": int(rend.get("total_alumnos", 0) or 0),
+                "aprobados": int(rend.get("aprobados", 0) or 0),
+                "reprobados": int(rend.get("reprobados", 0) or 0),
+                "retirados": int(rend.get("retirados", 0) or 0),
+                "trasladados": int(rend.get("trasladados", 0) or 0),
+                "tasa_aprobacion": float(rend.get("tasa_aprobacion", 0) or 0),
+                "tasa_retiro": float(rend.get("tasa_retiro", 0) or 0),
+                "prom_general": float(rend.get("prom_general", 0) or 0),
+                "prom_asistencia": float(rend.get("prom_asistencia", 0) or 0),
+            }
+
+        # SEP
+        sep_data = {}
+        if sep:
+            sep_data = {
+                "total_sep": int(sep.get("total_sep", 0) or 0),
+                "prioritarios": int(sep.get("prioritarios", 0) or 0),
+                "preferentes": int(sep.get("preferentes", 0) or 0),
+                "pct_sep": round(int(sep.get("total_sep", 0) or 0) / max(matricula, 1) * 100, 1),
+            }
 
         return {
-            "rbd": rbd,
-            "nombre": abril["nombre_establecimiento"],
-            "codigo_comuna": abril["codigo_comuna"],
-            "nombre_sostenedor": abril["nombre_sostenedor"],
-            "dependencia": abril["dependencia"],
-            "semaforo": abril.get("semaforo_riesgo", "Verde").lower().rstrip("a"),
-            "matricula": {
-                "abril": mat_abril,
-                "julio": mat_julio,
-                "variacion": round((mat_julio - mat_abril) / mat_abril * 100, 1) if mat_julio and mat_abril else None,
-            },
-            "asistencia": {
-                "abril": asist_abril,
-                "julio": asist_julio,
-                "variacion": round(asist_julio - asist_abril, 1) if asist_julio else None,
-            },
-            "vulnerabilidad": {
-                "total": int(abril.get("total_vulnerable") or 0),
-                "proporcion": round(float(abril.get("proporcion_vulnerabilidad") or 0) * 100, 1),
-            },
-            "riesgos": {
-                "asistencia": bool(abril.get("riesgo_asistencia")),
-                "vulnerabilidad": bool(abril.get("riesgo_vulnerabilidad")),
-            },
-            "simce": _get_simce(rbd),
-            "rendimiento": _get_rendimiento(rbd),
+            "rbd": rbd_int,
+            "nombre": nombre,
+            "comuna": comuna,
+            "nombre_slep": (mat or {}).get("nombre_slep", ""),
+            "matricula": matricula,
+            "semaforo": semaforo,
+            "asistencia_actual": asist_actual,
+            "asistencia_tendencia": tendencia,
+            "rendimiento": rend_data,
+            "sep": sep_data,
+            "source": "2025_real",
         }
     except HTTPException:
         raise
     except Exception as e:
-        logger.error("Error getting establishment detail: %s", e)
+        logger.error("Error detalle %s: %s", rbd, e)
         raise HTTPException(status_code=500, detail=str(e))
-
-
-def _get_simce(rbd: str) -> list:
-    """Get SIMCE scores for an establishment across years."""
-    try:
-        rows = query_all("""
-            SELECT anio, nivel, estado_resultado,
-                   prom_lectura, prom_matematica
-            FROM analytics.fact_simce
-            WHERE rbd = %s
-            ORDER BY anio DESC, nivel
-        """, (int(rbd),))
-        return [
-            {
-                "anio": r["anio"],
-                "nivel": r["nivel"],
-                "estado": r["estado_resultado"],
-                "lectura": float(r["prom_lectura"]) if r.get("prom_lectura") else None,
-                "matematica": float(r["prom_matematica"]) if r.get("prom_matematica") else None,
-            }
-            for r in rows
-        ]
-    except Exception:
-        return []
-
-
-def _get_rendimiento(rbd: str) -> list:
-    """Get academic performance for an establishment across years."""
-    try:
-        rows = query_all("""
-            SELECT anio,
-                   aprobados_hom + aprobados_muj AS aprobados,
-                   reprobados_hom + reprobados_muj AS reprobados,
-                   retirados_hom + retirados_muj AS retirados,
-                   prom_asistencia
-            FROM analytics.fact_rendimiento
-            WHERE rbd = %s
-            ORDER BY anio DESC
-        """, (int(rbd),))
-        result = []
-        for r in rows:
-            total = int(r["aprobados"] or 0) + int(r["reprobados"] or 0) + int(r["retirados"] or 0)
-            result.append({
-                "anio": r["anio"],
-                "aprobados": int(r["aprobados"] or 0),
-                "reprobados": int(r["reprobados"] or 0),
-                "retirados": int(r["retirados"] or 0),
-                "tasa_aprobacion": round(int(r["aprobados"] or 0) / total * 100, 1) if total > 0 else 0,
-                "tasa_retiro": round(int(r["retirados"] or 0) / total * 100, 1) if total > 0 else 0,
-                "prom_asistencia": float(r["prom_asistencia"]) if r.get("prom_asistencia") else None,
-            })
-        return result
-    except Exception:
-        return []

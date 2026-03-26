@@ -14,6 +14,7 @@ router = APIRouter()
 def list_pal_documents(current_user: dict = Depends(get_current_user)):
     """List all PAL documents loaded."""
     try:
+        slep_id = current_user["slep_id"]
         docs = query_all("""
             SELECT id, slep_nombre, anio, tipo_documento, acto_administrativo,
                    fecha_aprobacion, estado_extraccion,
@@ -22,8 +23,10 @@ def list_pal_documents(current_user: dict = Depends(get_current_user)):
                     JOIN analytics.pal_linea l ON i.linea_id = l.id
                     WHERE l.pal_id = d.id) AS n_indicadores
             FROM analytics.pal_document d
+            WHERE LOWER(REPLACE(slep_nombre, ' ', '_')) = %s
+               OR UPPER(slep_nombre) = UPPER(REPLACE(%s, '_', ' '))
             ORDER BY anio DESC
-        """)
+        """, (slep_id, slep_id))
         return {"total": len(docs), "documentos": docs}
     except Exception as e:
         logger.error("Error listing PAL docs: %s", e)
