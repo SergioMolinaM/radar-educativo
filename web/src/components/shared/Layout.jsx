@@ -17,11 +17,11 @@ const NAV_MODULES = [
     color: '#3b82f6',
     items: [
       { to: '/', icon: LayoutDashboard, label: 'Panel general' },
-      { to: '/mi-slep', icon: Building2, label: 'Mi SLEP' },
+      { to: '/mi-slep', icon: Building2, label: 'Resumen SLEP' },
       { to: '/alertas', icon: AlertTriangle, label: 'Alertas' },
       { to: '/establecimientos', icon: School, label: 'Establecimientos' },
-      { to: '/plan-anual', icon: ClipboardCheck, label: 'Plan Anual' },
       { to: '/indicadores', icon: BookOpen, label: 'Indicadores pedagogicos' },
+      { to: '/plan-anual', icon: ClipboardCheck, label: 'Plan Anual' },
     ],
   },
   {
@@ -231,16 +231,16 @@ export default function Layout() {
                   end={to === '/'}
                   style={({ isActive }) => ({
                     display: 'flex', alignItems: 'center', gap: 10,
-                    padding: '9px 16px 9px 32px',
+                    padding: '10px 16px 10px 32px',
                     color: isActive ? mod.color : 'var(--text-muted)',
-                    textDecoration: 'none', fontSize: 13,
+                    textDecoration: 'none', fontSize: 14,
                     fontWeight: isActive ? 600 : 400,
                     background: isActive ? `${mod.color}15` : 'transparent',
                     borderLeft: isActive ? `3px solid ${mod.color}` : '3px solid transparent',
                     transition: 'all 0.15s',
                   })}
                 >
-                  <Icon size={16} />
+                  <Icon size={17} />
                   {label}
                 </NavLink>
               ))}
