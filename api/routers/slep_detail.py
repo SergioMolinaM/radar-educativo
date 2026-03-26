@@ -40,7 +40,8 @@ def slep_overview(current_user: dict = Depends(get_current_user)):
             FROM matricula_2025_rbd WHERE {sf}
         """)
         asist = query_one(f"""
-            SELECT ROUND(AVG(pct_asistencia)::numeric, 1) AS asist_avg, MAX(mes) AS ultimo_mes
+            SELECT ROUND(AVG(CASE WHEN pct_asistencia > 0 THEN pct_asistencia END)::numeric, 1) AS asist_avg,
+                   MAX(mes) AS ultimo_mes
             FROM asistencia_2025_rbd WHERE {sf}
               AND mes = (SELECT MAX(mes) FROM asistencia_2025_rbd WHERE {sf})
         """)
@@ -115,10 +116,12 @@ def slep_establecimientos(current_user: dict = Depends(get_current_user)):
         rows = query_all(f"""
             SELECT a.rbd, a.nom_rbd, a.nom_com_rbd, a.pct_asistencia,
                    a.total_alumnos, m.matricula_total,
-                   d.latitud, d.longitud, d.rural_rbd
+                   r.tasa_aprobacion, r.prom_general,
+                   s.total_sep, s.prioritarios
             FROM asistencia_2025_rbd a
             LEFT JOIN matricula_2025_rbd m ON a.rbd = m.rbd
-            LEFT JOIN directorio_2025 d ON a.rbd = d.rbd
+            LEFT JOIN rendimiento_2025_detalle r ON a.rbd = r.rbd
+            LEFT JOIN sep_2025_rbd s ON a.rbd = s.rbd
             WHERE a.{sf}
               AND a.mes = (SELECT MAX(mes) FROM asistencia_2025_rbd WHERE {sf})
             ORDER BY a.pct_asistencia ASC
@@ -127,6 +130,9 @@ def slep_establecimientos(current_user: dict = Depends(get_current_user)):
         establecimientos = []
         for r in rows:
             asist = float(r.get("pct_asistencia") or 0)
+            nombre = r.get("nom_rbd") or ""
+            # Marcar CEIA/Adultos
+            es_adultos = any(x in nombre.upper() for x in ["CEIA", "ADULTO", "NOCTURNO"])
             if asist < 80:
                 semaforo = "rojo"
             elif asist < 88:
@@ -136,14 +142,16 @@ def slep_establecimientos(current_user: dict = Depends(get_current_user)):
 
             establecimientos.append({
                 "rbd": r["rbd"],
-                "nombre": r["nom_rbd"],
+                "nombre": nombre,
                 "comuna": r.get("nom_com_rbd"),
                 "matricula": int(r.get("matricula_total") or r.get("total_alumnos") or 0),
                 "asistencia_pct": asist,
+                "tasa_aprobacion": float(r.get("tasa_aprobacion") or 0),
+                "promedio": float(r.get("prom_general") or 0),
+                "sep": int(r.get("total_sep") or 0),
+                "prioritarios": int(r.get("prioritarios") or 0),
                 "semaforo": semaforo,
-                "latitud": float(r["latitud"]) if r.get("latitud") else None,
-                "longitud": float(r["longitud"]) if r.get("longitud") else None,
-                "rural": bool(r.get("rural_rbd")),
+                "es_adultos": es_adultos,
             })
 
         return {
