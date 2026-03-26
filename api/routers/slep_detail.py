@@ -190,17 +190,24 @@ def slep_establecimientos(
 @router.get("/ranking")
 def slep_ranking(
     metric: str = "asistencia",
+    mes: int = None,
+    excluir_adultos: bool = True,
     current_user: dict = Depends(get_current_user),
 ):
     """Ranking de establecimientos del SLEP por métrica."""
     slep_id = current_user["slep_id"]
     sf = _slep_filter(slep_id)
+    adultos = ADULTOS_FILTER.replace("nom_rbd", "a.nom_rbd") if excluir_adultos else ""
+
+    if not mes:
+        m = query_one(f"SELECT MAX(mes) AS m FROM asistencia_2025_rbd WHERE {sf}")
+        mes = int(m["m"]) if m and m["m"] else 10
 
     metric_map = {
         "asistencia": ("a.pct_asistencia", "DESC"),
         "matricula": ("m.matricula_total", "DESC"),
         "aprobacion": ("r.tasa_aprobacion", "DESC"),
-        "retiro": ("r.tasa_retiro", "ASC"),  # menor es mejor
+        "retiro": ("r.tasa_retiro", "ASC"),
         "promedio": ("r.prom_general", "DESC"),
     }
 
@@ -214,8 +221,8 @@ def slep_ranking(
             FROM asistencia_2025_rbd a
             LEFT JOIN matricula_2025_rbd m ON a.rbd = m.rbd
             LEFT JOIN rendimiento_2025_detalle r ON a.rbd = r.rbd
-            WHERE a.{sf}
-              AND a.mes = (SELECT MAX(mes) FROM asistencia_2025_rbd WHERE {sf})
+            WHERE a.{sf} AND a.mes = {mes}
+              AND a.pct_asistencia > 0 {adultos}
             ORDER BY {col} {order} NULLS LAST
         """)
 

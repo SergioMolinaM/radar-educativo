@@ -15,28 +15,32 @@ router = APIRouter()
 @router.get("/")
 def get_alerts(
     severity: str = Query(None, description="Filter: rojo, naranja, verde"),
+    mes: int = None,
+    excluir_adultos: bool = True,
     current_user: dict = Depends(get_current_user),
 ):
     """Return active alerts for the SLEP based on 2025 data."""
     slep_id = current_user["slep_id"]
     sf = _slep_filter(slep_id)
+    af = "AND a.nom_rbd NOT ILIKE '%CEIA%' AND a.nom_rbd NOT ILIKE '%ADULTO%' AND a.nom_rbd NOT ILIKE '%NOCTURNO%'" if excluir_adultos else ""
     today = date.today().isoformat()
 
     try:
-        # Get establishments with all indicators
+        if not mes:
+            m_row = query_all(f"SELECT MAX(mes) AS m FROM asistencia_2025_rbd WHERE {sf}")
+            mes = int(m_row[0]["m"]) if m_row and m_row[0]["m"] else 10
+
         rows = query_all(f"""
             SELECT
                 a.rbd, a.nom_rbd AS nombre, a.pct_asistencia,
                 a.total_alumnos, a.mes,
                 m.matricula_total,
-                r.tasa_aprobacion, r.tasa_retiro, r.prom_asistencia AS asist_rendimiento,
-                d.rural_rbd
+                r.tasa_aprobacion, r.tasa_retiro, r.prom_asistencia AS asist_rendimiento
             FROM asistencia_2025_rbd a
             LEFT JOIN matricula_2025_rbd m ON a.rbd = m.rbd
             LEFT JOIN rendimiento_2025_detalle r ON a.rbd = r.rbd
-            LEFT JOIN directorio_2025 d ON a.rbd = d.rbd
-            WHERE a.{sf}
-              AND a.mes = (SELECT MAX(mes) FROM asistencia_2025_rbd WHERE {sf})
+            WHERE a.{sf} AND a.mes = {mes}
+              AND a.pct_asistencia > 0 {af}
             ORDER BY a.pct_asistencia ASC
         """)
 
@@ -47,7 +51,7 @@ def get_alerts(
             mat = int(r.get("matricula_total") or r.get("total_alumnos") or 0)
             tasa_retiro = float(r.get("tasa_retiro") or 0)
             tasa_aprob = float(r.get("tasa_aprobacion") or 0)
-            rural = r.get("rural_rbd") == 1
+            nombre = r.get("nombre") or ""
 
             # Regla 1: Asistencia crítica (<80%)
             if asist < 80:
@@ -83,13 +87,6 @@ def get_alerts(
                 alerts.append(_alert(aid, r, "naranja", "microescuela",
                     f"Microescuela con {mat} alumnos - evaluar sustentabilidad",
                     mat, 30.0, "Evaluar fusión o reorganización de recursos", today))
-                aid += 1
-
-            # Regla 6: Escuela rural con asistencia bajo 85%
-            if rural and asist < 85:
-                alerts.append(_alert(aid, r, "rojo", "desercion_rural",
-                    f"Escuela rural con asistencia {asist}% - riesgo de deserción",
-                    asist, 85.0, "Activar programa de retención rural y transporte escolar", today))
                 aid += 1
 
         if severity:
