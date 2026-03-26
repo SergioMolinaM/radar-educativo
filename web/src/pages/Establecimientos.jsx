@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Search, ArrowUpDown } from 'lucide-react';
-import { establishmentsApi } from '../services/api';
+import { slepApi } from '../services/api';
 import SemaforoTag from '../components/shared/SemaforoTag';
 
 export default function Establecimientos() {
@@ -14,7 +14,7 @@ export default function Establecimientos() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    establishmentsApi.list()
+    slepApi.establecimientos()
       .then(({ data }) => setData(data))
       .catch(() => {})
       .finally(() => setLoading(false));

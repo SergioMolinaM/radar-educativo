@@ -5,7 +5,7 @@ import {
   LineChart, Line, BarChart, Bar, PieChart, Pie, Cell,
   XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Legend,
 } from 'recharts';
-import { establishmentsApi } from '../services/api';
+import { slepApi } from '../services/api';
 import KpiCard from '../components/shared/KpiCard';
 import SemaforoTag from '../components/shared/SemaforoTag';
 
@@ -18,7 +18,7 @@ export default function EstablecimientoDetalle() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    establishmentsApi.get(rbd)
+    slepApi.establecimiento(rbd)
       .then(({ data }) => setData(data))
       .catch(() => {})
       .finally(() => setLoading(false));
