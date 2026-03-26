@@ -5,20 +5,23 @@ export default function KpiCard({ label, value, unit, trend, icon: Icon }) {
   const TrendIcon = trend > 0 ? TrendingUp : trend < 0 ? TrendingDown : Minus;
 
   return (
-    <div className="glass-panel" style={{ padding: '20px 24px' }}>
+    <div className="glass-panel" style={{ padding: '22px 26px' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-        <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>{label}</span>
-        {Icon && <Icon size={18} style={{ color: 'var(--accent-primary)', opacity: 0.7 }} />}
+        <span style={{ fontSize: 15, color: 'var(--text-muted)' }}>{label}</span>
+        {Icon && <Icon size={20} style={{ color: 'var(--accent-primary)', opacity: 0.7 }} />}
       </div>
-      <div style={{ fontSize: 28, fontWeight: 700, marginTop: 8 }}>
+      <div style={{ fontSize: 34, fontWeight: 700, marginTop: 8 }}>
         {typeof value === 'number' ? value.toLocaleString('es-CL') : value}
-        {unit && <span style={{ fontSize: 14, fontWeight: 400, color: 'var(--text-muted)', marginLeft: 4 }}>{unit}</span>}
+        {unit && <span style={{ fontSize: 16, fontWeight: 400, color: 'var(--text-muted)', marginLeft: 4 }}>{unit}</span>}
       </div>
-      {trend !== undefined && (
-        <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginTop: 8, fontSize: 12, color: trendColor }}>
-          <TrendIcon size={14} />
+      {trend !== undefined && typeof trend === 'number' && (
+        <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginTop: 8, fontSize: 14, color: trendColor }}>
+          <TrendIcon size={15} />
           {trend > 0 ? '+' : ''}{trend}% vs mes anterior
         </div>
+      )}
+      {typeof trend === 'string' && (
+        <div style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 6 }}>{trend}</div>
       )}
     </div>
   );

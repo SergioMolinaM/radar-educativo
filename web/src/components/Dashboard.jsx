@@ -46,8 +46,8 @@ export default function Dashboard() {
     <div className="animate-fade-in">
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 24 }}>
         <div>
-          <h2 style={{ fontSize: 22, fontWeight: 700, marginBottom: 4 }}>Dashboard</h2>
-          <p style={{ color: 'var(--text-muted)', fontSize: 14 }}>
+          <h2 style={{ fontSize: 28, fontWeight: 700, marginBottom: 4 }}>Dashboard</h2>
+          <p style={{ color: 'var(--text-muted)', fontSize: 16 }}>
             Resumen operativo del SLEP &middot; {new Date().toLocaleDateString('es-CL', { month: 'long', year: 'numeric' })}
           </p>
         </div>
@@ -58,9 +58,9 @@ export default function Dashboard() {
           }}
           style={{
             display: 'flex', alignItems: 'center', gap: 8,
-            padding: '8px 16px', background: 'rgba(59, 130, 246, 0.15)',
+            padding: '10px 20px', background: 'rgba(59, 130, 246, 0.15)',
             color: 'var(--accent-primary)', border: '1px solid rgba(59, 130, 246, 0.3)',
-            borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: 'pointer',
+            borderRadius: 8, fontSize: 18, fontWeight: 600, cursor: 'pointer',
           }}
         >
           <Download size={15} /> Exportar Excel
@@ -78,7 +78,7 @@ export default function Dashboard() {
       <div style={{ display: 'grid', gridTemplateColumns: '300px 1fr', gap: 16, marginBottom: 24 }}>
         {/* Semáforo resumen */}
         <div className="glass-panel" style={{ padding: 24 }}>
-          <h3 style={{ fontSize: 15, fontWeight: 600, marginBottom: 16 }}>Estado general</h3>
+          <h3 style={{ fontSize: 18, fontWeight: 600, marginBottom: 16 }}>Estado general</h3>
           <ResponsiveContainer width="100%" height={180}>
             <PieChart>
               <Pie data={pieData} cx="50%" cy="50%" innerRadius={50} outerRadius={75} dataKey="value" strokeWidth={0}>
@@ -98,7 +98,7 @@ export default function Dashboard() {
 
         {/* Bar chart */}
         <div className="glass-panel" style={{ padding: 24 }}>
-          <h3 style={{ fontSize: 15, fontWeight: 600, marginBottom: 16 }}>Asistencia y ejecución por establecimiento</h3>
+          <h3 style={{ fontSize: 18, fontWeight: 600, marginBottom: 16 }}>Asistencia y ejecución por establecimiento</h3>
           <ResponsiveContainer width="100%" height={220}>
             <BarChart data={barData} barGap={4}>
               <XAxis dataKey="name" tick={{ fill: '#94a3b8', fontSize: 11 }} axisLine={false} tickLine={false} />
@@ -114,7 +114,7 @@ export default function Dashboard() {
       {/* Tabla de establecimientos */}
       <div className="glass-panel" style={{ padding: 24 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-          <h3 style={{ fontSize: 15, fontWeight: 600, margin: 0 }}>Establecimientos</h3>
+          <h3 style={{ fontSize: 18, fontWeight: 600, margin: 0 }}>Establecimientos</h3>
           <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{establecimientos.length} establecimientos</span>
         </div>
         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
@@ -166,7 +166,7 @@ function School2Icon(props) {
 
 function LegendDot({ color, label }) {
   return (
-    <span style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, color: 'var(--text-muted)' }}>
+    <span style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 14, color: 'var(--text-muted)' }}>
       <span style={{ width: 8, height: 8, borderRadius: '50%', background: color }} />
       {label}
     </span>
@@ -183,15 +183,15 @@ function LoadingSkeleton() {
 
 const thStyle = {
   textAlign: 'left',
-  padding: '10px 12px',
-  fontSize: 12,
+  padding: '12px 14px',
+  fontSize: 14,
   fontWeight: 600,
   color: 'var(--text-muted)',
   borderBottom: '1px solid var(--border-color)',
 };
 
 const tdStyle = {
-  padding: '12px',
-  fontSize: 13,
+  padding: '14px',
+  fontSize: 15,
   borderBottom: '1px solid var(--border-color)',
 };
