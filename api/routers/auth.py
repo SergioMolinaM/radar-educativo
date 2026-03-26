@@ -51,10 +51,11 @@ class UserOut(BaseModel):
 
 def _create_token(data: dict) -> str:
     """Create a JWT token. Uses python-jose if available, falls back to simple encoding."""
+    now = datetime.now(timezone.utc)
     payload = {
         **data,
-        "exp": (datetime.now(timezone.utc) + timedelta(hours=TOKEN_EXPIRE_HOURS)).isoformat(),
-        "iat": datetime.now(timezone.utc).isoformat(),
+        "exp": now + timedelta(hours=TOKEN_EXPIRE_HOURS),
+        "iat": now,
     }
     try:
         from jose import jwt
