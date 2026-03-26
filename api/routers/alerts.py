@@ -35,7 +35,7 @@ def get_alerts(
             LEFT JOIN matricula_2025_rbd m ON a.rbd = m.rbd
             LEFT JOIN rendimiento_2025_detalle r ON a.rbd = r.rbd
             LEFT JOIN directorio_2025 d ON a.rbd = d.rbd
-            WHERE a.{sf.replace('nombre_slep', 'a.nombre_slep')}
+            WHERE a.{sf}
               AND a.mes = (SELECT MAX(mes) FROM asistencia_2025_rbd WHERE {sf})
             ORDER BY a.pct_asistencia ASC
         """)

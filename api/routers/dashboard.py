@@ -141,7 +141,7 @@ def get_semaforos(current_user: dict = Depends(get_current_user)):
                    a.total_alumnos, m.matricula_total
             FROM asistencia_2025_rbd a
             LEFT JOIN matricula_2025_rbd m ON a.rbd = m.rbd
-            WHERE a.{sf.replace('nombre_slep', 'a.nombre_slep')}
+            WHERE a.{sf}
               AND a.mes = (SELECT MAX(mes) FROM asistencia_2025_rbd WHERE {sf})
             ORDER BY a.pct_asistencia ASC
         """)

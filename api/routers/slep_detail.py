@@ -119,7 +119,7 @@ def slep_establecimientos(current_user: dict = Depends(get_current_user)):
             FROM asistencia_2025_rbd a
             LEFT JOIN matricula_2025_rbd m ON a.rbd = m.rbd
             LEFT JOIN directorio_2025 d ON a.rbd = d.rbd
-            WHERE a.{sf.replace('nombre_slep', 'a.nombre_slep')}
+            WHERE a.{sf}
               AND a.mes = (SELECT MAX(mes) FROM asistencia_2025_rbd WHERE {sf})
             ORDER BY a.pct_asistencia ASC
         """)
@@ -205,7 +205,7 @@ def slep_ranking(
             FROM asistencia_2025_rbd a
             LEFT JOIN matricula_2025_rbd m ON a.rbd = m.rbd
             LEFT JOIN rendimiento_2025_detalle r ON a.rbd = r.rbd
-            WHERE a.{sf.replace('nombre_slep', 'a.nombre_slep')}
+            WHERE a.{sf}
               AND a.mes = (SELECT MAX(mes) FROM asistencia_2025_rbd WHERE {sf})
             ORDER BY {col} {order} NULLS LAST
         """)

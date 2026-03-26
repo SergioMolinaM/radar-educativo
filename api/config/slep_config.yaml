@@ -1,7 +1,7 @@
 sleps:
   # SLEPs con RUT sostenedor real (de la DB) + código organismo Mercado Público
   - id: barrancas
-    name: SLEP Las Barrancas
+    name: SLEP Barrancas
     rut_sostenedor: "65154021"
     codigo_organismo: "1593370"
     region: RM
