@@ -53,6 +53,7 @@ export const slepApi = {
   overview: () => api.get('/slep/overview'),
   establecimientos: () => api.get('/slep/establecimientos'),
   establecimiento: (rbd) => api.get(`/slep/establecimiento/${rbd}`),
+  ranking: (metric) => api.get('/slep/ranking', { params: metric ? { metric } : {} }),
 };
 
 export const palApi = {

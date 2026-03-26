@@ -178,6 +178,62 @@ def slep_establecimientos(current_user: dict = Depends(get_current_user)):
             return {"slep_id": slep_id, "total": 0, "establecimientos": []}
 
 
+@router.get("/ranking")
+def slep_ranking(
+    metric: str = "asistencia",
+    current_user: dict = Depends(get_current_user),
+):
+    """Ranking de establecimientos del SLEP por métrica."""
+    slep_id = current_user["slep_id"]
+    sf = _slep_filter(slep_id)
+
+    metric_map = {
+        "asistencia": ("a.pct_asistencia", "DESC"),
+        "matricula": ("m.matricula_total", "DESC"),
+        "aprobacion": ("r.tasa_aprobacion", "DESC"),
+        "retiro": ("r.tasa_retiro", "ASC"),  # menor es mejor
+        "promedio": ("r.prom_general", "DESC"),
+    }
+
+    col, order = metric_map.get(metric, ("a.pct_asistencia", "DESC"))
+
+    try:
+        rows = query_all(f"""
+            SELECT a.rbd, a.nom_rbd AS nombre, a.pct_asistencia,
+                   m.matricula_total,
+                   r.tasa_aprobacion, r.tasa_retiro, r.prom_general
+            FROM asistencia_2025_rbd a
+            LEFT JOIN matricula_2025_rbd m ON a.rbd = m.rbd
+            LEFT JOIN rendimiento_2025_detalle r ON a.rbd = r.rbd
+            WHERE a.{sf.replace('nombre_slep', 'a.nombre_slep')}
+              AND a.mes = (SELECT MAX(mes) FROM asistencia_2025_rbd WHERE {sf})
+            ORDER BY {col} {order} NULLS LAST
+        """)
+
+        ranking = []
+        for i, r in enumerate(rows):
+            ranking.append({
+                "posicion": i + 1,
+                "rbd": int(r["rbd"]),
+                "nombre": r["nombre"],
+                "asistencia": float(r.get("pct_asistencia") or 0),
+                "matricula": int(r.get("matricula_total") or 0),
+                "tasa_aprobacion": float(r.get("tasa_aprobacion") or 0),
+                "tasa_retiro": float(r.get("tasa_retiro") or 0),
+                "promedio_general": float(r.get("prom_general") or 0),
+            })
+
+        return {
+            "slep_id": slep_id,
+            "metric": metric,
+            "total": len(ranking),
+            "ranking": ranking,
+            "source": "2025_real",
+        }
+    except Exception as e:
+        return {"slep_id": slep_id, "metric": metric, "total": 0, "ranking": [], "error": str(e)}
+
+
 @router.get("/establecimiento/{rbd}")
 def slep_establecimiento_detalle(rbd: str, current_user: dict = Depends(get_current_user)):
     """Detalle de un establecimiento específico con datos abril + julio."""

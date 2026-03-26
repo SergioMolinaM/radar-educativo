@@ -1,28 +1,15 @@
-"""Alerts router - Early warning system endpoints."""
+"""Alerts router - Early warning system using real 2025 data."""
 import logging
+from datetime import date
 
 from fastapi import APIRouter, Depends, Query
 
 from api.db.connection import query_all, check_table_exists
 from api.routers.auth import get_current_user
+from api.routers.dashboard import _slep_filter
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
-
-DEMO_ALERTS = [
-    {"id": 1, "rbd": 10001, "establecimiento": "Escuela Básica Las Acacias", "tipo": "asistencia_critica",
-     "severidad": "rojo", "mensaje": "Asistencia promedio 78.5% - bajo umbral crítico 85%",
-     "valor": 78.5, "umbral": 85.0, "fecha_deteccion": "2026-03-20",
-     "accion_sugerida": "Activar plan de retención y contactar apoderados"},
-    {"id": 2, "rbd": 10001, "establecimiento": "Escuela Básica Las Acacias", "tipo": "ejecucion_presupuestaria",
-     "severidad": "rojo", "mensaje": "Ejecución presupuestaria 35.2% al mes 3 - riesgo de subejercicio",
-     "valor": 35.2, "umbral": 40.0, "fecha_deteccion": "2026-03-18",
-     "accion_sugerida": "Revisar plan de compras y acelerar licitaciones pendientes"},
-    {"id": 3, "rbd": 10002, "establecimiento": "Liceo Polivalente Central", "tipo": "ratio_docente",
-     "severidad": "naranja", "mensaje": "Ratio alumno/docente 32:1 - sobre umbral recomendado 25:1",
-     "valor": 32.0, "umbral": 25.0, "fecha_deteccion": "2026-03-15",
-     "accion_sugerida": "Evaluar contratación docente adicional o redistribución"},
-]
 
 
 @router.get("/")
@@ -30,82 +17,108 @@ def get_alerts(
     severity: str = Query(None, description="Filter: rojo, naranja, verde"),
     current_user: dict = Depends(get_current_user),
 ):
-    """Return active alerts for the SLEP."""
-    try:
-        if not check_table_exists("analytics", "dim_establecimiento"):
-            raise Exception("No analytics tables")
+    """Return active alerts for the SLEP based on 2025 data."""
+    slep_id = current_user["slep_id"]
+    sf = _slep_filter(slep_id)
+    today = date.today().isoformat()
 
-        rows = query_all("""
+    try:
+        # Get establishments with all indicators
+        rows = query_all(f"""
             SELECT
-                rbd_liceo AS rbd,
-                nombre_establecimiento AS nombre,
-                total_matricula AS matricula,
-                asistencia_promedio AS asistencia,
-                ratio_alumno_docente AS ratio,
-                es_rural,
-                total_docentes
-            FROM analytics.vh_radar_integral
-            ORDER BY asistencia_promedio ASC
+                a.rbd, a.nom_rbd AS nombre, a.pct_asistencia,
+                a.total_alumnos, a.mes,
+                m.matricula_total,
+                r.tasa_aprobacion, r.tasa_retiro, r.prom_asistencia AS asist_rendimiento,
+                d.rural_rbd
+            FROM asistencia_2025_rbd a
+            LEFT JOIN matricula_2025_rbd m ON a.rbd = m.rbd
+            LEFT JOIN rendimiento_2025_detalle r ON a.rbd = r.rbd
+            LEFT JOIN directorio_2025 d ON a.rbd = d.rbd
+            WHERE a.{sf.replace('nombre_slep', 'a.nombre_slep')}
+              AND a.mes = (SELECT MAX(mes) FROM asistencia_2025_rbd WHERE {sf})
+            ORDER BY a.pct_asistencia ASC
         """)
 
         alerts = []
-        alert_id = 1
+        aid = 1
         for r in rows:
-            asist = float(r.get("asistencia") or 0)
-            ratio = float(r.get("ratio") or 0)
-            mat = int(r.get("matricula") or 0)
-            rural = r.get("es_rural")
-            docentes = int(r.get("total_docentes") or 0)
+            asist = float(r.get("pct_asistencia") or 0)
+            mat = int(r.get("matricula_total") or r.get("total_alumnos") or 0)
+            tasa_retiro = float(r.get("tasa_retiro") or 0)
+            tasa_aprob = float(r.get("tasa_aprobacion") or 0)
+            rural = r.get("rural_rbd") == 1
 
-            # Rule: rural dropout risk
-            if rural and asist < 88:
-                alerts.append(_alert(alert_id, r, "rojo", "desercion_rural",
-                    f"Asistencia rural {asist}% bajo umbral 88% - riesgo de deserción",
-                    asist, 88.0, "Activar programa de retención rural y transporte escolar"))
-                alert_id += 1
+            # Regla 1: Asistencia crítica (<80%)
+            if asist < 80:
+                alerts.append(_alert(aid, r, "rojo", "asistencia_critica",
+                    f"Asistencia {asist}% - bajo umbral crítico 80%",
+                    asist, 80.0, "Activar plan de retención y contactar apoderados", today))
+                aid += 1
 
-            # Rule: urban attendance
-            if not rural and asist < 85:
-                alerts.append(_alert(alert_id, r, "rojo", "asistencia_critica",
-                    f"Asistencia urbana {asist}% bajo umbral 85% - riesgo subvención",
-                    asist, 85.0, "Activar plan de retención y contactar apoderados"))
-                alert_id += 1
+            # Regla 2: Asistencia en riesgo (80-88%)
+            elif asist < 88:
+                alerts.append(_alert(aid, r, "naranja", "asistencia_riesgo",
+                    f"Asistencia {asist}% - bajo meta 88%",
+                    asist, 88.0, "Monitorear y reforzar seguimiento de asistencia", today))
+                aid += 1
 
-            # Rule: high student/teacher ratio
-            if ratio > 25:
-                alerts.append(_alert(alert_id, r, "naranja", "ratio_docente",
-                    f"Ratio alumno/docente {ratio}:1 sobre umbral 25:1",
-                    ratio, 25.0, "Evaluar contratación docente adicional"))
-                alert_id += 1
+            # Regla 3: Tasa de retiro alta (>5%)
+            if tasa_retiro > 5:
+                alerts.append(_alert(aid, r, "rojo", "retiro_alto",
+                    f"Tasa de retiro {tasa_retiro}% - sobre umbral 5%",
+                    tasa_retiro, 5.0, "Analizar causas de retiro y activar programa de reincorporación", today))
+                aid += 1
 
-            # Rule: micro-school sustainability
-            if mat > 0 and mat < 50 and docentes > 8:
-                alerts.append(_alert(alert_id, r, "naranja", "microescuela",
-                    f"Microescuela ({mat} alumnos, {docentes} docentes) - revisar sustentabilidad",
-                    mat, 50.0, "Evaluar fusión o redistribución de personal"))
-                alert_id += 1
+            # Regla 4: Tasa de aprobación baja (<85%)
+            if tasa_aprob > 0 and tasa_aprob < 85:
+                sev = "rojo" if tasa_aprob < 75 else "naranja"
+                alerts.append(_alert(aid, r, sev, "aprobacion_baja",
+                    f"Tasa de aprobación {tasa_aprob}% - bajo umbral 85%",
+                    tasa_aprob, 85.0, "Revisar planes de apoyo académico y reforzamiento", today))
+                aid += 1
+
+            # Regla 5: Microescuela (<30 alumnos)
+            if 0 < mat < 30:
+                alerts.append(_alert(aid, r, "naranja", "microescuela",
+                    f"Microescuela con {mat} alumnos - evaluar sustentabilidad",
+                    mat, 30.0, "Evaluar fusión o reorganización de recursos", today))
+                aid += 1
+
+            # Regla 6: Escuela rural con asistencia bajo 85%
+            if rural and asist < 85:
+                alerts.append(_alert(aid, r, "rojo", "desercion_rural",
+                    f"Escuela rural con asistencia {asist}% - riesgo de deserción",
+                    asist, 85.0, "Activar programa de retención rural y transporte escolar", today))
+                aid += 1
 
         if severity:
             alerts = [a for a in alerts if a["severidad"] == severity]
 
-        return {"total": len(alerts), "alerts": alerts}
+        return {
+            "slep_id": slep_id,
+            "total": len(alerts),
+            "rojas": sum(1 for a in alerts if a["severidad"] == "rojo"),
+            "naranjas": sum(1 for a in alerts if a["severidad"] == "naranja"),
+            "alerts": alerts,
+            "source": "2025_real",
+        }
 
     except Exception as e:
-        logger.warning("Falling back to demo alerts: %s", e)
-        filtered = DEMO_ALERTS if not severity else [a for a in DEMO_ALERTS if a["severidad"] == severity]
-        return {"total": len(filtered), "alerts": filtered}
+        logger.warning("Alerts error: %s", e)
+        return {"slep_id": slep_id, "total": 0, "alerts": [], "error": str(e)}
 
 
-def _alert(aid, row, sev, tipo, msg, val, umbral, accion):
+def _alert(aid, row, sev, tipo, msg, val, umbral, accion, fecha):
     return {
         "id": aid,
-        "rbd": row["rbd"],
+        "rbd": int(row["rbd"]),
         "establecimiento": row["nombre"],
         "tipo": tipo,
         "severidad": sev,
         "mensaje": msg,
-        "valor": val,
+        "valor": round(val, 1),
         "umbral": umbral,
-        "fecha_deteccion": "2026-03-25",
+        "fecha_deteccion": fecha,
         "accion_sugerida": accion,
     }
