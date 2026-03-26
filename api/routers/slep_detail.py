@@ -27,6 +27,16 @@ def _get_rut_sostenedor(slep_id: str) -> str | None:
     return None
 
 
+def _parse_coord(val) -> float | None:
+    """Parse coordinate that may use comma as decimal separator."""
+    if val is None or val == '' or val == '0':
+        return None
+    try:
+        return float(str(val).replace(',', '.'))
+    except (ValueError, TypeError):
+        return None
+
+
 MESES = {1:"Enero",2:"Febrero",3:"Marzo",4:"Abril",5:"Mayo",6:"Junio",
          7:"Julio",8:"Agosto",9:"Septiembre",10:"Octubre",11:"Noviembre",12:"Diciembre"}
 
@@ -119,11 +129,13 @@ def slep_establecimientos(
             SELECT a.rbd, a.nom_rbd, a.nom_com_rbd, a.pct_asistencia,
                    a.total_alumnos, m.matricula_total,
                    r.tasa_aprobacion, r.prom_general,
-                   s.total_sep, s.prioritarios
+                   s.total_sep, s.prioritarios,
+                   d.latitud, d.longitud, d.rural_rbd
             FROM asistencia_2025_rbd a
             LEFT JOIN matricula_2025_rbd m ON a.rbd = m.rbd
             LEFT JOIN rendimiento_2025_detalle r ON a.rbd = r.rbd
             LEFT JOIN sep_2025_rbd s ON a.rbd = s.rbd
+            LEFT JOIN directorio_2025 d ON a.rbd = d.rbd
             WHERE a.{sf} AND a.mes = {mes} {adultos.replace('nom_rbd', 'a.nom_rbd')}
             ORDER BY a.pct_asistencia ASC
         """)
@@ -141,6 +153,10 @@ def slep_establecimientos(
             else:
                 semaforo = "verde"
 
+            # Parse coordinates (may use comma as decimal separator)
+            lat = _parse_coord(r.get("latitud"))
+            lon = _parse_coord(r.get("longitud"))
+
             establecimientos.append({
                 "rbd": r["rbd"],
                 "nombre": nombre,
@@ -153,6 +169,9 @@ def slep_establecimientos(
                 "prioritarios": int(r.get("prioritarios") or 0),
                 "semaforo": semaforo,
                 "es_adultos": es_adultos,
+                "latitud": lat,
+                "longitud": lon,
+                "rural": r.get("rural_rbd") in (1, "1", True),
             })
 
         return {

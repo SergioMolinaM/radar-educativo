@@ -173,7 +173,7 @@ export default function EstablecimientoDetalle() {
       <div style={{ marginTop: 24, padding: 16, background: 'rgba(255,255,255,0.03)', borderRadius: 8, fontSize: 12, color: 'var(--text-muted)' }}>
         <AlertTriangle size={14} style={{ display: 'inline', marginRight: 6 }} />
         <strong>Fuente de datos:</strong> Datos oficiales Mineduc 2025 (Directorio, Matrícula, Rendimiento, Asistencia declarada, SEP).
-        Procesados por Radar Educativo - Tercera Letra SpA. Los datos corresponden al año escolar 2025 y pueden tener rezago
+        Procesados por Radar de la Educación Pública - Tercera Letra SpA. Los datos corresponden al año escolar 2025 y pueden tener rezago
         respecto a la información más reciente declarada por los establecimientos.
       </div>
     </div>

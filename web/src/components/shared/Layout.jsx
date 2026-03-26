@@ -141,8 +141,8 @@ export default function Layout() {
               fontSize: 16, fontWeight: 800, color: '#fff',
             }}>R</div>
             <div>
-              <h1 style={{ fontSize: 16, fontWeight: 700, margin: 0, lineHeight: 1.2 }}>
-                <span className="text-gradient">Radar</span> Educativo
+              <h1 style={{ fontSize: 14, fontWeight: 700, margin: 0, lineHeight: 1.3 }}>
+                <span className="text-gradient">Radar</span> de la<br/>Educación Pública
               </h1>
               <div style={{ fontSize: 9, color: 'var(--text-muted)', letterSpacing: 1, textTransform: 'uppercase' }}>
                 Tercera Letra
@@ -200,6 +200,18 @@ export default function Layout() {
               </div>
             )}
           </div>
+
+          {/* SLEP Logo */}
+          {user?.slep_id && (
+            <div style={{ textAlign: 'center', marginTop: 12 }}>
+              <img
+                src={`/logos/${user.slep_id}.png`}
+                alt={slepLabel}
+                style={{ maxWidth: '80%', maxHeight: 45, objectFit: 'contain', opacity: 0.9 }}
+                onError={(e) => { e.target.style.display = 'none'; }}
+              />
+            </div>
+          )}
         </div>
 
         {/* Navegación por módulos */}

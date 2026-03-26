@@ -71,7 +71,7 @@ export default function FuentesDatos() {
           <span style={{ fontWeight: 600, fontSize: 13 }}>Compromiso de transparencia</span>
         </div>
         <p style={{ fontSize: 12, color: 'var(--text-muted)', margin: 0, lineHeight: 1.6 }}>
-          Radar Educativo utiliza exclusivamente datos de fuentes públicas y oficiales del Estado de Chile.
+          Radar de la Educación Pública utiliza exclusivamente datos de fuentes públicas y oficiales del Estado de Chile.
           Ningún dato es inventado, estimado o proyectado sin indicarlo explícitamente.
           Cada indicador incluye referencia a su fuente, período y fecha de última actualización.
         </p>

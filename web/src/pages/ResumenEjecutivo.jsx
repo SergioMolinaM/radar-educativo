@@ -131,7 +131,7 @@ export default function ResumenEjecutivo() {
 
       {/* Footer */}
       <div style={{ textAlign: 'center', padding: '24px 0', color: 'var(--text-muted)', fontSize: 12 }}>
-        Radar Educativo &middot; Generado el {fecha} &middot; Tercera Letra SpA
+        Radar de la Educación Pública &middot; Generado el {fecha} &middot; Tercera Letra SpA
       </div>
     </div>
   );

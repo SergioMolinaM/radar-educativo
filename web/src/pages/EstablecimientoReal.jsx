@@ -161,7 +161,7 @@ export default function EstablecimientoReal() {
       <div style={{ fontSize: 12, color: 'var(--text-muted)', lineHeight: 1.7, padding: '12px 0', borderTop: '1px solid var(--border-color)' }}>
         <strong>Fuentes:</strong> Asistencia y matricula - MINEDUC SIGE 2025.
         Rendimiento - MINEDUC Datos Abiertos 2025. Alumnos SEP - MINEDUC Abril 2025.
-        Semaforos y alertas calculados por Radar Educativo en base a umbrales definidos.
+        Semaforos y alertas calculados por Radar de la Educación Pública en base a umbrales definidos.
         &middot; Tercera Letra SpA &middot; {data.source === '2025_real' ? 'Datos reales verificados' : 'Datos parciales'}
       </div>
     </div>

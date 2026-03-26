@@ -314,7 +314,7 @@ export default function PlanAnual() {
 
       {/* Disclosure */}
       <div style={{ fontSize: 12, color: 'var(--text-muted)', lineHeight: 1.7, padding: '16px 0', borderTop: '1px solid var(--border-color)', marginTop: 16 }}>
-        <strong>Fuente:</strong> Plan Anual Local extraido por Radar Educativo. Los indicadores automatizables se monitorean
+        <strong>Fuente:</strong> Plan Anual Local extraido por Radar de la Educación Pública. Los indicadores automatizables se monitorean
         con datos de MINEDUC SIGE, Mercado Publico y otras fuentes abiertas. &middot; Tercera Letra SpA
       </div>
     </div>

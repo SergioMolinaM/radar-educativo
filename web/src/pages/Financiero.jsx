@@ -33,8 +33,11 @@ export default function Financiero() {
 
   return (
     <div className="animate-fade-in">
-      <h2 style={{ fontSize: 22, fontWeight: 700, marginBottom: 4 }}>Financiero</h2>
-      <p style={{ color: 'var(--text-muted)', fontSize: 14, marginBottom: 24 }}>Ejecución presupuestaria y compras públicas</p>
+      <h2 style={{ fontSize: 26, fontWeight: 700, marginBottom: 4 }}>Financiero</h2>
+      <p style={{ color: 'var(--text-muted)', fontSize: 15, marginBottom: 16 }}>Ejecución presupuestaria y compras públicas</p>
+      <div style={{ background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.3)', borderRadius: 8, padding: '10px 16px', marginBottom: 24, fontSize: 14, color: '#f59e0b' }}>
+        ⚠️ <strong>Vista demostración</strong> — Los datos financieros se conectarán con la API de Mercado Público del SLEP. Las cifras mostradas son ilustrativas.
+      </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16, marginBottom: 24 }}>
         <KpiCard label="Presupuesto total" value={formatCLP(execution?.presupuesto_total || 0)} icon={DollarSign} />
