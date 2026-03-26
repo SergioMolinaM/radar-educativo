@@ -27,33 +27,53 @@ def _get_rut_sostenedor(slep_id: str) -> str | None:
     return None
 
 
+MESES = {1:"Enero",2:"Febrero",3:"Marzo",4:"Abril",5:"Mayo",6:"Junio",
+         7:"Julio",8:"Agosto",9:"Septiembre",10:"Octubre",11:"Noviembre",12:"Diciembre"}
+
+ADULTOS_FILTER = "AND nom_rbd NOT ILIKE '%CEIA%' AND nom_rbd NOT ILIKE '%ADULTO%' AND nom_rbd NOT ILIKE '%NOCTURNO%'"
+
+
+@router.get("/meses")
+def slep_meses(current_user: dict = Depends(get_current_user)):
+    """List available months for the SLEP."""
+    sf = _slep_filter(current_user["slep_id"])
+    rows = query_all(f"SELECT DISTINCT mes FROM asistencia_2025_rbd WHERE {sf} ORDER BY mes")
+    return {"meses": [{"valor": r["mes"], "nombre": MESES.get(r["mes"], str(r["mes"]))} for r in rows]}
+
+
 @router.get("/overview")
-def slep_overview(current_user: dict = Depends(get_current_user)):
+def slep_overview(
+    mes: int = None,
+    excluir_adultos: bool = True,
+    current_user: dict = Depends(get_current_user),
+):
     """KPIs aggregados del SLEP completo - datos 2025."""
     slep_id = current_user["slep_id"]
     sf = _slep_filter(slep_id)
+    adultos = ADULTOS_FILTER if excluir_adultos else ""
 
     try:
-        # Try 2025 data first
+        # Determine month
+        if not mes:
+            m = query_one(f"SELECT MAX(mes) AS m FROM asistencia_2025_rbd WHERE {sf}")
+            mes = int(m["m"]) if m and m["m"] else 10
+
         mat = query_one(f"""
             SELECT COUNT(DISTINCT rbd) AS total_ee, SUM(matricula_total) AS mat_total
             FROM matricula_2025_rbd WHERE {sf}
         """)
         asist = query_one(f"""
-            SELECT ROUND(AVG(CASE WHEN pct_asistencia > 0 THEN pct_asistencia END)::numeric, 1) AS asist_avg,
-                   MAX(mes) AS ultimo_mes
-            FROM asistencia_2025_rbd WHERE {sf}
-              AND mes = (SELECT MAX(mes) FROM asistencia_2025_rbd WHERE {sf})
+            SELECT ROUND(AVG(CASE WHEN pct_asistencia > 0 THEN pct_asistencia END)::numeric, 1) AS asist_avg
+            FROM asistencia_2025_rbd WHERE {sf} AND mes = {mes} {adultos}
         """)
-        # Semáforos
         alertas_q = query_all(f"""
-            SELECT pct_asistencia FROM asistencia_2025_rbd
-            WHERE {sf} AND mes = (SELECT MAX(mes) FROM asistencia_2025_rbd WHERE {sf})
+            SELECT pct_asistencia, nom_rbd FROM asistencia_2025_rbd
+            WHERE {sf} AND mes = {mes} {adultos}
         """)
 
         total_ee = int(mat['total_ee'] or 0) if mat else 0
         if total_ee == 0:
-            raise ValueError("No 2025 data, try analytics")
+            raise ValueError("No 2025 data")
 
         rojas = sum(1 for a in alertas_q if float(a['pct_asistencia'] or 0) < 80)
         naranjas = sum(1 for a in alertas_q if 80 <= float(a['pct_asistencia'] or 0) < 88)
@@ -62,6 +82,9 @@ def slep_overview(current_user: dict = Depends(get_current_user)):
         return {
             "slep_id": slep_id,
             "source": "2025_real",
+            "mes": mes,
+            "mes_nombre": MESES.get(mes, str(mes)),
+            "excluir_adultos": excluir_adultos,
             "kpis": {
                 "total_establecimientos": total_ee,
                 "matricula_total": int(mat['mat_total'] or 0),
@@ -72,47 +95,26 @@ def slep_overview(current_user: dict = Depends(get_current_user)):
             },
         }
     except Exception as e:
-        logger.info("2025 data not available for %s, trying analytics: %s", slep_id, e)
-
-    # Fallback: analytics schema (2024)
-    rut = _get_rut_sostenedor(slep_id)
-    if not rut:
-        raise HTTPException(status_code=404, detail=f"SLEP {slep_id} no configurado")
-    try:
-        overview = query_one("""
-            SELECT COUNT(*) AS total_ee, SUM(matricula_total) AS mat_total,
-                   ROUND(AVG(tasa_asistencia)*100, 1) AS asist_avg,
-                   SUM(CASE WHEN semaforo_riesgo='Roja' THEN 1 ELSE 0 END) AS rojas,
-                   SUM(CASE WHEN semaforo_riesgo='Naranja' THEN 1 ELSE 0 END) AS naranjas,
-                   SUM(CASE WHEN semaforo_riesgo='Verde' THEN 1 ELSE 0 END) AS verdes
-            FROM analytics.mart_alerta_temprana_abril WHERE rut_sostenedor = %s
-        """, (rut,))
-        if not overview or not overview['total_ee']:
-            raise HTTPException(status_code=404, detail="Sin datos")
-        return {
-            "slep_id": slep_id, "source": "2024_analytics",
-            "kpis": {
-                "total_establecimientos": int(overview['total_ee']),
-                "matricula_total": int(overview['mat_total'] or 0),
-                "asistencia_promedio": float(overview['asist_avg'] or 0),
-                "alertas_rojas": int(overview['rojas'] or 0),
-                "alertas_naranjas": int(overview['naranjas'] or 0),
-                "alertas_verdes": int(overview['verdes'] or 0),
-            },
-        }
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        logger.info("2025 overview error for %s: %s", slep_id, e)
+        return {"slep_id": slep_id, "source": "error", "error": str(e), "kpis": {}}
 
 
 @router.get("/establecimientos")
-def slep_establecimientos(current_user: dict = Depends(get_current_user)):
+def slep_establecimientos(
+    mes: int = None,
+    excluir_adultos: bool = True,
+    current_user: dict = Depends(get_current_user),
+):
     """Lista de establecimientos del SLEP con datos 2025."""
     slep_id = current_user["slep_id"]
     sf = _slep_filter(slep_id)
+    adultos = ADULTOS_FILTER if excluir_adultos else ""
 
     try:
+        if not mes:
+            m = query_one(f"SELECT MAX(mes) AS m FROM asistencia_2025_rbd WHERE {sf}")
+            mes = int(m["m"]) if m and m["m"] else 10
+
         rows = query_all(f"""
             SELECT a.rbd, a.nom_rbd, a.nom_com_rbd, a.pct_asistencia,
                    a.total_alumnos, m.matricula_total,
@@ -122,8 +124,7 @@ def slep_establecimientos(current_user: dict = Depends(get_current_user)):
             LEFT JOIN matricula_2025_rbd m ON a.rbd = m.rbd
             LEFT JOIN rendimiento_2025_detalle r ON a.rbd = r.rbd
             LEFT JOIN sep_2025_rbd s ON a.rbd = s.rbd
-            WHERE a.{sf}
-              AND a.mes = (SELECT MAX(mes) FROM asistencia_2025_rbd WHERE {sf})
+            WHERE a.{sf} AND a.mes = {mes} {adultos.replace('nom_rbd', 'a.nom_rbd')}
             ORDER BY a.pct_asistencia ASC
         """)
 

@@ -50,10 +50,11 @@ export const financialApi = {
 };
 
 export const slepApi = {
-  overview: () => api.get('/slep/overview'),
-  establecimientos: () => api.get('/slep/establecimientos'),
+  overview: (params) => api.get('/slep/overview', { params }),
+  establecimientos: (params) => api.get('/slep/establecimientos', { params }),
   establecimiento: (rbd) => api.get(`/slep/establecimiento/${rbd}`),
   ranking: (metric) => api.get('/slep/ranking', { params: metric ? { metric } : {} }),
+  meses: () => api.get('/slep/meses'),
 };
 
 export const palApi = {
