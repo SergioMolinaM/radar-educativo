@@ -1,11 +1,14 @@
-"""SLEP detail router - Establishments and KPIs for a specific SLEP."""
+"""SLEP detail router - Establishments and KPIs for a specific SLEP.
+Uses 2025 data tables with fallback to analytics schema (2024).
+"""
 import logging
 
 import yaml
 from fastapi import APIRouter, Depends, HTTPException
 
-from api.db.connection import query_all, query_one
+from api.db.connection import query_all, query_one, check_table_exists
 from api.routers.auth import get_current_user
+from api.routers.dashboard import _slep_filter, SLEP_NAME_MAP
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -26,104 +29,153 @@ def _get_rut_sostenedor(slep_id: str) -> str | None:
 
 @router.get("/overview")
 def slep_overview(current_user: dict = Depends(get_current_user)):
-    """KPIs aggregados del SLEP completo con datos reales."""
-    rut = _get_rut_sostenedor(current_user["slep_id"])
-    if not rut:
-        raise HTTPException(status_code=404, detail=f"SLEP {current_user['slep_id']} no configurado")
+    """KPIs aggregados del SLEP completo - datos 2025."""
+    slep_id = current_user["slep_id"]
+    sf = _slep_filter(slep_id)
 
     try:
-        overview = query_one("""
-            SELECT
-                COUNT(*) AS total_establecimientos,
-                SUM(matricula_total) AS matricula_total,
-                ROUND(AVG(tasa_asistencia) * 100, 1) AS asistencia_promedio,
-                SUM(total_vulnerable) AS total_vulnerable,
-                ROUND(AVG(proporcion_vulnerabilidad) * 100, 1) AS vulnerabilidad_promedio,
-                SUM(CASE WHEN semaforo_riesgo = 'Roja' THEN 1 ELSE 0 END) AS alertas_rojas,
-                SUM(CASE WHEN semaforo_riesgo = 'Naranja' THEN 1 ELSE 0 END) AS alertas_naranjas,
-                SUM(CASE WHEN semaforo_riesgo = 'Verde' THEN 1 ELSE 0 END) AS alertas_verdes,
-                nombre_sostenedor
-            FROM analytics.mart_alerta_temprana_abril
-            WHERE rut_sostenedor = %s
-            GROUP BY nombre_sostenedor
-        """, (rut,))
+        # Try 2025 data first
+        mat = query_one(f"""
+            SELECT COUNT(DISTINCT rbd) AS total_ee, SUM(matricula_total) AS mat_total
+            FROM matricula_2025_rbd WHERE {sf}
+        """)
+        asist = query_one(f"""
+            SELECT ROUND(AVG(pct_asistencia)::numeric, 1) AS asist_avg, MAX(mes) AS ultimo_mes
+            FROM asistencia_2025_rbd WHERE {sf}
+              AND mes = (SELECT MAX(mes) FROM asistencia_2025_rbd WHERE {sf})
+        """)
+        # Semáforos
+        alertas_q = query_all(f"""
+            SELECT pct_asistencia FROM asistencia_2025_rbd
+            WHERE {sf} AND mes = (SELECT MAX(mes) FROM asistencia_2025_rbd WHERE {sf})
+        """)
 
-        if not overview:
-            raise HTTPException(status_code=404, detail="Sin datos para este SLEP")
+        total_ee = int(mat['total_ee'] or 0) if mat else 0
+        if total_ee == 0:
+            raise ValueError("No 2025 data, try analytics")
+
+        rojas = sum(1 for a in alertas_q if float(a['pct_asistencia'] or 0) < 80)
+        naranjas = sum(1 for a in alertas_q if 80 <= float(a['pct_asistencia'] or 0) < 88)
+        verdes = sum(1 for a in alertas_q if float(a['pct_asistencia'] or 0) >= 88)
 
         return {
-            "slep_id": current_user["slep_id"],
-            "nombre_sostenedor": overview["nombre_sostenedor"],
+            "slep_id": slep_id,
+            "source": "2025_real",
             "kpis": {
-                "total_establecimientos": int(overview["total_establecimientos"]),
-                "matricula_total": int(overview["matricula_total"]),
-                "asistencia_promedio": float(overview["asistencia_promedio"]),
-                "total_vulnerable": int(overview["total_vulnerable"]),
-                "vulnerabilidad_promedio": float(overview["vulnerabilidad_promedio"]),
-                "alertas_rojas": int(overview["alertas_rojas"]),
-                "alertas_naranjas": int(overview["alertas_naranjas"]),
-                "alertas_verdes": int(overview["alertas_verdes"]),
+                "total_establecimientos": total_ee,
+                "matricula_total": int(mat['mat_total'] or 0),
+                "asistencia_promedio": float(asist['asist_avg'] or 0) if asist else 0,
+                "alertas_rojas": rojas,
+                "alertas_naranjas": naranjas,
+                "alertas_verdes": verdes,
+            },
+        }
+    except Exception as e:
+        logger.info("2025 data not available for %s, trying analytics: %s", slep_id, e)
+
+    # Fallback: analytics schema (2024)
+    rut = _get_rut_sostenedor(slep_id)
+    if not rut:
+        raise HTTPException(status_code=404, detail=f"SLEP {slep_id} no configurado")
+    try:
+        overview = query_one("""
+            SELECT COUNT(*) AS total_ee, SUM(matricula_total) AS mat_total,
+                   ROUND(AVG(tasa_asistencia)*100, 1) AS asist_avg,
+                   SUM(CASE WHEN semaforo_riesgo='Roja' THEN 1 ELSE 0 END) AS rojas,
+                   SUM(CASE WHEN semaforo_riesgo='Naranja' THEN 1 ELSE 0 END) AS naranjas,
+                   SUM(CASE WHEN semaforo_riesgo='Verde' THEN 1 ELSE 0 END) AS verdes
+            FROM analytics.mart_alerta_temprana_abril WHERE rut_sostenedor = %s
+        """, (rut,))
+        if not overview or not overview['total_ee']:
+            raise HTTPException(status_code=404, detail="Sin datos")
+        return {
+            "slep_id": slep_id, "source": "2024_analytics",
+            "kpis": {
+                "total_establecimientos": int(overview['total_ee']),
+                "matricula_total": int(overview['mat_total'] or 0),
+                "asistencia_promedio": float(overview['asist_avg'] or 0),
+                "alertas_rojas": int(overview['rojas'] or 0),
+                "alertas_naranjas": int(overview['naranjas'] or 0),
+                "alertas_verdes": int(overview['verdes'] or 0),
             },
         }
     except HTTPException:
         raise
     except Exception as e:
-        logger.error("Error getting SLEP overview: %s", e)
         raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.get("/establecimientos")
 def slep_establecimientos(current_user: dict = Depends(get_current_user)):
-    """Lista de todos los colegios del SLEP con datos de alerta temprana."""
-    rut = _get_rut_sostenedor(current_user["slep_id"])
-    if not rut:
-        raise HTTPException(status_code=404, detail=f"SLEP {current_user['slep_id']} no configurado")
+    """Lista de establecimientos del SLEP con datos 2025."""
+    slep_id = current_user["slep_id"]
+    sf = _slep_filter(slep_id)
 
     try:
-        rows = query_all("""
-            SELECT
-                rbd,
-                nombre_establecimiento,
-                codigo_comuna,
-                dependencia,
-                matricula_total,
-                ROUND(tasa_asistencia * 100, 1) AS asistencia_pct,
-                total_vulnerable,
-                ROUND(proporcion_vulnerabilidad * 100, 1) AS vulnerabilidad_pct,
-                riesgo_asistencia,
-                riesgo_vulnerabilidad,
-                semaforo_riesgo
-            FROM analytics.mart_alerta_temprana_abril
-            WHERE rut_sostenedor = %s
-            ORDER BY tasa_asistencia ASC
-        """, (rut,))
+        rows = query_all(f"""
+            SELECT a.rbd, a.nom_rbd, a.nom_com_rbd, a.pct_asistencia,
+                   a.total_alumnos, m.matricula_total,
+                   d.latitud, d.longitud, d.rural_rbd
+            FROM asistencia_2025_rbd a
+            LEFT JOIN matricula_2025_rbd m ON a.rbd = m.rbd
+            LEFT JOIN directorio_2025 d ON a.rbd = d.rbd
+            WHERE a.{sf.replace('nombre_slep', 'a.nombre_slep')}
+              AND a.mes = (SELECT MAX(mes) FROM asistencia_2025_rbd WHERE {sf})
+            ORDER BY a.pct_asistencia ASC
+        """)
 
         establecimientos = []
         for r in rows:
+            asist = float(r.get("pct_asistencia") or 0)
+            if asist < 80:
+                semaforo = "rojo"
+            elif asist < 88:
+                semaforo = "naranja"
+            else:
+                semaforo = "verde"
+
             establecimientos.append({
                 "rbd": r["rbd"],
-                "nombre": r["nombre_establecimiento"],
-                "codigo_comuna": r["codigo_comuna"],
-                "dependencia": r["dependencia"],
-                "matricula": int(r["matricula_total"] or 0),
-                "asistencia": float(r["asistencia_pct"] or 0),
-                "vulnerable": int(r["total_vulnerable"] or 0),
-                "vulnerabilidad_pct": float(r["vulnerabilidad_pct"] or 0),
-                "riesgo_asistencia": bool(r["riesgo_asistencia"]),
-                "riesgo_vulnerabilidad": bool(r["riesgo_vulnerabilidad"]),
-                "semaforo": r["semaforo_riesgo"].lower().rstrip('a') if r.get("semaforo_riesgo") else "verde",
+                "nombre": r["nom_rbd"],
+                "comuna": r.get("nom_com_rbd"),
+                "matricula": int(r.get("matricula_total") or r.get("total_alumnos") or 0),
+                "asistencia_pct": asist,
+                "semaforo": semaforo,
+                "latitud": float(r["latitud"]) if r.get("latitud") else None,
+                "longitud": float(r["longitud"]) if r.get("longitud") else None,
+                "rural": bool(r.get("rural_rbd")),
             })
 
         return {
-            "slep_id": current_user["slep_id"],
+            "slep_id": slep_id,
             "total": len(establecimientos),
             "establecimientos": establecimientos,
+            "source": "2025_real",
         }
-    except HTTPException:
-        raise
     except Exception as e:
-        logger.error("Error getting SLEP establishments: %s", e)
-        raise HTTPException(status_code=500, detail=str(e))
+        logger.warning("2025 establishments error: %s", e)
+        # Fallback to analytics
+        rut = _get_rut_sostenedor(slep_id)
+        if not rut:
+            return {"slep_id": slep_id, "total": 0, "establecimientos": []}
+        try:
+            rows = query_all("""
+                SELECT rbd, nombre_establecimiento, codigo_comuna, matricula_total,
+                       ROUND(tasa_asistencia*100, 1) AS asist, semaforo_riesgo
+                FROM analytics.mart_alerta_temprana_abril WHERE rut_sostenedor = %s
+                ORDER BY tasa_asistencia ASC
+            """, (rut,))
+            return {
+                "slep_id": slep_id, "total": len(rows), "source": "2024_analytics",
+                "establecimientos": [{
+                    "rbd": r["rbd"], "nombre": r["nombre_establecimiento"],
+                    "matricula": int(r["matricula_total"] or 0),
+                    "asistencia_pct": float(r["asist"] or 0),
+                    "semaforo": (r.get("semaforo_riesgo") or "verde").lower().rstrip('a'),
+                } for r in rows],
+            }
+        except Exception:
+            return {"slep_id": slep_id, "total": 0, "establecimientos": []}
 
 
 @router.get("/establecimiento/{rbd}")
