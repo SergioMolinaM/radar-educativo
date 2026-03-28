@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Printer } from 'lucide-react';
-import { dashboardApi, alertsApi } from '../services/api';
+import { dashboardApi, alertsApi, compromisosApi } from '../services/api';
 import { useAuth } from '../hooks/useAuth';
 import SemaforoTag from '../components/shared/SemaforoTag';
 
@@ -9,6 +9,7 @@ export default function ResumenEjecutivo() {
   const [summary, setSummary] = useState(null);
   const [semaforos, setSemaforos] = useState(null);
   const [alerts, setAlerts] = useState([]);
+  const [compromisos, setCompromisos] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -16,11 +17,13 @@ export default function ResumenEjecutivo() {
       dashboardApi.summary(),
       dashboardApi.semaforos(),
       alertsApi.list(),
+      compromisosApi.list(),
     ])
-      .then(([s, sem, a]) => {
+      .then(([s, sem, a, c]) => {
         setSummary(s.data);
         setSemaforos(sem.data);
         setAlerts(a.data.alerts || []);
+        setCompromisos(c.data);
       })
       .catch(() => {})
       .finally(() => setLoading(false));
@@ -79,7 +82,7 @@ export default function ResumenEjecutivo() {
         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
           <thead>
             <tr>
-              {['Establecimiento', 'Matrícula', 'Asistencia', 'Ejecución', 'Estado'].map((h) => (
+              {['Establecimiento', 'Comuna', 'Matricula', 'Asistencia', 'Estado'].map((h) => (
                 <th key={h} style={thStyle}>{h}</th>
               ))}
             </tr>
@@ -88,9 +91,9 @@ export default function ResumenEjecutivo() {
             {establecimientos.map((e) => (
               <tr key={e.rbd}>
                 <td style={tdStyle}><strong>{e.nombre}</strong><br /><span style={{ fontSize: 11, color: 'var(--text-muted)' }}>RBD {e.rbd}</span></td>
-                <td style={tdStyle}>{e.matricula}</td>
-                <td style={{ ...tdStyle, color: e.asistencia < 85 ? 'var(--alert-red)' : 'inherit', fontWeight: e.asistencia < 85 ? 700 : 400 }}>{e.asistencia}%</td>
-                <td style={{ ...tdStyle, color: e.ejecucion < 40 ? 'var(--alert-red)' : 'inherit', fontWeight: e.ejecucion < 40 ? 700 : 400 }}>{e.ejecucion}%</td>
+                <td style={tdStyle}>{e.comuna || '—'}</td>
+                <td style={tdStyle}>{e.matricula?.toLocaleString('es-CL')}</td>
+                <td style={{ ...tdStyle, color: e.asistencia < 75 ? 'var(--alert-red)' : e.asistencia < 82 ? 'var(--alert-orange)' : 'inherit', fontWeight: e.asistencia < 75 ? 700 : 400 }}>{e.asistencia}%</td>
                 <td style={tdStyle}><SemaforoTag value={e.semaforo} size="sm" /></td>
               </tr>
             ))}
@@ -126,6 +129,72 @@ export default function ResumenEjecutivo() {
               <div style={{ fontSize: 13, color: 'var(--accent-primary)', marginTop: 4 }}>Acción: {a.accion_sugerida}</div>
             </div>
           ))}
+        </div>
+      )}
+
+      {/* Compromisos de gestión */}
+      {compromisos && (compromisos.atrasados?.length > 0 || compromisos.proximos?.length > 0) && (
+        <div className="glass-panel" style={{ padding: 24, marginBottom: 16 }}>
+          <h3 style={{ fontSize: 16, fontWeight: 700, marginBottom: 16 }}>
+            Compromisos de Gestion
+            <span style={{ fontSize: 12, fontWeight: 400, color: 'var(--text-muted)', marginLeft: 8 }}>
+              {compromisos.resumen?.total_activos} activos
+            </span>
+          </h3>
+
+          {compromisos.atrasados?.length > 0 && (
+            <div style={{ marginBottom: 16 }}>
+              <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--alert-red)', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                Vencidos ({compromisos.atrasados.length})
+              </div>
+              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                <thead>
+                  <tr>
+                    {['Hito', 'Instrumento', 'Responsable', 'Dias atraso'].map(h => (
+                      <th key={h} style={thStyle}>{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {compromisos.atrasados.map(c => (
+                    <tr key={c.id}>
+                      <td style={tdStyle}>{c.hito}</td>
+                      <td style={tdStyle}><span style={{ padding: '2px 6px', borderRadius: 4, fontSize: 11, fontWeight: 700, background: 'rgba(239,68,68,0.1)', color: 'var(--alert-red)' }}>{c.instrumento}</span></td>
+                      <td style={tdStyle}>{c.responsable}</td>
+                      <td style={{ ...tdStyle, color: 'var(--alert-red)', fontWeight: 700 }}>{c.dias_atraso} dias</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+
+          {compromisos.proximos?.length > 0 && (
+            <div>
+              <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--alert-orange)', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                Proximos a vencer ({compromisos.proximos.length})
+              </div>
+              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                <thead>
+                  <tr>
+                    {['Hito', 'Instrumento', 'Responsable', 'Vence'].map(h => (
+                      <th key={h} style={thStyle}>{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {compromisos.proximos.map(c => (
+                    <tr key={c.id}>
+                      <td style={tdStyle}>{c.hito}</td>
+                      <td style={tdStyle}><span style={{ padding: '2px 6px', borderRadius: 4, fontSize: 11, fontWeight: 700, background: 'rgba(245,158,11,0.1)', color: 'var(--alert-orange)' }}>{c.instrumento}</span></td>
+                      <td style={tdStyle}>{c.responsable}</td>
+                      <td style={{ ...tdStyle, color: 'var(--alert-orange)' }}>en {c.dias_restantes} dias</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
       )}
 

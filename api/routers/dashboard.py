@@ -46,6 +46,38 @@ MES_NOMBRES = ['', 'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
 
 ADULTOS_FILTER = "AND nom_rbd NOT ILIKE '%CEIA%' AND nom_rbd NOT ILIKE '%ADULTO%' AND nom_rbd NOT ILIKE '%NOCTURNO%'"
 
+# Umbrales de semáforo configurables por SLEP.
+# Defaults calibrados con realidad chilena 2025 (promedio nacional ~82%).
+# Cada SLEP puede ajustar según su contexto.
+SEMAFORO_DEFAULTS = {
+    "asistencia_verde": 82,    # >= 82% = verde (antes era 88, dejaba todo rojo)
+    "asistencia_amarillo": 75, # >= 75% = amarillo
+    # < 75% = rojo
+}
+
+# Override por SLEP si lo requieren
+SEMAFORO_OVERRIDES = {
+    # "barrancas": {"asistencia_verde": 80, "asistencia_amarillo": 72},
+}
+
+
+def _get_umbrales(slep_id: str) -> dict:
+    """Return semáforo thresholds for a SLEP (configurable)."""
+    base = dict(SEMAFORO_DEFAULTS)
+    overrides = SEMAFORO_OVERRIDES.get(slep_id, {})
+    base.update(overrides)
+    return base
+
+
+def _clasificar_semaforo(asistencia: float, umbrales: dict) -> str:
+    """Classify an establishment by attendance using configurable thresholds."""
+    if asistencia >= umbrales["asistencia_verde"]:
+        return "verde"
+    elif asistencia >= umbrales["asistencia_amarillo"]:
+        return "naranja"
+    else:
+        return "rojo"
+
 
 def _slep_filter(slep_id: str) -> str:
     """Build SQL IN clause for SLEP name variants."""
@@ -81,10 +113,11 @@ def get_dashboard_summary(
             m = query_one(f"SELECT MAX(mes) AS m FROM asistencia_2025_rbd WHERE {sf}")
             mes = int(m["m"]) if m and m["m"] else 10
 
-        # Matrícula 2025
+        # Matrícula 2025 (consistent with adultos filter)
+        mat_af = "AND nom_rbd NOT ILIKE '%CEIA%' AND nom_rbd NOT ILIKE '%ADULTO%' AND nom_rbd NOT ILIKE '%NOCTURNO%'" if excluir_adultos else ""
         mat = query_one(f"""
             SELECT COUNT(DISTINCT rbd) AS total_ee, SUM(matricula_total) AS mat_total
-            FROM matricula_2025_rbd WHERE {sf}
+            FROM matricula_2025_rbd WHERE {sf} {mat_af}
         """)
 
         # Asistencia mes seleccionado (sin adultos)
@@ -110,9 +143,10 @@ def get_dashboard_summary(
         asist_avg = float(asist['asist_avg']) if asist and asist['asist_avg'] else 0
         prev_avg = float(prev['asist_avg']) if prev and prev.get('asist_avg') else None
 
-        rojas = sum(1 for a in alertas if float(a['pct_asistencia'] or 0) < 80)
-        naranjas = sum(1 for a in alertas if 80 <= float(a['pct_asistencia'] or 0) < 88)
-        verdes = sum(1 for a in alertas if float(a['pct_asistencia'] or 0) >= 88)
+        umbrales = _get_umbrales(slep_id)
+        rojas = sum(1 for a in alertas if _clasificar_semaforo(float(a['pct_asistencia'] or 0), umbrales) == "rojo")
+        naranjas = sum(1 for a in alertas if _clasificar_semaforo(float(a['pct_asistencia'] or 0), umbrales) == "naranja")
+        verdes = sum(1 for a in alertas if _clasificar_semaforo(float(a['pct_asistencia'] or 0), umbrales) == "verde")
 
         return {
             "slep_id": slep_id,
@@ -131,6 +165,7 @@ def get_dashboard_summary(
             "tendencias": {
                 "asistencia_variacion_mensual": round(asist_avg - prev_avg, 1) if prev_avg else None,
             },
+            "umbrales": umbrales,
         }
     except Exception as e:
         logger.warning("Dashboard summary error: %s", e)
@@ -166,18 +201,16 @@ def get_semaforos(
             ORDER BY a.pct_asistencia ASC
         """)
 
+        umbrales = _get_umbrales(slep_id)
         establecimientos = []
         for r in rows:
             asist = float(r.get("pct_asistencia") or 0)
+            semaforo = _clasificar_semaforo(asist, umbrales)
             alertas_list = []
-            if asist < 80:
-                alertas_list.append(f"Asistencia crítica ({asist}%)")
-                semaforo = "rojo"
-            elif asist < 88:
+            if semaforo == "rojo":
+                alertas_list.append(f"Asistencia critica ({asist}%)")
+            elif semaforo == "naranja":
                 alertas_list.append(f"Asistencia bajo meta ({asist}%)")
-                semaforo = "naranja"
-            else:
-                semaforo = "verde"
 
             establecimientos.append({
                 "rbd": r["rbd"],

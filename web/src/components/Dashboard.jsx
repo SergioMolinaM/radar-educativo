@@ -1,24 +1,28 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Users, GraduationCap, CalendarCheck, DollarSign, AlertTriangle, Download } from 'lucide-react';
-import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
+import { PieChart, Pie, Cell, BarChart, Bar, LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, ReferenceLine } from 'recharts';
 import { dashboardApi } from '../services/api';
 import KpiCard from './shared/KpiCard';
 import SemaforoTag from './shared/SemaforoTag';
+import CompromisosPanel from './dashboard/CompromisosPanel';
+import SemaforoLeyenda from './shared/SemaforoLeyenda';
 
 const PIE_COLORS = ['var(--alert-red)', 'var(--alert-orange)', 'var(--alert-green)'];
 
 export default function Dashboard() {
   const [summary, setSummary] = useState(null);
   const [semaforos, setSemaforos] = useState(null);
+  const [tendencia, setTendencia] = useState(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
   useEffect(() => {
-    Promise.all([dashboardApi.summary(), dashboardApi.semaforos()])
-      .then(([s, sem]) => {
+    Promise.all([dashboardApi.summary(), dashboardApi.semaforos(), dashboardApi.tendenciaAsistencia()])
+      .then(([s, sem, t]) => {
         setSummary(s.data);
         setSemaforos(sem.data);
+        setTendencia(t.data);
       })
       .catch(() => {})
       .finally(() => setLoading(false));
@@ -67,13 +71,49 @@ export default function Dashboard() {
         </button>
       </div>
 
+      {/* Panel de compromisos institucionales */}
+      <CompromisosPanel />
+
       {/* KPI Cards */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16, marginBottom: 24 }}>
-        <KpiCard label="Establecimientos" value={kpis.total_establecimientos} icon={School2Icon} />
-        <KpiCard label="Matrícula total" value={kpis.matricula_total} icon={GraduationCap} trend={trends.matricula_variacion_anual} />
-        <KpiCard label="Asistencia promedio" value={kpis.asistencia_promedio} unit="%" icon={CalendarCheck} trend={trends.asistencia_variacion_mensual} />
-        <KpiCard label="Ejecución presup." value={kpis.ejecucion_presupuestaria} unit="%" icon={DollarSign} trend={trends.ejecucion_variacion_mensual} />
+        <KpiCard label="Establecimientos" value={kpis.total_establecimientos} icon={School2Icon}
+          tooltip={{ text: 'Total de establecimientos del SLEP (sin ed. adultos)', fuente: 'MINEDUC Directorio 2025', periodo: summary?.mes_nombre + ' 2025' }} />
+        <KpiCard label="Matricula total" value={kpis.matricula_total} icon={GraduationCap} trend={trends.matricula_variacion_anual}
+          tooltip={{ text: 'Alumnos matriculados en el SLEP', fuente: 'MINEDUC Matricula 2025', periodo: 'Anual 2025' }} />
+        <KpiCard label="Asistencia promedio" value={kpis.asistencia_promedio} unit="%" icon={CalendarCheck} trend={trends.asistencia_variacion_mensual}
+          tooltip={{ text: 'Promedio del SLEP (sin ed. adultos)', fuente: 'MINEDUC Asistencia 2025', periodo: summary?.mes_nombre + ' 2025' }} />
+        <KpiCard label="Ejecucion presup." value={kpis.ejecucion_presupuestaria} unit="%" icon={DollarSign} trend={trends.ejecucion_variacion_mensual}
+          tooltip={{ text: 'Porcentaje del presupuesto ejecutado', fuente: 'Mercado Publico', periodo: 'Q1 2026' }} />
       </div>
+
+      {/* Tendencia asistencia mensual 2025 */}
+      {tendencia?.meses?.length > 0 && (
+        <div className="glass-panel" style={{ padding: 24, marginBottom: 24 }}>
+          <h3 style={{ fontSize: 18, fontWeight: 600, marginBottom: 16 }}>
+            Asistencia mensual 2025
+            <span style={{ fontSize: 13, fontWeight: 400, color: 'var(--text-muted)', marginLeft: 8 }}>
+              {tendencia.meses.length} meses con datos
+            </span>
+          </h3>
+          <ResponsiveContainer width="100%" height={220}>
+            <LineChart data={tendencia.meses}>
+              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" />
+              <XAxis dataKey="mes_nombre" tick={{ fill: '#94a3b8', fontSize: 12 }} axisLine={false} tickLine={false} />
+              <YAxis domain={[60, 100]} tick={{ fill: '#94a3b8', fontSize: 12 }} axisLine={false} tickLine={false} />
+              <Tooltip
+                contentStyle={{ background: '#1e293b', border: 'none', borderRadius: 8, fontSize: 13 }}
+                formatter={(v) => [`${v}%`, 'Asistencia']}
+              />
+              <ReferenceLine y={88} stroke="var(--alert-orange)" strokeDasharray="4 4" label={{ value: 'Meta 88%', fill: 'var(--alert-orange)', fontSize: 11 }} />
+              <Line
+                type="monotone" dataKey="asistencia" stroke="var(--accent-primary)"
+                strokeWidth={3} dot={{ r: 5, fill: 'var(--accent-primary)' }}
+                activeDot={{ r: 7, stroke: '#fff', strokeWidth: 2 }}
+              />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+      )}
 
       <div style={{ display: 'grid', gridTemplateColumns: '300px 1fr', gap: 16, marginBottom: 24 }}>
         {/* Semáforo resumen */}
@@ -98,17 +138,21 @@ export default function Dashboard() {
 
         {/* Bar chart */}
         <div className="glass-panel" style={{ padding: 24 }}>
-          <h3 style={{ fontSize: 18, fontWeight: 600, marginBottom: 16 }}>Asistencia y ejecución por establecimiento</h3>
+          <h3 style={{ fontSize: 18, fontWeight: 600, marginBottom: 16 }}>Asistencia por establecimiento</h3>
           <ResponsiveContainer width="100%" height={220}>
             <BarChart data={barData} barGap={4}>
               <XAxis dataKey="name" tick={{ fill: '#94a3b8', fontSize: 11 }} axisLine={false} tickLine={false} />
               <YAxis tick={{ fill: '#94a3b8', fontSize: 11 }} axisLine={false} tickLine={false} domain={[0, 100]} />
               <Tooltip contentStyle={{ background: '#1e293b', border: 'none', borderRadius: 8, fontSize: 13 }} />
               <Bar dataKey="asistencia" name="Asistencia %" fill="var(--accent-primary)" radius={[4, 4, 0, 0]} />
-              <Bar dataKey="ejecucion" name="Ejecución %" fill="#8b5cf6" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>
+      </div>
+
+      {/* Leyenda semáforos */}
+      <div style={{ marginBottom: 16 }}>
+        <SemaforoLeyenda />
       </div>
 
       {/* Tabla de establecimientos */}
@@ -120,7 +164,7 @@ export default function Dashboard() {
         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
           <thead>
             <tr>
-              {['RBD', 'Nombre', 'Matrícula', 'Asistencia', 'Ejecución', 'Estado', 'Alertas'].map((h) => (
+              {['RBD', 'Nombre', 'Matricula', 'Asistencia', 'Estado', 'Alertas'].map((h) => (
                 <th key={h} style={thStyle}>{h}</th>
               ))}
             </tr>
@@ -137,11 +181,8 @@ export default function Dashboard() {
                 <td style={tdStyle}>{e.rbd}</td>
                 <td style={tdStyle}>{e.nombre}</td>
                 <td style={tdStyle}>{e.matricula?.toLocaleString('es-CL')}</td>
-                <td style={{ ...tdStyle, color: e.asistencia < 85 ? 'var(--alert-red)' : 'var(--text-main)' }}>
+                <td style={{ ...tdStyle, color: e.asistencia < 75 ? 'var(--alert-red)' : e.asistencia < 82 ? 'var(--alert-orange)' : 'var(--text-main)' }}>
                   {e.asistencia}%
-                </td>
-                <td style={{ ...tdStyle, color: e.ejecucion < 40 ? 'var(--alert-red)' : 'var(--text-main)' }}>
-                  {e.ejecucion}%
                 </td>
                 <td style={tdStyle}><SemaforoTag value={e.semaforo} size="sm" /></td>
                 <td style={tdStyle}>

@@ -33,6 +33,7 @@ export const authApi = {
 export const dashboardApi = {
   summary: () => api.get('/dashboard/summary'),
   semaforos: () => api.get('/dashboard/semaforos'),
+  tendenciaAsistencia: () => api.get('/dashboard/tendencia-asistencia'),
 };
 
 export const alertsApi = {
@@ -66,6 +67,11 @@ export const palApi = {
   documentos: () => api.get('/pal/documentos'),
   documento: (id) => api.get(`/pal/documento/${id}`),
   resumen: () => api.get('/pal/resumen'),
+};
+
+export const compromisosApi = {
+  list: () => api.get('/compromisos/'),
+  update: (id, estado) => api.patch(`/compromisos/${id}`, null, { params: { estado } }),
 };
 
 export default api;

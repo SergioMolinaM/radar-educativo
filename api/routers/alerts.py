@@ -6,7 +6,7 @@ from fastapi import APIRouter, Depends, Query
 
 from api.db.connection import query_all, check_table_exists
 from api.routers.auth import get_current_user
-from api.routers.dashboard import _slep_filter
+from api.routers.dashboard import _slep_filter, _get_umbrales
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -53,18 +53,20 @@ def get_alerts(
             tasa_aprob = float(r.get("tasa_aprobacion") or 0)
             nombre = r.get("nombre") or ""
 
-            # Regla 1: Asistencia crítica (<80%)
-            if asist < 80:
-                alerts.append(_alert(aid, r, "rojo", "asistencia_critica",
-                    f"Asistencia {asist}% - bajo umbral crítico 80%",
-                    asist, 80.0, "Activar plan de retención y contactar apoderados", today))
-                aid += 1
+            # Regla 1-2: Asistencia (umbrales configurables por SLEP)
+            umbrales = _get_umbrales(slep_id)
+            umbral_verde = umbrales["asistencia_verde"]
+            umbral_amarillo = umbrales["asistencia_amarillo"]
 
-            # Regla 2: Asistencia en riesgo (80-88%)
-            elif asist < 88:
+            if asist < umbral_amarillo:
+                alerts.append(_alert(aid, r, "rojo", "asistencia_critica",
+                    f"Asistencia {asist}% - bajo umbral critico {umbral_amarillo}%",
+                    asist, umbral_amarillo, "Activar plan de retencion y contactar apoderados", today))
+                aid += 1
+            elif asist < umbral_verde:
                 alerts.append(_alert(aid, r, "naranja", "asistencia_riesgo",
-                    f"Asistencia {asist}% - bajo meta 88%",
-                    asist, 88.0, "Monitorear y reforzar seguimiento de asistencia", today))
+                    f"Asistencia {asist}% - bajo meta {umbral_verde}%",
+                    asist, umbral_verde, "Monitorear y reforzar seguimiento de asistencia", today))
                 aid += 1
 
             # Regla 3: Tasa de retiro alta (>5%)

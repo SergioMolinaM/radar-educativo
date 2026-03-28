@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import api from '../../services/api';
+import RadarLogo from './RadarLogo';
 
 // Navegación organizada en 3 módulos según documento de estrategia
 const NAV_MODULES = [
@@ -17,10 +18,10 @@ const NAV_MODULES = [
     color: '#3b82f6',
     items: [
       { to: '/', icon: LayoutDashboard, label: 'Panel general' },
-      { to: '/mi-slep', icon: Building2, label: 'Resumen SLEP' },
+      { to: '/mi-slep', icon: Building2, label: 'Mi SLEP' },
       { to: '/alertas', icon: AlertTriangle, label: 'Alertas' },
       { to: '/establecimientos', icon: School, label: 'Establecimientos' },
-      { to: '/indicadores', icon: BookOpen, label: 'Indicadores pedagógicos' },
+      { to: '/indicadores', icon: TrendingUp, label: 'Rendimiento y SIMCE' },
       { to: '/plan-anual', icon: ClipboardCheck, label: 'Plan Anual' },
     ],
   },
@@ -31,7 +32,7 @@ const NAV_MODULES = [
     color: '#10b981',
     items: [
       { to: '/financiero', icon: DollarSign, label: 'Financiero' },
-      { to: '/ranking', icon: Trophy, label: 'Ranking' },
+      { to: '/ranking', icon: Trophy, label: 'Panorama comparativo' },
       { to: '/comparador', icon: Scale, label: 'Comparador' },
       { to: '/mapa', icon: Map, label: 'Mapa territorial' },
     ],
@@ -49,7 +50,7 @@ const NAV_MODULES = [
 ];
 
 // Banda contextual: "vista de 90 segundos" para el director
-function ContextBanner({ slepLabel }) {
+function ContextBanner({ slepLabel, onToggleDemo, demoActive }) {
   const now = new Date();
   const weekNum = Math.ceil(((now - new Date(now.getFullYear(), 0, 1)) / 86400000 + 1) / 7);
   const monthNames = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
@@ -88,9 +89,30 @@ function ContextBanner({ slepLabel }) {
         <Users size={14} style={{ color: '#f59e0b' }} />
         <span>{slepLabel}</span>
       </div>
-      <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 6 }}>
-        <TrendingUp size={14} style={{ color: '#10b981' }} />
-        <span style={{ color: '#10b981', fontWeight: 600 }}>Datos actualizados</span>
+      <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 12 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+          <TrendingUp size={14} style={{ color: '#10b981' }} />
+          <span style={{ color: '#10b981', fontWeight: 600 }}>Datos actualizados</span>
+        </div>
+        {onToggleDemo && (
+          <button
+            onClick={onToggleDemo}
+            style={{
+              display: 'flex', alignItems: 'center', gap: 6,
+              padding: '4px 12px', borderRadius: 6, fontSize: 11, fontWeight: 600,
+              letterSpacing: '0.05em', cursor: 'pointer', fontFamily: 'inherit',
+              border: demoActive
+                ? '1px solid var(--alert-red)'
+                : '1px solid var(--border-color)',
+              background: demoActive
+                ? 'rgba(239,68,68,0.12)'
+                : 'rgba(255,255,255,0.05)',
+              color: demoActive ? 'var(--alert-red)' : 'var(--text-muted)',
+            }}
+          >
+            {demoActive ? '✕ SALIR DEMO' : '◼ MODO DEMO'}
+          </button>
+        )}
       </div>
     </div>
   );
@@ -102,6 +124,7 @@ export default function Layout() {
   const [sleps, setSleps] = useState([]);
   const [slepOpen, setSlepOpen] = useState(false);
   const [collapsedModules, setCollapsedModules] = useState({});
+  const [demoMode, setDemoMode] = useState(false);
 
   useEffect(() => {
     api.get('/sleps/').then(({ data }) => setSleps(data.sleps || [])).catch(() => {});
@@ -121,12 +144,12 @@ export default function Layout() {
 
   return (
     <div style={{ display: 'flex', minHeight: '100vh' }}>
-      {/* Sidebar */}
+      {/* Sidebar - hidden in demo mode */}
       <aside style={{
+        display: demoMode ? 'none' : 'flex',
         width: 250,
         background: 'rgba(15, 23, 42, 0.95)',
         borderRight: '1px solid var(--border-color)',
-        display: 'flex',
         flexDirection: 'column',
         padding: '20px 0',
         flexShrink: 0,
@@ -134,21 +157,25 @@ export default function Layout() {
         {/* Logo + SLEP selector */}
         <div style={{ padding: '0 16px', marginBottom: 20 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
-            <div style={{
-              width: 32, height: 32, borderRadius: 8,
-              background: 'linear-gradient(135deg, #3b82f6, #10b981)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: 16, fontWeight: 800, color: '#fff',
-            }}>R</div>
+            <RadarLogo size={34} />
             <div>
               <h1 style={{ fontSize: 14, fontWeight: 700, margin: 0, lineHeight: 1.3 }}>
-                <span className="text-gradient">Radar</span> de la<br/>Educación Pública
+                <span className="text-gradient">Radar</span> de la<br/>Educacion Publica
               </h1>
-              <div style={{ fontSize: 9, color: 'var(--text-muted)', letterSpacing: 1, textTransform: 'uppercase' }}>
-                Tercera Letra
-              </div>
             </div>
           </div>
+
+          {/* SLEP Logo */}
+          {user?.slep_id && (
+            <div style={{ textAlign: 'center', marginBottom: 10 }}>
+              <img
+                src={`/logos/${user.slep_id}.png`}
+                alt={slepLabel}
+                style={{ maxWidth: '80%', maxHeight: 50, objectFit: 'contain', opacity: 0.9 }}
+                onError={(e) => { e.target.style.display = 'none'; }}
+              />
+            </div>
+          )}
 
           {/* SLEP Selector */}
           <div style={{ position: 'relative' }}>
@@ -201,17 +228,6 @@ export default function Layout() {
             )}
           </div>
 
-          {/* SLEP Logo */}
-          {user?.slep_id && (
-            <div style={{ textAlign: 'center', marginTop: 12 }}>
-              <img
-                src={`/logos/${user.slep_id}.png`}
-                alt={slepLabel}
-                style={{ maxWidth: '80%', maxHeight: 45, objectFit: 'contain', opacity: 0.9 }}
-                onError={(e) => { e.target.style.display = 'none'; }}
-              />
-            </div>
-          )}
         </div>
 
         {/* Navegación por módulos */}
@@ -277,14 +293,17 @@ export default function Layout() {
             }}
           >
             <LogOut size={13} />
-            Cerrar sesión
+            Cerrar sesion
           </button>
+          <div style={{ marginTop: 12, fontSize: 9, color: 'var(--text-muted)', opacity: 0.5, letterSpacing: '0.05em' }}>
+            © 2026 Tercera Letra SpA
+          </div>
         </div>
       </aside>
 
       {/* Main content area */}
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
-        <ContextBanner slepLabel={slepLabel} />
+        <ContextBanner slepLabel={slepLabel} onToggleDemo={() => setDemoMode(!demoMode)} demoActive={demoMode} />
         <main style={{ flex: 1, padding: '24px 32px' }}>
           <Outlet />
         </main>

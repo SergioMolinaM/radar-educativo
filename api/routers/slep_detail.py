@@ -8,7 +8,7 @@ from fastapi import APIRouter, Depends, HTTPException
 
 from api.db.connection import query_all, query_one, check_table_exists
 from api.routers.auth import get_current_user
-from api.routers.dashboard import _slep_filter, SLEP_NAME_MAP
+from api.routers.dashboard import _slep_filter, SLEP_NAME_MAP, _get_umbrales, _clasificar_semaforo
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -68,9 +68,10 @@ def slep_overview(
             m = query_one(f"SELECT MAX(mes) AS m FROM asistencia_2025_rbd WHERE {sf}")
             mes = int(m["m"]) if m and m["m"] else 10
 
+        mat_af = "AND nom_rbd NOT ILIKE '%CEIA%' AND nom_rbd NOT ILIKE '%ADULTO%' AND nom_rbd NOT ILIKE '%NOCTURNO%'" if excluir_adultos else ""
         mat = query_one(f"""
             SELECT COUNT(DISTINCT rbd) AS total_ee, SUM(matricula_total) AS mat_total
-            FROM matricula_2025_rbd WHERE {sf}
+            FROM matricula_2025_rbd WHERE {sf} {mat_af}
         """)
         asist = query_one(f"""
             SELECT ROUND(AVG(CASE WHEN pct_asistencia > 0 THEN pct_asistencia END)::numeric, 1) AS asist_avg
@@ -85,9 +86,10 @@ def slep_overview(
         if total_ee == 0:
             raise ValueError("No 2025 data")
 
-        rojas = sum(1 for a in alertas_q if float(a['pct_asistencia'] or 0) < 80)
-        naranjas = sum(1 for a in alertas_q if 80 <= float(a['pct_asistencia'] or 0) < 88)
-        verdes = sum(1 for a in alertas_q if float(a['pct_asistencia'] or 0) >= 88)
+        umbrales = _get_umbrales(slep_id)
+        rojas = sum(1 for a in alertas_q if _clasificar_semaforo(float(a['pct_asistencia'] or 0), umbrales) == "rojo")
+        naranjas = sum(1 for a in alertas_q if _clasificar_semaforo(float(a['pct_asistencia'] or 0), umbrales) == "naranja")
+        verdes = sum(1 for a in alertas_q if _clasificar_semaforo(float(a['pct_asistencia'] or 0), umbrales) == "verde")
 
         return {
             "slep_id": slep_id,
@@ -146,12 +148,8 @@ def slep_establecimientos(
             nombre = r.get("nom_rbd") or ""
             # Marcar CEIA/Adultos
             es_adultos = any(x in nombre.upper() for x in ["CEIA", "ADULTO", "NOCTURNO"])
-            if asist < 80:
-                semaforo = "rojo"
-            elif asist < 88:
-                semaforo = "naranja"
-            else:
-                semaforo = "verde"
+            umbrales = _get_umbrales(slep_id)
+            semaforo = _clasificar_semaforo(asist, umbrales)
 
             # Parse coordinates (may use comma as decimal separator)
             lat = _parse_coord(r.get("latitud"))
@@ -299,7 +297,8 @@ def slep_establecimiento_detalle(rbd: str, current_user: dict = Depends(get_curr
         # Último mes de asistencia
         ultimo = asist_mensual[-1] if asist_mensual else {}
         asist_actual = float(ultimo.get("pct_asistencia", 0) or 0)
-        semaforo = "rojo" if asist_actual < 80 else ("naranja" if asist_actual < 88 else "verde")
+        umbrales = _get_umbrales(current_user["slep_id"])
+        semaforo = _clasificar_semaforo(asist_actual, umbrales)
 
         # Tendencia asistencia
         tendencia = [{"mes": MESES.get(a["mes"], str(a["mes"])), "mes_num": a["mes"],

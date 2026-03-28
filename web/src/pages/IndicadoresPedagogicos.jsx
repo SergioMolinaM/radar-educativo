@@ -12,7 +12,7 @@ export default function IndicadoresPedagogicos() {
   const [simce, setSimce] = useState(null);
   const [rend, setRend] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [tab, setTab] = useState('simce');
+  const [tab, setTab] = useState('rendimiento');
 
   useEffect(() => {
     Promise.all([pedagogicoApi.simce(), pedagogicoApi.rendimiento()])
@@ -29,15 +29,20 @@ export default function IndicadoresPedagogicos() {
         <BookOpen size={22} style={{ verticalAlign: 'middle', marginRight: 8 }} />
         Indicadores Pedagógicos
       </h2>
-      <p style={{ color: 'var(--text-muted)', fontSize: 15, marginBottom: 20 }}>
-        SIMCE, rendimiento academico y resultados de aprendizaje
+      <p style={{ color: 'var(--text-muted)', fontSize: 15, marginBottom: 6 }}>
+        Rendimiento academico y resultados SIMCE del SLEP
       </p>
+      <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 16, lineHeight: 1.6 }}>
+        <strong>Rendimiento:</strong> tasas de aprobacion, reprobacion y retiro de cada establecimiento (MINEDUC 2025).
+        Permite identificar donde se concentra la desercion y el bajo rendimiento.
+        <strong> SIMCE:</strong> promedios de lectura y matematica por nivel, comparando resultados dentro del SLEP (Agencia de Calidad 2024).
+      </div>
 
       {/* Tab selector */}
       <div style={{ display: 'flex', gap: 8, marginBottom: 24 }}>
         {[
-          { key: 'simce', label: 'SIMCE', icon: GraduationCap },
           { key: 'rendimiento', label: 'Rendimiento', icon: TrendingUp },
+          { key: 'simce', label: 'SIMCE', icon: GraduationCap },
         ].map(t => (
           <button key={t.key} onClick={() => setTab(t.key)} style={{
             padding: '9px 18px', borderRadius: 8, fontSize: 14, cursor: 'pointer',
@@ -54,8 +59,9 @@ export default function IndicadoresPedagogicos() {
       {tab === 'simce' ? <SimceView data={simce} /> : <RendimientoView data={rend} />}
 
       <div style={{ fontSize: 12, color: 'var(--text-muted)', lineHeight: 1.7, padding: '16px 0', borderTop: '1px solid var(--border-color)', marginTop: 16 }}>
-        <strong>Fuentes:</strong> SIMCE - Agencia de Calidad de la Educacion (2024 preliminar).
-        Rendimiento - MINEDUC Datos Abiertos 2023-2025. &middot; Tercera Letra SpA
+        <strong>Fuentes:</strong> SIMCE — Agencia de Calidad de la Educacion, resultados oficiales 2024.
+        Los promedios mostrados corresponden al SLEP (no al promedio nacional).
+        Rendimiento — MINEDUC Datos Abiertos 2025. &middot; Tercera Letra SpA
       </div>
     </div>
   );
@@ -102,7 +108,12 @@ function SimceView({ data }) {
 
       {/* Chart comparison */}
       <div className="glass-panel" style={{ padding: 24, marginBottom: 24 }}>
-        <h3 style={{ fontSize: 16, fontWeight: 600, marginBottom: 16 }}>Promedios SIMCE por nivel</h3>
+        <h3 style={{ fontSize: 16, fontWeight: 600, marginBottom: 16 }}>
+          Promedios SIMCE del SLEP por nivel
+          <span style={{ fontSize: 12, fontWeight: 400, color: 'var(--text-muted)', marginLeft: 8 }}>
+            (promedio de los establecimientos del SLEP evaluados)
+          </span>
+        </h3>
         <ResponsiveContainer width="100%" height={250}>
           <BarChart data={chartData} barGap={4}>
             <XAxis dataKey="nivel" tick={{ fill: '#94a3b8', fontSize: 13 }} axisLine={false} tickLine={false} />

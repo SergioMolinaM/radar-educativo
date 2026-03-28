@@ -47,17 +47,18 @@ export default function MiSlep() {
   // Top 15 peores asistencia para el gráfico
   const barData = establecimientos.slice(0, 15).map((e) => ({
     name: e.nombre.length > 20 ? e.nombre.slice(0, 20) + '...' : e.nombre,
-    asistencia: e.asistencia,
-    vulnerabilidad: e.vulnerabilidad_pct,
+    asistencia: e.asistencia_pct || 0,
   }));
 
   return (
     <div className="animate-fade-in">
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 24 }}>
         <div>
-          <h2 style={{ fontSize: 22, fontWeight: 700, marginBottom: 4 }}>Mi SLEP</h2>
+          <h2 style={{ fontSize: 22, fontWeight: 700, marginBottom: 4 }}>
+            SLEP {user?.slep_id?.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) || 'Mi SLEP'}
+          </h2>
           <p style={{ color: 'var(--text-muted)', fontSize: 14 }}>
-            {overview?.nombre_sostenedor} &middot; Datos reales
+            {overview?.nombre_sostenedor || 'Datos reales 2025'}
           </p>
         </div>
         <button
@@ -75,16 +76,24 @@ export default function MiSlep() {
 
       {/* KPIs */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 16, marginBottom: 24 }}>
-        <KpiCard label="Establecimientos" value={kpis.total_establecimientos} icon={Users} />
-        <KpiCard label="Matrícula total" value={kpis.matricula_total} icon={GraduationCap} />
-        <KpiCard label="Asistencia prom." value={kpis.asistencia_promedio} unit="%" icon={CalendarCheck} />
-        <KpiCard label="Vulnerabilidad" value={kpis.vulnerabilidad_promedio} unit="%" icon={ShieldAlert} />
+        <KpiCard label="Establecimientos" value={kpis.total_establecimientos} icon={Users}
+          tooltip={{ text: 'EE del SLEP (sin ed. adultos)', fuente: 'MINEDUC Directorio 2025' }} />
+        <KpiCard label="Matricula total" value={kpis.matricula_total} icon={GraduationCap}
+          tooltip={{ text: 'Alumnos matriculados en el SLEP', fuente: 'MINEDUC Matricula 2025' }} />
+        <KpiCard label="Asistencia prom." value={kpis.asistencia_promedio} unit="%" icon={CalendarCheck}
+          tooltip={{ text: 'Promedio del SLEP (sin ed. adultos)', fuente: 'MINEDUC Asistencia 2025', periodo: overview?.mes_nombre }} />
+        <KpiCard label="Vulnerabilidad" value={kpis.vulnerabilidad_promedio || '—'} unit={kpis.vulnerabilidad_promedio ? '%' : ''} icon={ShieldAlert}
+          tooltip={{ text: 'Porcentaje de alumnos prioritarios SEP', fuente: 'MINEDUC SEP 2025' }} />
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: '280px 1fr', gap: 16, marginBottom: 24 }}>
         {/* Semáforo resumen */}
         <div className="glass-panel" style={{ padding: 24 }}>
-          <h3 style={{ fontSize: 15, fontWeight: 600, marginBottom: 16 }}>Distribución semáforo</h3>
+          <h3 style={{ fontSize: 15, fontWeight: 600, marginBottom: 8 }}>Distribucion semaforo</h3>
+          <div style={{ fontSize: 10, color: 'var(--text-muted)', marginBottom: 12, lineHeight: 1.6 }}>
+            Rojo: asistencia &lt;75% · Naranja: 75-82% · Verde: &ge;82%<br/>
+            Umbrales configurables por el SLEP
+          </div>
           <ResponsiveContainer width="100%" height={180}>
             <PieChart>
               <Pie data={pieData} cx="50%" cy="50%" innerRadius={50} outerRadius={75} dataKey="value" strokeWidth={0}>
@@ -198,8 +207,8 @@ export default function MiSlep() {
                         <td style={tdStyle}>{e.rbd}</td>
                         <td style={tdStyle}>{e.nombre}</td>
                         <td style={tdStyle}>{e.matricula.toLocaleString('es-CL')}</td>
-                        <td style={{ ...tdStyle, color: e.asistencia < 85 ? 'var(--alert-red)' : e.asistencia < 90 ? 'var(--alert-orange)' : 'var(--text-main)', fontWeight: e.asistencia < 85 ? 700 : 400 }}>
-                          {e.asistencia}%
+                        <td style={{ ...tdStyle, color: (e.asistencia_pct || 0) < 75 ? 'var(--alert-red)' : (e.asistencia_pct || 0) < 82 ? 'var(--alert-orange)' : 'var(--text-main)', fontWeight: (e.asistencia_pct || 0) < 75 ? 700 : 400 }}>
+                          {(e.asistencia_pct || 0)}%
                         </td>
                         <td style={{ ...tdStyle, color: e.vulnerabilidad_pct > 70 ? 'var(--alert-red)' : 'var(--text-muted)' }}>
                           {e.vulnerabilidad_pct}%

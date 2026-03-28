@@ -6,7 +6,7 @@ import api from '../services/api';
 const COLORS = ['#3b82f6', '#8b5cf6', '#f59e0b', '#10b981', '#ef4444'];
 
 export default function Comparador() {
-  const [rbdInput, setRbdInput] = useState('10001, 10002, 10003');
+  const [rbdInput, setRbdInput] = useState('24889, 10081, 10076');
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -54,16 +54,21 @@ export default function Comparador() {
         <Scale size={22} style={{ verticalAlign: 'middle', marginRight: 8 }} />
         Comparador
       </h2>
-      <p style={{ color: 'var(--text-muted)', fontSize: 14, marginBottom: 24 }}>
-        Compara indicadores entre establecimientos
+      <p style={{ color: 'var(--text-muted)', fontSize: 14, marginBottom: 6 }}>
+        Compara indicadores entre establecimientos del SLEP
       </p>
+      <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 16, lineHeight: 1.6 }}>
+        Ingresa los codigos RBD de los establecimientos que quieres comparar, separados por coma.
+        Se mostrara asistencia, matricula, dotacion docente y ratio alumno/docente.
+        Puedes encontrar los RBD en la pantalla de Establecimientos. Fuente: MINEDUC 2025.
+      </div>
 
       {/* Input */}
       <div className="glass-panel" style={{ padding: 16, marginBottom: 24, display: 'flex', gap: 12, alignItems: 'center' }}>
         <input
           value={rbdInput}
           onChange={(e) => setRbdInput(e.target.value)}
-          placeholder="RBDs separados por coma: 10001, 10002, 10003"
+          placeholder="RBDs separados por coma: 24889, 10081, 10076"
           style={{
             flex: 1, padding: '10px 14px', background: 'rgba(255,255,255,0.05)',
             border: '1px solid var(--border-color)', borderRadius: 8,

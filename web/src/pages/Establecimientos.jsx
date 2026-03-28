@@ -73,9 +73,13 @@ export default function Establecimientos() {
   return (
     <div className="animate-fade-in">
       <h2 style={{ fontSize: 24, fontWeight: 700, marginBottom: 4 }}>Establecimientos</h2>
-      <p style={{ color: 'var(--text-muted)', fontSize: 15, marginBottom: 20 }}>
+      <p style={{ color: 'var(--text-muted)', fontSize: 15, marginBottom: 6 }}>
         {resumen.total} establecimientos {excluirAdultos ? '(sin ed. adultos)' : '(todos)'} &middot; {mesNombre} 2025
       </p>
+      <div style={{ display: 'flex', gap: 16, fontSize: 12, color: 'var(--text-muted)', marginBottom: 16 }}>
+        <span>Semaforo: <span style={{ color: '#ef4444' }}>●</span> Rojo &lt;75% · <span style={{ color: '#f59e0b' }}>●</span> Naranja 75-82% · <span style={{ color: '#10b981' }}>●</span> Verde &ge;82%</span>
+        <span style={{ opacity: 0.6 }}>Fuente: MINEDUC 2025 · Haz clic en un establecimiento para ver su detalle</span>
+      </div>
 
       {/* Controls row */}
       <div style={{ display: 'flex', gap: 12, marginBottom: 16, alignItems: 'center', flexWrap: 'wrap' }}>

@@ -43,9 +43,16 @@ export default function MapaTerritorial() {
   return (
     <div>
       <h2 style={{ fontSize: 22, fontWeight: 700, marginBottom: 4 }}>Mapa territorial</h2>
-      <p style={{ color: 'var(--text-muted)', fontSize: 14, marginBottom: 20 }}>
+      <p style={{ color: 'var(--text-muted)', fontSize: 14, marginBottom: 6 }}>
         {withCoords.length} establecimientos georreferenciados de {ees.length} total · {comunas.length} comunas
       </p>
+      <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 16, lineHeight: 1.6 }}>
+        Cada circulo representa un establecimiento. El tamano indica matricula y el color el estado del semaforo
+        (<span style={{ color: '#ef4444' }}>rojo</span> = critico,
+        <span style={{ color: '#f59e0b' }}> naranja</span> = atencion,
+        <span style={{ color: '#10b981' }}> verde</span> = esperado).
+        Haz clic en un circulo para ver detalle. Fuente: Coordenadas MINEDUC 2025.
+      </div>
 
       {/* KPIs */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16, marginBottom: 20 }}>
@@ -78,7 +85,7 @@ export default function MapaTerritorial() {
               scrollWheelZoom={true}>
               <TileLayer
                 attribution='&copy; <a href="https://carto.com">CARTO</a>'
-                url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+                url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
               />
               {withCoords.map((e) => (
                 <CircleMarker

@@ -33,7 +33,7 @@ export default function Ranking() {
       .finally(() => setLoading(false));
   }, [metric, user?.slep_id]);
 
-  if (loading) return <p style={{ color: 'var(--text-muted)', padding: 40 }}>Cargando ranking...</p>;
+  if (loading) return <p style={{ color: 'var(--text-muted)', padding: 40 }}>Cargando panorama...</p>;
 
   const m = METRICS.find((x) => x.key === metric) || METRICS[0];
   const fieldKey = m.field || m.key;
@@ -49,7 +49,7 @@ export default function Ranking() {
 
   return (
     <div className="animate-fade-in">
-      <h2 style={{ fontSize: 22, fontWeight: 700, marginBottom: 4 }}>Ranking</h2>
+      <h2 style={{ fontSize: 22, fontWeight: 700, marginBottom: 4 }}>Panorama comparativo</h2>
       <p style={{ color: 'var(--text-muted)', fontSize: 14, marginBottom: 24 }}>
         {ranking.length} establecimientos &middot; Datos 2025
       </p>
@@ -130,7 +130,7 @@ export default function Ranking() {
 
       {/* Full ranking table */}
       <div className="glass-panel" style={{ padding: 24 }}>
-        <h3 style={{ fontSize: 15, fontWeight: 600, marginBottom: 16 }}>Ranking completo ({ranking.length} establecimientos)</h3>
+        <h3 style={{ fontSize: 15, fontWeight: 600, marginBottom: 16 }}>Detalle completo ({ranking.length} establecimientos)</h3>
         <div style={{ maxHeight: 400, overflowY: 'auto' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse' }}>
             <thead style={{ position: 'sticky', top: 0, background: 'rgba(15, 23, 42, 0.95)' }}>

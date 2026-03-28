@@ -27,7 +27,12 @@ export default function Alertas() {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
         <div>
           <h2 style={{ fontSize: 22, fontWeight: 700, marginBottom: 4 }}>Alertas</h2>
-          <p style={{ color: 'var(--text-muted)', fontSize: 14 }}>Sistema de alerta temprana</p>
+          <p style={{ color: 'var(--text-muted)', fontSize: 14, marginBottom: 6 }}>Sistema de alerta temprana basado en datos 2025</p>
+          <div style={{ fontSize: 11, color: 'var(--text-muted)', lineHeight: 1.6, maxWidth: 600 }}>
+            Las alertas se generan automaticamente al detectar indicadores fuera de rango:
+            asistencia bajo el umbral del SLEP, tasa de retiro mayor a 5%, aprobacion bajo 85%, o microescuelas con menos de 30 alumnos.
+            Los umbrales son configurables por cada SLEP.
+          </div>
         </div>
         <div style={{ display: 'flex', gap: 8 }}>
           {FILTERS.map((f) => (
@@ -70,7 +75,10 @@ export default function Alertas() {
                 </div>
                 <SemaforoTag value={a.severidad} size="sm" />
               </div>
-              <p style={{ fontSize: 14, margin: '0 0 12px', lineHeight: 1.5 }}>{a.mensaje}</p>
+              <p style={{ fontSize: 14, margin: '0 0 8px', lineHeight: 1.5 }}>{a.mensaje}</p>
+              <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 10 }}>
+                Valor actual: <strong>{a.valor}</strong> · Umbral: {a.umbral} · Tipo: {a.tipo?.replace(/_/g, ' ')}
+              </div>
               <div style={{
                 padding: '10px 14px',
                 background: 'rgba(59, 130, 246, 0.08)',
@@ -78,7 +86,7 @@ export default function Alertas() {
                 fontSize: 13,
                 color: 'var(--accent-primary)',
               }}>
-                Acción sugerida: {a.accion_sugerida}
+                <strong>¿Que hacer?</strong> {a.accion_sugerida}
               </div>
             </div>
           ))}
