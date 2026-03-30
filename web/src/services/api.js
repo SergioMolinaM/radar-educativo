@@ -67,6 +67,8 @@ export const palApi = {
   documentos: () => api.get('/pal/documentos'),
   documento: (id) => api.get(`/pal/documento/${id}`),
   resumen: () => api.get('/pal/resumen'),
+  cge: (id) => api.get(`/pal/cge/${id}`),
+  pme: (id) => api.get(`/pal/pme/${id}`),
 };
 
 export const compromisosApi = {

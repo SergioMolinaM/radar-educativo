@@ -1,34 +1,59 @@
 import { useState, useEffect } from 'react';
-import { ClipboardCheck, Target, CheckCircle, Clock, AlertTriangle, ChevronDown, ChevronRight, TrendingUp, Calendar } from 'lucide-react';
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, BarChart, Bar, XAxis, YAxis } from 'recharts';
+import {
+  ClipboardCheck, Target, CheckCircle, AlertTriangle, ChevronDown, ChevronRight,
+  TrendingUp, BarChart3, School, FileText, Info
+} from 'lucide-react';
+import {
+  PieChart, Pie, Cell, ResponsiveContainer, Tooltip as RTooltip,
+  BarChart, Bar, XAxis, YAxis, CartesianGrid
+} from 'recharts';
 import { palApi } from '../services/api';
 import { useAuth } from '../hooks/useAuth';
 
 const AUTO_COLORS = { si: '#10b981', parcial: '#f59e0b', manual: '#94a3b8' };
 const AUTO_LABELS = { si: 'Automatizable', parcial: 'Parcial', manual: 'Manual' };
 
-// Simulated monitoring data for demo (replace with real API when available)
-const MONITORING_DATA = {
-  1: { avance: 60, registros: [
-    { periodo: 'Q1', valor: '3 de 5 proyectos', pct: 60, fecha: '2025-03-31' },
-  ]},
-  2: { avance: 75, registros: [
-    { periodo: 'Q1', valor: '6 de 8 informes', pct: 75, fecha: '2025-03-31' },
-    { periodo: 'Q2', valor: 'Pendiente', pct: 0, fecha: null },
-  ]},
-  3: { avance: 45, registros: [
-    { periodo: 'Q1', valor: '23 de 50 EE', pct: 46, fecha: '2025-03-28' },
-  ]},
-};
+function parseNumeric(val) {
+  if (!val || val === 'S/I' || val === 'N/A') return null;
+  const n = parseFloat(String(val).replace(/[^0-9,.\-]/g, '').replace(',', '.'));
+  return isNaN(n) ? null : n;
+}
+
+function avanceColor(avance, meta) {
+  if (avance === null) return 'var(--text-muted)';
+  if (meta === null) return '#60a5fa';
+  const ratio = meta !== 0 ? avance / meta : 0;
+  if (ratio >= 0.9) return '#10b981';
+  if (ratio >= 0.6) return '#f59e0b';
+  return '#ef4444';
+}
+
+function SemaforoChip({ avance, meta }) {
+  const av = parseNumeric(avance);
+  const mt = parseNumeric(meta);
+  const color = avanceColor(av, mt);
+  const label = avance || 'Sin dato';
+  return (
+    <span style={{
+      padding: '3px 10px', borderRadius: 8, fontSize: 12, fontWeight: 600,
+      background: `${color}18`, color,
+    }}>
+      {label}
+    </span>
+  );
+}
 
 export default function PlanAnual() {
   const { user } = useAuth();
   const [resumen, setResumen] = useState(null);
   const [docs, setDocs] = useState([]);
   const [detail, setDetail] = useState(null);
+  const [cge, setCge] = useState(null);
+  const [pme, setPme] = useState(null);
   const [expanded, setExpanded] = useState({});
   const [loading, setLoading] = useState(true);
-  const [viewMode, setViewMode] = useState('estructura'); // estructura | monitoreo
+  const [viewMode, setViewMode] = useState('monitoreo');
+  const [selectedDocId, setSelectedDocId] = useState(null);
 
   useEffect(() => {
     Promise.all([palApi.resumen(), palApi.documentos()])
@@ -36,15 +61,26 @@ export default function PlanAnual() {
         setResumen(r.data);
         setDocs(d.data.documentos || []);
         if (d.data.documentos?.length > 0) {
-          loadDetail(d.data.documentos[0].id);
+          const firstId = d.data.documentos[0].id;
+          setSelectedDocId(firstId);
+          loadAll(firstId);
         }
       })
       .catch(() => {})
       .finally(() => setLoading(false));
   }, []);
 
-  const loadDetail = (docId) => {
-    palApi.documento(docId).then(({ data }) => setDetail(data)).catch(() => {});
+  const loadAll = (docId) => {
+    setSelectedDocId(docId);
+    Promise.all([
+      palApi.documento(docId),
+      palApi.cge(docId).catch(() => ({ data: { cge: [] } })),
+      palApi.pme(docId).catch(() => ({ data: { establecimientos: [] } })),
+    ]).then(([det, cgeRes, pmeRes]) => {
+      setDetail(det.data);
+      setCge(cgeRes.data);
+      setPme(pmeRes.data);
+    });
   };
 
   const toggleLine = (idx) => setExpanded((prev) => ({ ...prev, [idx]: !prev[idx] }));
@@ -57,10 +93,19 @@ export default function PlanAnual() {
     { name: 'Manuales', value: resumen.manuales, color: AUTO_COLORS.manual },
   ] : [];
 
-  // Collect all indicators for monitoring view
-  const allIndicators = detail?.lineas?.flatMap((l, li) =>
-    (l.indicadores || []).map((ind, ii) => ({ ...ind, lineaIdx: li, lineaDesc: l.descripcion || l.nombre, indIdx: ii }))
+  // Separate PEL lines (OE1-OE5) from ATP lines
+  const pelLineas = detail?.lineas?.filter(l => l.nombre.startsWith('OE')) || [];
+  const atpLineas = detail?.lineas?.filter(l => l.nombre.startsWith('ATP')) || [];
+  const allIndicators = detail?.lineas?.flatMap((l) =>
+    (l.indicadores || []).map((ind) => ({ ...ind, lineaName: l.nombre, lineaDesc: l.descripcion }))
   ) || [];
+
+  const VIEWS = [
+    { key: 'monitoreo', label: 'Monitoreo', icon: TrendingUp },
+    { key: 'estructura', label: 'Estructura', icon: Target },
+    { key: 'cge', label: 'CGE', icon: FileText },
+    { key: 'pme', label: 'PME por EE', icon: School },
+  ];
 
   return (
     <div className="animate-fade-in">
@@ -69,15 +114,29 @@ export default function PlanAnual() {
         Plan Anual Local (PAL)
       </h2>
       <p style={{ color: 'var(--text-muted)', fontSize: 15, marginBottom: 20 }}>
-        Seguimiento de compromisos e indicadores del PAL
+        Monitoreo profundo de compromisos, indicadores y avance del PAL {detail?.documento?.anio || ''}
+        {detail?.documento?.slep && ` — SLEP ${detail.documento.slep}`}
       </p>
 
+      {/* Document selector if multiple */}
+      {docs.length > 1 && (
+        <div style={{ display: 'flex', gap: 8, marginBottom: 16, flexWrap: 'wrap' }}>
+          {docs.map((d) => (
+            <button key={d.id} onClick={() => loadAll(d.id)} style={{
+              padding: '6px 14px', borderRadius: 8, fontSize: 13, cursor: 'pointer',
+              border: `1px solid ${selectedDocId === d.id ? 'var(--accent-primary)' : 'var(--border-color)'}`,
+              background: selectedDocId === d.id ? 'rgba(59,130,246,0.1)' : 'transparent',
+              color: selectedDocId === d.id ? 'var(--accent-primary)' : 'var(--text-muted)',
+            }}>
+              PAL {d.anio} — {d.slep_nombre}
+            </button>
+          ))}
+        </div>
+      )}
+
       {/* View toggle */}
-      <div style={{ display: 'flex', gap: 8, marginBottom: 20 }}>
-        {[
-          { key: 'estructura', label: 'Estructura PAL', icon: Target },
-          { key: 'monitoreo', label: 'Monitoreo', icon: TrendingUp },
-        ].map(v => (
+      <div style={{ display: 'flex', gap: 8, marginBottom: 20, flexWrap: 'wrap' }}>
+        {VIEWS.map(v => (
           <button key={v.key} onClick={() => setViewMode(v.key)} style={{
             padding: '9px 18px', borderRadius: 8, fontSize: 14, cursor: 'pointer',
             border: '1px solid var(--border-color)',
@@ -92,18 +151,77 @@ export default function PlanAnual() {
 
       {/* KPIs */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))', gap: 16, marginBottom: 24 }}>
-        <MiniKpi icon={ClipboardCheck} label="PALs cargados" value={resumen?.total_pals || 0} />
-        <MiniKpi icon={Target} label="Lineas estrategicas" value={resumen?.total_lineas || 0} />
-        <MiniKpi icon={CheckCircle} label="Indicadores" value={resumen?.total_indicadores || 0} color="var(--accent-primary)" />
-        <MiniKpi icon={CheckCircle} label="Automatizables" value={resumen?.automatizables || 0} color="var(--alert-green)" />
+        <MiniKpi icon={Target} label="Objetivos Estratégicos" value={pelLineas.length} />
+        <MiniKpi icon={ClipboardCheck} label="Acciones ATP" value={atpLineas.length} />
+        <MiniKpi icon={CheckCircle} label="Indicadores totales" value={resumen?.total_indicadores || 0} color="var(--accent-primary)" />
+        <MiniKpi icon={School} label="Establecimientos" value={pme?.total_ee || 0} color="var(--alert-green)" />
       </div>
 
-      {viewMode === 'estructura' ? (
+      {/* ============= MONITOREO VIEW ============= */}
+      {viewMode === 'monitoreo' && (
+        <div>
+          {/* Summary bar chart of PEL avance */}
+          {pelLineas.length > 0 && <AvanceResumenChart lineas={pelLineas} />}
+
+          {/* ATP avance cards */}
+          {atpLineas.length > 0 && (
+            <div className="glass-panel" style={{ padding: 24, marginBottom: 16 }}>
+              <h3 style={{ fontSize: 17, fontWeight: 700, marginBottom: 16 }}>
+                <TrendingUp size={18} style={{ verticalAlign: 'middle', marginRight: 8 }} />
+                Acciones Técnico Pedagógicas — Avance
+              </h3>
+              {atpLineas.map((l, i) => (
+                <AtpCard key={i} linea={l} index={i} />
+              ))}
+            </div>
+          )}
+
+          {/* All indicators detailed */}
+          <div className="glass-panel" style={{ padding: 24 }}>
+            <h3 style={{ fontSize: 17, fontWeight: 700, marginBottom: 4 }}>
+              Detalle de Indicadores PEL — Avance Real
+            </h3>
+            <p style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 20 }}>
+              {allIndicators.filter(i => i.avance && i.avance !== 'S/I' && i.avance !== 'N/A').length} de {allIndicators.length} indicadores con dato de avance
+            </p>
+
+            {pelLineas.map((linea, idx) => (
+              <div key={idx} style={{ marginBottom: 16 }}>
+                <button onClick={() => toggleLine(`mon_${idx}`)} style={{
+                  width: '100%', display: 'flex', alignItems: 'center', gap: 10,
+                  padding: '12px 16px', background: 'rgba(255,255,255,0.03)',
+                  border: '1px solid var(--border-color)', borderRadius: 10,
+                  color: 'var(--text-main)', fontSize: 14, fontWeight: 600,
+                  cursor: 'pointer', textAlign: 'left',
+                }}>
+                  {expanded[`mon_${idx}`] ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
+                  <span style={{ flex: 1 }}>{linea.descripcion}</span>
+                  <span style={{ fontSize: 13, color: 'var(--text-muted)', fontWeight: 400 }}>
+                    {linea.indicadores.length} ind.
+                  </span>
+                </button>
+
+                {expanded[`mon_${idx}`] && (
+                  <div style={{ padding: '12px 0 0 24px' }}>
+                    {linea.indicadores.map((ind, iIdx) => (
+                      <IndicadorMonitorCard key={iIdx} ind={ind} />
+                    ))}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+
+          <SourceNote />
+        </div>
+      )}
+
+      {/* ============= ESTRUCTURA VIEW ============= */}
+      {viewMode === 'estructura' && (
         <>
           <div style={{ display: 'grid', gridTemplateColumns: '280px 1fr', gap: 16, marginBottom: 24 }}>
-            {/* Automatizacion pie */}
             <div className="glass-panel" style={{ padding: 24 }}>
-              <h3 style={{ fontSize: 15, fontWeight: 600, marginBottom: 16 }}>Automatizacion</h3>
+              <h3 style={{ fontSize: 15, fontWeight: 600, marginBottom: 16 }}>Automatización</h3>
               {pieData.some(d => d.value > 0) ? (
                 <>
                   <ResponsiveContainer width="100%" height={160}>
@@ -111,7 +229,7 @@ export default function PlanAnual() {
                       <Pie data={pieData} cx="50%" cy="50%" innerRadius={45} outerRadius={65} dataKey="value" strokeWidth={0}>
                         {pieData.map((d, i) => <Cell key={i} fill={d.color} />)}
                       </Pie>
-                      <Tooltip contentStyle={{ background: '#1e293b', border: 'none', borderRadius: 8, fontSize: 12 }} />
+                      <RTooltip contentStyle={{ background: '#1e293b', border: 'none', borderRadius: 8, fontSize: 12 }} />
                     </PieChart>
                   </ResponsiveContainer>
                   <div style={{ display: 'flex', justifyContent: 'center', gap: 12, marginTop: 8 }}>
@@ -128,70 +246,47 @@ export default function PlanAnual() {
               )}
             </div>
 
-            {/* PAL Documents */}
             <div className="glass-panel" style={{ padding: 24 }}>
-              <h3 style={{ fontSize: 15, fontWeight: 600, marginBottom: 16 }}>Documentos PAL</h3>
-              {docs.length === 0 ? (
-                <div style={{ padding: 20, textAlign: 'center', color: 'var(--text-muted)' }}>
-                  <AlertTriangle size={24} style={{ marginBottom: 8, opacity: 0.5 }} />
-                  <p style={{ fontSize: 14 }}>No hay PALs cargados para este SLEP.</p>
-                  <p style={{ fontSize: 13, marginTop: 8 }}>Sube el PDF del PAL para comenzar el seguimiento automatizado.</p>
+              <h3 style={{ fontSize: 15, fontWeight: 600, marginBottom: 16 }}>Información del Documento</h3>
+              {detail?.documento && (
+                <div style={{ display: 'grid', gap: 8 }}>
+                  <InfoPill label="SLEP" value={detail.documento.slep} />
+                  <InfoPill label="Año" value={detail.documento.anio} />
+                  <InfoPill label="Acto Administrativo" value={detail.documento.acto_administrativo} />
+                  <InfoPill label="Fecha Aprobación" value={detail.documento.fecha_aprobacion} />
+                  <InfoPill label="Estado Extracción" value={detail.documento.estado} highlight />
                 </div>
-              ) : (
-                docs.map((d) => (
-                  <div key={d.id} onClick={() => loadDetail(d.id)} style={{
-                    padding: 14, marginBottom: 8, borderRadius: 10,
-                    background: detail?.documento?.id === d.id ? 'rgba(59,130,246,0.1)' : 'rgba(255,255,255,0.03)',
-                    border: `1px solid ${detail?.documento?.id === d.id ? 'rgba(59,130,246,0.3)' : 'var(--border-color)'}`,
-                    cursor: 'pointer',
-                  }}>
-                    <div style={{ fontWeight: 600, fontSize: 14 }}>PAL {d.anio}</div>
-                    <div style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 4 }}>
-                      {d.acto_administrativo} &middot; {d.n_lineas} lineas &middot; {d.n_indicadores} indicadores
-                    </div>
-                    <span style={{
-                      fontSize: 11, padding: '2px 8px', borderRadius: 8, marginTop: 6, display: 'inline-block',
-                      background: d.estado_extraccion === 'completo' ? 'rgba(16,185,129,0.15)' : 'rgba(249,115,22,0.15)',
-                      color: d.estado_extraccion === 'completo' ? '#10b981' : '#f59e0b',
-                    }}>
-                      {d.estado_extraccion === 'demo' ? 'Ejemplo' : d.estado_extraccion}
-                    </span>
-                  </div>
-                ))
               )}
             </div>
           </div>
 
-          {/* Lines and indicators */}
           {detail && (
             <div className="glass-panel" style={{ padding: 24 }}>
-              <h3 style={{ fontSize: 17, fontWeight: 700, marginBottom: 4 }}>
-                PAL {detail.documento.anio}
-              </h3>
-              <p style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 20 }}>
-                {detail.documento.acto_administrativo}
-                {detail.documento.fecha_aprobacion && ` · Aprobado: ${detail.documento.fecha_aprobacion}`}
-              </p>
-
+              <h3 style={{ fontSize: 17, fontWeight: 700, marginBottom: 16 }}>Líneas Estratégicas e Indicadores</h3>
               {detail.lineas.map((linea, idx) => (
                 <div key={idx} style={{ marginBottom: 8 }}>
-                  <button onClick={() => toggleLine(idx)} style={{
+                  <button onClick={() => toggleLine(`est_${idx}`)} style={{
                     width: '100%', display: 'flex', alignItems: 'center', gap: 10,
-                    padding: '14px 16px', background: 'rgba(255,255,255,0.03)',
+                    padding: '14px 16px', background: linea.nombre.startsWith('ATP') ? 'rgba(59,130,246,0.04)' : 'rgba(255,255,255,0.03)',
                     border: '1px solid var(--border-color)', borderRadius: 10,
                     color: 'var(--text-main)', fontSize: 14, fontWeight: 600,
                     cursor: 'pointer', textAlign: 'left',
                   }}>
-                    {expanded[idx] ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
-                    <span style={{ flex: 1 }}>
-                      {idx + 1}. {linea.descripcion || linea.nombre}
+                    {expanded[`est_${idx}`] ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
+                    <span style={{
+                      fontSize: 11, padding: '2px 8px', borderRadius: 6, flexShrink: 0,
+                      background: linea.nombre.startsWith('ATP') ? 'rgba(59,130,246,0.15)' : 'rgba(16,185,129,0.15)',
+                      color: linea.nombre.startsWith('ATP') ? '#60a5fa' : '#10b981',
+                    }}>
+                      {linea.nombre}
                     </span>
+                    <span style={{ flex: 1 }}>{linea.descripcion}</span>
                     <span style={{ fontSize: 13, color: 'var(--text-muted)', fontWeight: 400 }}>
-                      {linea.indicadores.length} indicadores
+                      {linea.indicadores.length} ind.
                     </span>
                   </button>
 
-                  {expanded[idx] && linea.indicadores.length > 0 && (
+                  {expanded[`est_${idx}`] && linea.indicadores.length > 0 && (
                     <div style={{ padding: '12px 0 12px 32px' }}>
                       {linea.indicadores.map((ind, iIdx) => (
                         <div key={iIdx} style={{
@@ -201,14 +296,25 @@ export default function PlanAnual() {
                           <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 10 }}>{ind.nombre}</div>
                           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 12 }}>
                             <InfoPill label="Meta" value={ind.meta} highlight />
+                            <InfoPill label="Avance" value={ind.avance || '—'} color={avanceColor(parseNumeric(ind.avance), parseNumeric(ind.meta))} />
                             <InfoPill label="Periodicidad" value={ind.periodicidad} />
                             <InfoPill label="Responsable" value={ind.responsable} />
                             <InfoPill label="Automatizable" value={AUTO_LABELS[ind.automatizable] || ind.automatizable}
                               color={AUTO_COLORS[ind.automatizable]} />
                           </div>
+                          {ind.formula && (
+                            <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 8 }}>
+                              <strong>Fórmula:</strong> {ind.formula}
+                            </div>
+                          )}
                           {ind.medio_verificacion && (
-                            <div style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 8 }}>
-                              <strong>Verificacion:</strong> {ind.medio_verificacion}
+                            <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 4 }}>
+                              <strong>Verificación:</strong> {ind.medio_verificacion}
+                            </div>
+                          )}
+                          {ind.observacion && (
+                            <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 4, fontStyle: 'italic' }}>
+                              {ind.observacion}
                             </div>
                           )}
                         </div>
@@ -219,104 +325,317 @@ export default function PlanAnual() {
               ))}
             </div>
           )}
+          <SourceNote />
         </>
-      ) : (
-        /* MONITORING VIEW */
+      )}
+
+      {/* ============= CGE VIEW ============= */}
+      {viewMode === 'cge' && (
         <div className="glass-panel" style={{ padding: 24 }}>
-          <h3 style={{ fontSize: 17, fontWeight: 700, marginBottom: 4 }}>Monitoreo de Indicadores PAL</h3>
-          <p style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 24 }}>
-            Seguimiento trimestral del avance de cada indicador
+          <h3 style={{ fontSize: 17, fontWeight: 700, marginBottom: 4 }}>
+            <FileText size={18} style={{ verticalAlign: 'middle', marginRight: 8 }} />
+            Convenio de Gestión Educacional (CGE)
+          </h3>
+          <p style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 20 }}>
+            Estado de avance de los 5 objetivos del CGE con sus sub-indicadores
           </p>
 
-          {allIndicators.length === 0 ? (
-            <p style={{ color: 'var(--text-muted)', fontSize: 14, padding: 20, textAlign: 'center' }}>
-              No hay indicadores cargados para monitorear.
-            </p>
+          {(!cge?.cge || cge.cge.length === 0) ? (
+            <EmptyState message="No hay datos CGE cargados para este PAL." />
           ) : (
-            allIndicators.map((ind) => {
-              const mon = MONITORING_DATA[ind.id] || { avance: 0, registros: [] };
-              const avance = mon.avance;
-              const color = avance >= 75 ? '#10b981' : avance >= 50 ? '#f59e0b' : '#ef4444';
-
-              return (
-                <div key={ind.id} style={{
-                  padding: 20, marginBottom: 16, borderRadius: 12,
-                  background: 'rgba(255,255,255,0.02)', border: '1px solid var(--border-color)',
-                }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12 }}>
-                    <div style={{ flex: 1 }}>
-                      <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 4 }}>
-                        Linea {ind.lineaIdx + 1}: {ind.lineaDesc?.slice(0, 50)}
-                      </div>
-                      <div style={{ fontSize: 15, fontWeight: 600 }}>{ind.nombre}</div>
-                    </div>
-                    <div style={{ textAlign: 'right', flexShrink: 0 }}>
-                      <div style={{ fontSize: 24, fontWeight: 700, color }}>{avance}%</div>
-                      <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>avance</div>
-                    </div>
-                  </div>
-
-                  {/* Progress bar */}
-                  <div style={{ height: 8, background: 'rgba(255,255,255,0.05)', borderRadius: 4, marginBottom: 12, overflow: 'hidden' }}>
-                    <div style={{ height: '100%', width: `${avance}%`, background: color, borderRadius: 4, transition: 'width 0.5s ease' }} />
-                  </div>
-
-                  <div style={{ display: 'flex', gap: 16, fontSize: 13, color: 'var(--text-muted)', marginBottom: 12 }}>
-                    <span><strong>Meta:</strong> {ind.meta}</span>
-                    <span><strong>Periodicidad:</strong> {ind.periodicidad}</span>
-                    <span style={{ color: AUTO_COLORS[ind.automatizable] }}>
-                      {AUTO_LABELS[ind.automatizable] || ind.automatizable}
-                    </span>
-                  </div>
-
-                  {/* Timeline */}
-                  {mon.registros.length > 0 && (
-                    <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: 12 }}>
-                      <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-muted)', marginBottom: 8 }}>
-                        <Calendar size={12} style={{ verticalAlign: 'middle', marginRight: 4 }} />
-                        Registros
-                      </div>
-                      {mon.registros.map((reg, ri) => (
-                        <div key={ri} style={{
-                          display: 'flex', alignItems: 'center', gap: 12, padding: '8px 0',
-                          borderBottom: ri < mon.registros.length - 1 ? '1px solid rgba(255,255,255,0.03)' : 'none',
-                        }}>
-                          <span style={{
-                            padding: '3px 10px', borderRadius: 6, fontSize: 12, fontWeight: 600,
-                            background: reg.pct > 0 ? 'rgba(59,130,246,0.15)' : 'rgba(255,255,255,0.05)',
-                            color: reg.pct > 0 ? '#60a5fa' : 'var(--text-muted)',
-                          }}>
-                            {reg.periodo}
-                          </span>
-                          <span style={{ fontSize: 13, flex: 1 }}>{reg.valor}</span>
-                          {reg.fecha && <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{reg.fecha}</span>}
-                          {reg.pct > 0 && (
-                            <span style={{ fontSize: 13, fontWeight: 600, color: reg.pct >= 75 ? '#10b981' : reg.pct >= 50 ? '#f59e0b' : '#ef4444' }}>
-                              {reg.pct}%
-                            </span>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              );
-            })
+            <div style={{ overflowX: 'auto' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
+                <thead>
+                  <tr style={{ borderBottom: '2px solid var(--border-color)' }}>
+                    <th style={thStyle}>Obj.</th>
+                    <th style={thStyle}>Indicador</th>
+                    <th style={{ ...thStyle, textAlign: 'right' }}>Meta</th>
+                    <th style={{ ...thStyle, textAlign: 'right' }}>Pond.</th>
+                    <th style={{ ...thStyle, textAlign: 'right' }}>Resultado</th>
+                    <th style={{ ...thStyle, textAlign: 'right' }}>Alcanzado</th>
+                    <th style={thStyle}>Observación</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {cge.cge.map((row, i) => {
+                    const isHeader = row.sub_indicador === row.indicador_nombre?.split(' - ')[0]?.trim()
+                      || !row.sub_indicador?.includes('.');
+                    return (
+                      <tr key={i} style={{
+                        borderBottom: '1px solid var(--border-color)',
+                        background: isHeader ? 'rgba(59,130,246,0.04)' : 'transparent',
+                        fontWeight: isHeader ? 600 : 400,
+                      }}>
+                        <td style={tdStyle}>{row.objetivo}</td>
+                        <td style={{ ...tdStyle, maxWidth: 350 }}>{row.indicador_nombre}</td>
+                        <td style={{ ...tdStyle, textAlign: 'right' }}>{row.meta}</td>
+                        <td style={{ ...tdStyle, textAlign: 'right' }}>{row.ponderacion}</td>
+                        <td style={{ ...tdStyle, textAlign: 'right' }}>
+                          <SemaforoChip avance={row.resultado_obtenido} meta={row.meta} />
+                        </td>
+                        <td style={{ ...tdStyle, textAlign: 'right', color: row.ponderacion_alcanzada === '0%' ? '#ef4444' : 'var(--text-main)' }}>
+                          {row.ponderacion_alcanzada || '—'}
+                        </td>
+                        <td style={{ ...tdStyle, fontSize: 12, color: 'var(--text-muted)', maxWidth: 280 }}>
+                          {row.observacion || ''}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
           )}
 
-          <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 16, padding: 12, background: 'rgba(59,130,246,0.05)', borderRadius: 8 }}>
-            <strong>Nota:</strong> Los datos de monitoreo se actualizan trimestralmente.
-            Los indicadores marcados como "Automatizable" se alimentan desde las fuentes de datos conectadas (SIGE, Mercado Publico).
-            Los "Parciales" requieren complemento manual. Los "Manuales" se ingresan directamente por el equipo del SLEP.
+          <div style={{ marginTop: 16, padding: 12, borderRadius: 8, background: 'rgba(239,68,68,0.06)', fontSize: 12, color: 'var(--text-muted)' }}>
+            <Info size={14} style={{ verticalAlign: 'middle', marginRight: 4 }} />
+            <strong>Nota técnica:</strong> Cuando el resultado ponderado es menor a 70%, la nota técnica del CGE asigna 0% de avance.
+            Esto distorsiona la evaluación intermedia pero se presenta según las notas oficiales del indicador.
           </div>
+          <SourceNote />
         </div>
       )}
 
-      {/* Disclosure */}
-      <div style={{ fontSize: 12, color: 'var(--text-muted)', lineHeight: 1.7, padding: '16px 0', borderTop: '1px solid var(--border-color)', marginTop: 16 }}>
-        <strong>Fuente:</strong> Plan Anual Local extraido por Radar de la Educación Pública. Los indicadores automatizables se monitorean
-        con datos de MINEDUC SIGE, Mercado Publico y otras fuentes abiertas. &middot; Tercera Letra SpA
+      {/* ============= PME VIEW ============= */}
+      {viewMode === 'pme' && (
+        <div>
+          {pme && pme.total_ee > 0 && (
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))', gap: 16, marginBottom: 16 }}>
+              <MiniKpi icon={School} label="Establecimientos" value={pme.total_ee} />
+              <MiniKpi icon={TrendingUp} label="Promedio cumplimiento" value={`${pme.promedio_cumplimiento}%`}
+                color={pme.promedio_cumplimiento >= 60 ? '#10b981' : '#f59e0b'} />
+              <MiniKpi icon={CheckCircle} label="EE sobre 70%" value={pme.ee_sobre_70} color="#10b981" />
+              <MiniKpi icon={AlertTriangle} label="EE críticos (<30%)" value={pme.ee_criticos} color="#ef4444" />
+            </div>
+          )}
+
+          <div className="glass-panel" style={{ padding: 24 }}>
+            <h3 style={{ fontSize: 17, fontWeight: 700, marginBottom: 4 }}>
+              <School size={18} style={{ verticalAlign: 'middle', marginRight: 8 }} />
+              Avance PME por Establecimiento
+            </h3>
+            <p style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 20 }}>
+              % de cumplimiento global del PME 2025 — ordenado de mayor a menor avance
+            </p>
+
+            {(!pme?.establecimientos || pme.establecimientos.length === 0) ? (
+              <EmptyState message="No hay datos PME cargados para este PAL." />
+            ) : (
+              <>
+                {/* Distribution chart */}
+                <PmeDistributionChart data={pme.establecimientos} />
+
+                <div style={{ overflowX: 'auto', marginTop: 16 }}>
+                  <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
+                    <thead>
+                      <tr style={{ borderBottom: '2px solid var(--border-color)' }}>
+                        <th style={thStyle}>RBD</th>
+                        <th style={thStyle}>Establecimiento</th>
+                        <th style={thStyle}>Comuna</th>
+                        <th style={{ ...thStyle, textAlign: 'center' }}>Lid.</th>
+                        <th style={{ ...thStyle, textAlign: 'center' }}>G.Ped.</th>
+                        <th style={{ ...thStyle, textAlign: 'center' }}>Conv.</th>
+                        <th style={{ ...thStyle, textAlign: 'center' }}>Rec.</th>
+                        <th style={{ ...thStyle, textAlign: 'center' }}>Total</th>
+                        <th style={{ ...thStyle, textAlign: 'right' }}>Cumplimiento</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {pme.establecimientos.map((ee, i) => {
+                        const pct = parseFloat(ee.pct_cumplimiento);
+                        const color = pct >= 70 ? '#10b981' : pct >= 40 ? '#f59e0b' : '#ef4444';
+                        return (
+                          <tr key={i} style={{ borderBottom: '1px solid var(--border-color)' }}>
+                            <td style={{ ...tdStyle, fontSize: 12, color: 'var(--text-muted)' }}>{ee.rbd}</td>
+                            <td style={{ ...tdStyle, fontWeight: 500 }}>{ee.nombre_ee}</td>
+                            <td style={tdStyle}>{ee.comuna}</td>
+                            <td style={{ ...tdStyle, textAlign: 'center' }}>{ee.n_acciones_liderazgo}</td>
+                            <td style={{ ...tdStyle, textAlign: 'center' }}>{ee.n_acciones_gestion_pedagogica}</td>
+                            <td style={{ ...tdStyle, textAlign: 'center' }}>{ee.n_acciones_convivencia}</td>
+                            <td style={{ ...tdStyle, textAlign: 'center' }}>{ee.n_acciones_recursos}</td>
+                            <td style={{ ...tdStyle, textAlign: 'center', fontWeight: 600 }}>{ee.total_acciones}</td>
+                            <td style={{ ...tdStyle, textAlign: 'right' }}>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: 8, justifyContent: 'flex-end' }}>
+                                <div style={{ width: 60, height: 6, background: 'rgba(255,255,255,0.05)', borderRadius: 3, overflow: 'hidden' }}>
+                                  <div style={{ height: '100%', width: `${pct}%`, background: color, borderRadius: 3 }} />
+                                </div>
+                                <span style={{ fontWeight: 700, color, minWidth: 45, textAlign: 'right' }}>{pct}%</span>
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              </>
+            )}
+          </div>
+          <SourceNote />
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ---- Sub-components ---- */
+
+function AvanceResumenChart({ lineas }) {
+  const data = lineas.map((l) => {
+    const total = l.indicadores.length;
+    const conDato = l.indicadores.filter(i => i.avance && i.avance !== 'S/I' && i.avance !== 'N/A').length;
+    const cumplidos = l.indicadores.filter(i => {
+      const av = parseNumeric(i.avance);
+      const mt = parseNumeric(i.meta);
+      return av !== null && mt !== null && mt !== 0 && (av / mt) >= 0.9;
+    }).length;
+    return {
+      name: l.nombre,
+      total,
+      conDato,
+      cumplidos,
+      pct: total > 0 ? Math.round((cumplidos / total) * 100) : 0,
+    };
+  });
+
+  return (
+    <div className="glass-panel" style={{ padding: 24, marginBottom: 16 }}>
+      <h3 style={{ fontSize: 17, fontWeight: 700, marginBottom: 16 }}>
+        <BarChart3 size={18} style={{ verticalAlign: 'middle', marginRight: 8 }} />
+        Resumen PEL — Indicadores por Objetivo Estratégico
+      </h3>
+      <ResponsiveContainer width="100%" height={220}>
+        <BarChart data={data} barSize={28}>
+          <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
+          <XAxis dataKey="name" tick={{ fill: 'var(--text-muted)', fontSize: 12 }} />
+          <YAxis tick={{ fill: 'var(--text-muted)', fontSize: 12 }} />
+          <RTooltip
+            contentStyle={{ background: '#1e293b', border: 'none', borderRadius: 8, fontSize: 12 }}
+            formatter={(value, name) => [value, name === 'total' ? 'Total' : name === 'conDato' ? 'Con avance' : 'Cumplidos (≥90%)']}
+          />
+          <Bar dataKey="total" fill="#475569" radius={[4, 4, 0, 0]} name="Total" />
+          <Bar dataKey="conDato" fill="#60a5fa" radius={[4, 4, 0, 0]} name="Con avance" />
+          <Bar dataKey="cumplidos" fill="#10b981" radius={[4, 4, 0, 0]} name="Cumplidos" />
+        </BarChart>
+      </ResponsiveContainer>
+    </div>
+  );
+}
+
+function AtpCard({ linea, index }) {
+  const ind = linea.indicadores[0];
+  if (!ind) return null;
+  return (
+    <div style={{
+      padding: 20, marginBottom: 12, borderRadius: 12,
+      background: 'rgba(59,130,246,0.04)', border: '1px solid rgba(59,130,246,0.15)',
+    }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8 }}>
+        <div style={{ flex: 1 }}>
+          <span style={{
+            fontSize: 11, padding: '2px 8px', borderRadius: 6,
+            background: 'rgba(59,130,246,0.15)', color: '#60a5fa', marginBottom: 6, display: 'inline-block',
+          }}>
+            {linea.nombre}
+          </span>
+          <div style={{ fontSize: 15, fontWeight: 600, marginTop: 4 }}>{linea.descripcion}</div>
+        </div>
       </div>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 12, marginTop: 12 }}>
+        <InfoPill label="Meta" value={ind.meta} highlight />
+        <InfoPill label="Periodicidad" value={ind.periodicidad} />
+        <InfoPill label="Responsable" value={ind.responsable} />
+      </div>
+      {ind.observacion && (
+        <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 8, fontStyle: 'italic' }}>
+          {ind.observacion}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function IndicadorMonitorCard({ ind }) {
+  const av = parseNumeric(ind.avance);
+  const mt = parseNumeric(ind.meta);
+  const hasData = av !== null;
+  const pct = hasData && mt ? Math.min(Math.round((av / mt) * 100), 150) : 0;
+  const color = avanceColor(av, mt);
+
+  return (
+    <div style={{
+      padding: 16, marginBottom: 8, borderRadius: 10,
+      background: 'rgba(255,255,255,0.02)', border: '1px solid var(--border-color)',
+    }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 16 }}>
+        <div style={{ flex: 1 }}>
+          <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 6 }}>{ind.nombre}</div>
+          <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', fontSize: 13, color: 'var(--text-muted)' }}>
+            <span><strong>Meta:</strong> {ind.meta}</span>
+            <span><strong>Periodicidad:</strong> {ind.periodicidad}</span>
+            <span style={{ color: AUTO_COLORS[ind.automatizable] }}>
+              {AUTO_LABELS[ind.automatizable]}
+            </span>
+          </div>
+        </div>
+        <div style={{ textAlign: 'right', flexShrink: 0, minWidth: 80 }}>
+          <div style={{ fontSize: 22, fontWeight: 700, color }}>
+            {hasData ? ind.avance : '—'}
+          </div>
+          <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>
+            {hasData ? `${pct}% de meta` : 'Sin dato'}
+          </div>
+        </div>
+      </div>
+
+      {hasData && (
+        <div style={{ height: 6, background: 'rgba(255,255,255,0.05)', borderRadius: 3, marginTop: 10, overflow: 'hidden' }}>
+          <div style={{ height: '100%', width: `${Math.min(pct, 100)}%`, background: color, borderRadius: 3, transition: 'width 0.5s ease' }} />
+        </div>
+      )}
+
+      {ind.observacion && (
+        <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 8, fontStyle: 'italic' }}>
+          {ind.observacion}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function PmeDistributionChart({ data }) {
+  const ranges = [
+    { label: '0-29%', min: 0, max: 29, color: '#ef4444' },
+    { label: '30-49%', min: 30, max: 49, color: '#f97316' },
+    { label: '50-69%', min: 50, max: 69, color: '#f59e0b' },
+    { label: '70-84%', min: 70, max: 84, color: '#10b981' },
+    { label: '85-100%', min: 85, max: 100, color: '#059669' },
+  ];
+  const chartData = ranges.map(r => ({
+    name: r.label,
+    count: data.filter(ee => {
+      const p = parseFloat(ee.pct_cumplimiento);
+      return p >= r.min && p <= r.max;
+    }).length,
+    fill: r.color,
+  }));
+
+  return (
+    <div>
+      <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-muted)', marginBottom: 8 }}>
+        Distribución de cumplimiento PME
+      </div>
+      <ResponsiveContainer width="100%" height={160}>
+        <BarChart data={chartData} barSize={36}>
+          <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
+          <XAxis dataKey="name" tick={{ fill: 'var(--text-muted)', fontSize: 12 }} />
+          <YAxis tick={{ fill: 'var(--text-muted)', fontSize: 12 }} allowDecimals={false} />
+          <RTooltip contentStyle={{ background: '#1e293b', border: 'none', borderRadius: 8, fontSize: 12 }} />
+          <Bar dataKey="count" name="Establecimientos" radius={[4, 4, 0, 0]}>
+            {chartData.map((d, i) => <Cell key={i} fill={d.fill} />)}
+          </Bar>
+        </BarChart>
+      </ResponsiveContainer>
     </div>
   );
 }
@@ -338,8 +657,30 @@ function InfoPill({ label, value, highlight, color }) {
     <div style={{ fontSize: 13 }}>
       <span style={{ color: 'var(--text-muted)' }}>{label}: </span>
       <span style={{ fontWeight: highlight ? 700 : 600, color: color || (highlight ? 'var(--accent-primary)' : 'var(--text-main)') }}>
-        {value || '\u2014'}
+        {value || '—'}
       </span>
     </div>
   );
 }
+
+function EmptyState({ message }) {
+  return (
+    <div style={{ padding: 40, textAlign: 'center', color: 'var(--text-muted)' }}>
+      <AlertTriangle size={24} style={{ marginBottom: 8, opacity: 0.5 }} />
+      <p style={{ fontSize: 14 }}>{message}</p>
+    </div>
+  );
+}
+
+function SourceNote() {
+  return (
+    <div style={{ fontSize: 12, color: 'var(--text-muted)', lineHeight: 1.7, padding: '16px 0', borderTop: '1px solid var(--border-color)', marginTop: 16 }}>
+      <strong>Fuente:</strong> Plan Anual Local extraído del documento oficial del SLEP por Radar de la Educación Pública.
+      Los indicadores automatizables se monitorean con datos de MINEDUC/SIGE, Agencia de Calidad y otras fuentes abiertas.
+      Los indicadores parciales y manuales requieren actualización directa por el equipo del SLEP. · Tercera Letra SpA
+    </div>
+  );
+}
+
+const thStyle = { padding: '10px 12px', textAlign: 'left', fontSize: 12, color: 'var(--text-muted)', fontWeight: 600, whiteSpace: 'nowrap' };
+const tdStyle = { padding: '10px 12px', fontSize: 13 };
