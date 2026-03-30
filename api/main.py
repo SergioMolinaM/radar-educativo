@@ -2,6 +2,8 @@
 Radar Educativo - API Server
 FastAPI backend for SLEP education management platform.
 """
+import os
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -13,9 +15,18 @@ app = FastAPI(
     version="0.1.0",
 )
 
+CORS_ORIGINS = [
+    "http://localhost:5173",
+    "http://localhost:5176",
+    "http://localhost:3000",
+]
+if os.getenv("NETLIFY_URL"):
+    CORS_ORIGINS.append(os.getenv("NETLIFY_URL"))
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://localhost:5176", "http://localhost:3000"],
+    allow_origins=CORS_ORIGINS,
+    allow_origin_regex=r"https://.*\.netlify\.app",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
