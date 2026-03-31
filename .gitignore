@@ -51,5 +51,3 @@ web/.netlify/
 load_pal_barrancas.py
 pal_barrancas_text.txt
 radar_edu_render.dump
-scripts/new_tables_sync.sql
-api/scripts/new_tables_sync.sql
