@@ -13,40 +13,45 @@ router = APIRouter()
 
 @router.get("/simce")
 def simce_slep(current_user: dict = Depends(get_current_user)):
-    """SIMCE results aggregated for the SLEP + by establishment."""
+    """SIMCE 2024 results (preliminar) aggregated for the SLEP + by establishment.
+    Source: datosabiertos.mineduc.cl - SIMCE 2024 preliminar por RBD."""
     slep_id = current_user["slep_id"]
+    sf = _slep_filter(slep_id)
     try:
-        # Aggregated by year and level
-        resumen = query_all("""
-            SELECT f.anio, f.nivel, COUNT(*) AS n_ee,
-                   ROUND(AVG(f.prom_lectura)::numeric, 1) AS avg_lectura,
-                   ROUND(AVG(f.prom_matematica)::numeric, 1) AS avg_matematica,
-                   ROUND(MIN(f.prom_lectura)::numeric, 1) AS min_lectura,
-                   ROUND(MAX(f.prom_lectura)::numeric, 1) AS max_lectura,
-                   ROUND(MIN(f.prom_matematica)::numeric, 1) AS min_matematica,
-                   ROUND(MAX(f.prom_matematica)::numeric, 1) AS max_matematica
-            FROM analytics.fact_simce f
-            JOIN matricula_2025_rbd m ON f.rbd = m.rbd
-            WHERE m.nombre_slep IN (SELECT unnest(string_to_array(%s, ',')))
-            GROUP BY f.anio, f.nivel ORDER BY f.anio DESC, f.nivel
-        """, (','.join(_get_names(slep_id)),))
+        # Use simce_2024_rbd (real data) joined with matricula for SLEP filter
+        resumen = query_all(f"""
+            SELECT 2024 AS anio, s.grado AS nivel, COUNT(*) AS n_ee,
+                   ROUND(AVG(s.prom_lectura)::numeric, 1) AS avg_lectura,
+                   ROUND(AVG(s.prom_matematica)::numeric, 1) AS avg_matematica,
+                   ROUND(MIN(s.prom_lectura)::numeric, 1) AS min_lectura,
+                   ROUND(MAX(s.prom_lectura)::numeric, 1) AS max_lectura,
+                   ROUND(MIN(s.prom_matematica)::numeric, 1) AS min_matematica,
+                   ROUND(MAX(s.prom_matematica)::numeric, 1) AS max_matematica
+            FROM simce_2024_rbd s
+            JOIN matricula_2025_rbd m ON s.rbd = m.rbd
+            WHERE m.{sf} AND s.prom_lectura IS NOT NULL
+            GROUP BY s.grado ORDER BY s.grado
+        """)
 
-        # By establishment (latest year per level)
-        detalle = query_all("""
-            SELECT f.rbd, f.nom_rbd, f.anio, f.nivel, f.estado_resultado,
-                   f.prom_lectura, f.prom_matematica
-            FROM analytics.fact_simce f
-            JOIN matricula_2025_rbd m ON f.rbd = m.rbd
-            WHERE m.nombre_slep IN (SELECT unnest(string_to_array(%s, ',')))
-              AND f.anio = (SELECT MAX(anio) FROM analytics.fact_simce)
-            ORDER BY f.nivel, f.prom_lectura DESC NULLS LAST
-        """, (','.join(_get_names(slep_id)),))
+        # By establishment detail
+        detalle = query_all(f"""
+            SELECT s.rbd, s.nom_rbd, 2024 AS anio, s.grado AS nivel,
+                   'preliminar' AS estado_resultado,
+                   s.prom_lectura, s.prom_matematica,
+                   s.pct_insuficiente_lectura, s.pct_adecuado_lectura,
+                   s.pct_insuficiente_matematica, s.pct_adecuado_matematica
+            FROM simce_2024_rbd s
+            JOIN matricula_2025_rbd m ON s.rbd = m.rbd
+            WHERE m.{sf} AND s.prom_lectura IS NOT NULL
+            ORDER BY s.grado, s.prom_lectura DESC NULLS LAST
+        """)
 
         return {
             "slep_id": slep_id,
             "resumen": [dict(r) for r in resumen],
             "detalle": [dict(r) for r in detalle],
-            "source": "simce_real",
+            "source": "simce_2024_preliminar",
+            "fuente": "datosabiertos.mineduc.cl",
         }
     except Exception as e:
         logger.error("SIMCE error: %s", e)
