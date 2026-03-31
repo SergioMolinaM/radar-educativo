@@ -9,7 +9,7 @@ import { useAuth } from '../../hooks/useAuth';
 import api from '../../services/api';
 import RadarLogo from './RadarLogo';
 
-// Navegación organizada en 3 módulos según documento de estrategia
+// Navegación organizada por lógica de uso del director SLEP
 const NAV_MODULES = [
   {
     id: 'gestion',
@@ -17,12 +17,10 @@ const NAV_MODULES = [
     icon: LayoutDashboard,
     color: '#3b82f6',
     items: [
-      { to: '/', icon: LayoutDashboard, label: 'Panel general' },
-      { to: '/mi-slep', icon: Building2, label: 'Mi SLEP' },
-      { to: '/alertas', icon: AlertTriangle, label: 'Alertas' },
+      { to: '/dashboard', icon: LayoutDashboard, label: 'Panel general' },
       { to: '/establecimientos', icon: School, label: 'Establecimientos' },
       { to: '/indicadores', icon: TrendingUp, label: 'Rendimiento y SIMCE' },
-      { to: '/plan-anual', icon: ClipboardCheck, label: 'Plan Anual' },
+      { to: '/alertas', icon: AlertTriangle, label: 'Alertas' },
     ],
   },
   {
@@ -31,18 +29,37 @@ const NAV_MODULES = [
     icon: Map,
     color: '#10b981',
     items: [
-      { to: '/financiero', icon: DollarSign, label: 'Financiero' },
-      { to: '/ranking', icon: Trophy, label: 'Panorama comparativo' },
-      { to: '/comparador', icon: Scale, label: 'Comparador' },
       { to: '/mapa', icon: Map, label: 'Mapa territorial' },
+      { to: '/ranking', icon: Trophy, label: 'Panorama comparativo' },
     ],
   },
   {
-    id: 'ejecutivo',
-    label: 'Ejecutivo',
-    icon: FileText,
+    id: 'pal',
+    label: 'Monitoreo PAL',
+    icon: ClipboardCheck,
+    color: '#8b5cf6',
+    items: [
+      { to: '/plan-anual', icon: ClipboardCheck, label: 'Avance PAL' },
+      { to: '/mi-slep', icon: Building2, label: 'Compromisos CGE' },
+    ],
+  },
+  {
+    id: 'finanzas',
+    label: 'Administración y Finanzas',
+    icon: DollarSign,
     color: '#f59e0b',
     items: [
+      { to: '/financiero', icon: DollarSign, label: 'Ejecución presupuestaria' },
+    ],
+  },
+  {
+    id: 'herramientas',
+    label: '',
+    icon: null,
+    color: '#64748b',
+    separator: true,
+    items: [
+      { to: '/comparador', icon: Scale, label: 'Indicadores comparados' },
       { to: '/resumen', icon: FileText, label: 'Resumen ejecutivo' },
       { to: '/fuentes', icon: Database, label: 'Fuentes de datos' },
     ],
@@ -234,29 +251,36 @@ export default function Layout() {
         <nav style={{ flex: 1, overflowY: 'auto' }}>
           {NAV_MODULES.map((mod) => (
             <div key={mod.id} style={{ marginBottom: 4 }}>
+              {/* Separator line for utility section */}
+              {mod.separator && (
+                <div style={{ margin: '12px 16px 8px', borderTop: '1px solid var(--border-color)' }} />
+              )}
+
               {/* Module header */}
-              <button
-                onClick={() => toggleModule(mod.id)}
-                style={{
-                  width: '100%', display: 'flex', alignItems: 'center', gap: 8,
-                  padding: '8px 16px', background: 'none', border: 'none',
-                  color: mod.color, fontSize: 10, fontWeight: 700,
-                  letterSpacing: 1.2, textTransform: 'uppercase', cursor: 'pointer',
-                }}
-              >
-                <ChevronRight size={12} style={{
-                  transform: collapsedModules[mod.id] ? 'none' : 'rotate(90deg)',
-                  transition: 'transform 0.2s',
-                }} />
-                {mod.label}
-              </button>
+              {mod.label && (
+                <button
+                  onClick={() => toggleModule(mod.id)}
+                  style={{
+                    width: '100%', display: 'flex', alignItems: 'center', gap: 8,
+                    padding: '8px 16px', background: 'none', border: 'none',
+                    color: mod.color, fontSize: 10, fontWeight: 700,
+                    letterSpacing: 1.2, textTransform: 'uppercase', cursor: 'pointer',
+                  }}
+                >
+                  <ChevronRight size={12} style={{
+                    transform: collapsedModules[mod.id] ? 'none' : 'rotate(90deg)',
+                    transition: 'transform 0.2s',
+                  }} />
+                  {mod.label}
+                </button>
+              )}
 
               {/* Module items */}
               {!collapsedModules[mod.id] && mod.items.map(({ to, icon: Icon, label }) => (
                 <NavLink
                   key={to}
                   to={to}
-                  end={to === '/'}
+                  end={to === '/dashboard'}
                   style={({ isActive }) => ({
                     display: 'flex', alignItems: 'center', gap: 10,
                     padding: '10px 16px 10px 32px',
