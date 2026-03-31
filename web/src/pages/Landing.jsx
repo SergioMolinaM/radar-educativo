@@ -49,8 +49,8 @@ export default function Landing() {
     },
     {
       icon: '📋',
-      title: 'Datos oficiales verificados',
-      description: 'Fuentes del Mineduc, Agencia de Calidad y Mercado Público. Sin datos inventados.',
+      title: 'Datos oficiales y del SLEP',
+      description: 'Fuentes del Mineduc, Agencia de Calidad, Mercado Público y datos propios del SLEP.',
       color: '#64748b',
       bg: 'rgba(100, 116, 139, 0.12)',
     },
