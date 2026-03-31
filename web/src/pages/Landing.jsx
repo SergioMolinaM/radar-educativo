@@ -55,10 +55,10 @@ export default function Landing() {
       <div className="animate-fade-in" style={{ textAlign: 'center', marginBottom: 48 }}>
         <RadarLogo size={80} />
         <h1 style={{ fontSize: 36, fontWeight: 800, marginTop: 16, marginBottom: 8 }}>
-          <span className="text-gradient">Radar</span> de la Educaci&oacute;n P&uacute;blica
+          <span className="text-gradient">Radar</span> de la Educación Pública
         </h1>
         <p style={{ fontSize: 18, color: 'var(--text-muted)', maxWidth: 500, margin: '0 auto', lineHeight: 1.6 }}>
-          Plataforma de gesti&oacute;n integral para Servicios Locales de Educaci&oacute;n P&uacute;blica.
+          Plataforma de gestión integral para Servicios Locales de Educación Pública.
           Datos oficiales, actualizados y accionables.
         </p>
       </div>
@@ -134,7 +134,7 @@ export default function Landing() {
 
       {/* Footer */}
       <p style={{ marginTop: 32, fontSize: 12, color: 'var(--text-muted)', opacity: 0.6 }}>
-        Tercera Letra &middot; Datos fuente: MINEDUC, Agencia de Calidad, Mercado P&uacute;blico
+        Tercera Letra · Datos fuente: MINEDUC, Agencia de Calidad, Mercado Público
       </p>
     </div>
   );

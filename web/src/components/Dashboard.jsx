@@ -60,13 +60,13 @@ export default function Dashboard() {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 20 }}>
         <div>
           <h2 style={{ fontSize: 28, fontWeight: 700, marginBottom: 4 }}>
-            Buenos d&iacute;as
+            Buenos días
           </h2>
           <p style={{ color: 'var(--text-muted)', fontSize: 15, margin: 0 }}>
             {comunas.length > 0 && (
               <span>
                 <MapPin size={14} style={{ verticalAlign: 'middle', marginRight: 4 }} />
-                {comunas.join(', ')} &middot;{' '}
+                {comunas.join(', ')} ·{' '}
               </span>
             )}
             {summary?.cobertura_datos || `${kpis.ee_con_datos || '?'} EE con datos`}
@@ -95,12 +95,12 @@ export default function Dashboard() {
             ? `${kpis.ee_con_datos} de ${kpis.ee_oficial} con datos`
             : summary?.cobertura_datos}
           tooltip={{ text: `Total oficial: ${kpis.ee_oficial || '?'} EE (${kpis.ee_escuelas_liceos || '?'} escuelas/liceos + ${kpis.ee_jardines || '?'} jardines). Jardines JUNJI/VTF no reportan asistencia al Mineduc.`, fuente: 'Sitio oficial SLEP + MINEDUC 2025' }} />
-        <KpiCard label="Matr&iacute;cula total" value={kpis.matricula_total} icon={GraduationCap} trend={trends.matricula_variacion_anual}
-          tooltip={{ text: 'Alumnos matriculados en el SLEP', fuente: 'MINEDUC Matr&iacute;cula 2025' }} />
+        <KpiCard label="Matrícula total" value={kpis.matricula_total} icon={GraduationCap} trend={trends.matricula_variacion_anual}
+          tooltip={{ text: 'Alumnos matriculados en el SLEP', fuente: 'MINEDUC Matrícula 2025' }} />
         <KpiCard label="Asistencia promedio" value={kpis.asistencia_promedio} unit="%" icon={CalendarCheck} trend={trends.asistencia_variacion_mensual}
           tooltip={{ text: 'Promedio del SLEP (sin ed. adultos)', fuente: 'MINEDUC Asistencia 2025', periodo: summary?.mes_nombre + ' 2025' }} />
-        <KpiCard label="Ejecuci&oacute;n presup." value={kpis.ejecucion_presupuestaria} unit="%" icon={DollarSign}
-          tooltip={{ text: 'Porcentaje del presupuesto ejecutado', fuente: 'Mercado P&uacute;blico', periodo: 'Q1 2026' }} />
+        <KpiCard label="Ejecución presup." value={kpis.ejecucion_presupuestaria} unit="%" icon={DollarSign}
+          tooltip={{ text: 'Porcentaje del presupuesto ejecutado', fuente: 'Mercado Público', periodo: 'Q1 2026' }} />
       </div>
 
       {/* Fila principal: Compromisos + Alertas urgentes */}
@@ -113,7 +113,7 @@ export default function Dashboard() {
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
             <h3 style={{ fontSize: 16, fontWeight: 700, margin: 0, display: 'flex', alignItems: 'center', gap: 8 }}>
               <AlertTriangle size={18} style={{ color: 'var(--alert-red)' }} />
-              Requieren atenci&oacute;n
+              Requieren atención
             </h3>
             <button onClick={() => navigate('/alertas')} style={{ background: 'none', border: 'none', color: 'var(--accent-primary)', fontSize: 12, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4 }}>
               Ver todas <ChevronRight size={14} />
@@ -126,8 +126,8 @@ export default function Dashboard() {
             background: 'rgba(239, 68, 68, 0.08)', border: '1px solid rgba(239, 68, 68, 0.15)',
             fontSize: 12, color: 'var(--text-muted)', lineHeight: 1.5,
           }}>
-            <strong style={{ color: 'var(--alert-red)' }}>{kpis.alertas_rojas || 0} establecimientos en rojo</strong> &mdash; asistencia bajo 75%.
-            {top5criticos.length > 0 && ` El m&aacute;s cr&iacute;tico: ${top5criticos[0]?.nombre?.slice(0, 30)} (${top5criticos[0]?.asistencia}%).`}
+            <strong style={{ color: 'var(--alert-red)' }}>{kpis.alertas_rojas || 0} establecimientos en rojo</strong> — asistencia bajo 75%.
+            {top5criticos.length > 0 && ` El más crítico: ${top5criticos[0]?.nombre?.slice(0, 30)} (${top5criticos[0]?.asistencia}%).`}
           </div>
 
           {/* Top 5 críticos */}
@@ -155,7 +155,7 @@ export default function Dashboard() {
                   {e.nombre}
                 </div>
                 <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>
-                  RBD {e.rbd} &middot; {e.matricula?.toLocaleString('es-CL')} alumnos
+                  RBD {e.rbd} · {e.matricula?.toLocaleString('es-CL')} alumnos
                 </div>
               </div>
               <div style={{ fontSize: 16, fontWeight: 700, color: 'var(--alert-red)' }}>
@@ -166,7 +166,7 @@ export default function Dashboard() {
 
           {top5criticos.length === 0 && (
             <div style={{ textAlign: 'center', padding: 20, color: 'var(--text-muted)', fontSize: 13 }}>
-              No hay establecimientos en rojo. &iexcl;Buen estado!
+              No hay establecimientos en rojo. ¡Buen estado!
             </div>
           )}
         </div>
@@ -219,7 +219,7 @@ export default function Dashboard() {
             background: 'rgba(59, 130, 246, 0.08)', border: '1px solid rgba(59, 130, 246, 0.15)',
             fontSize: 11, color: 'var(--text-muted)', lineHeight: 1.5, textAlign: 'center',
           }}>
-            <Target size={12} style={{ verticalAlign: 'middle', color: 'var(--accent-primary)' }} /> Umbrales: <strong>Rojo</strong> &lt;75% &middot; <strong>Naranja</strong> 75-82% &middot; <strong>Verde</strong> &ge;82%
+            <Target size={12} style={{ verticalAlign: 'middle', color: 'var(--accent-primary)' }} /> Umbrales: <strong>Rojo</strong> &lt;75% · <strong>Naranja</strong> 75-82% · <strong>Verde</strong> &ge;82%
           </div>
         </div>
       </div>
