@@ -2,7 +2,7 @@ import { TrendingUp, TrendingDown, Minus } from 'lucide-react';
 import useCountUp from '../../hooks/useCountUp';
 import InfoTooltip from './InfoTooltip';
 
-export default function KpiCard({ label, value, unit, trend, icon: Icon, tooltip }) {
+export default function KpiCard({ label, value, unit, trend, icon: Icon, tooltip, subtitle }) {
   const trendColor = trend > 0 ? 'var(--alert-green)' : trend < 0 ? 'var(--alert-red)' : 'var(--text-muted)';
   const TrendIcon = trend > 0 ? TrendingUp : trend < 0 ? TrendingDown : Minus;
   const animatedValue = useCountUp(typeof value === 'number' ? value : 0);
@@ -28,6 +28,9 @@ export default function KpiCard({ label, value, unit, trend, icon: Icon, tooltip
       )}
       {typeof trend === 'string' && (
         <div style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 6 }}>{trend}</div>
+      )}
+      {subtitle && (
+        <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 4, opacity: 0.8 }}>{subtitle}</div>
       )}
     </div>
   );

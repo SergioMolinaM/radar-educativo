@@ -77,7 +77,10 @@ export default function Dashboard() {
       {/* KPI Cards */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16, marginBottom: 24 }}>
         <KpiCard label="Establecimientos" value={kpis.total_establecimientos} icon={School2Icon}
-          tooltip={{ text: 'Total de establecimientos del SLEP (sin ed. adultos)', fuente: 'MINEDUC Directorio 2025', periodo: summary?.mes_nombre + ' 2025' }} />
+          subtitle={kpis.total_establecimientos_con_datos && kpis.total_establecimientos_con_datos < kpis.total_establecimientos
+            ? `${kpis.total_establecimientos_con_datos} con datos de asistencia`
+            : undefined}
+          tooltip={{ text: `Total: ${kpis.total_establecimientos_directorio || kpis.total_establecimientos} EE en directorio oficial. Datos de asistencia disponibles para ${kpis.total_establecimientos_con_datos || '?'} EE. Excluye jardines JUNJI/VTF no reportados al Mineduc.`, fuente: 'MINEDUC Directorio Oficial 2025', periodo: 'Anual 2025' }} />
         <KpiCard label="Matricula total" value={kpis.matricula_total} icon={GraduationCap} trend={trends.matricula_variacion_anual}
           tooltip={{ text: 'Alumnos matriculados en el SLEP', fuente: 'MINEDUC Matricula 2025', periodo: 'Anual 2025' }} />
         <KpiCard label="Asistencia promedio" value={kpis.asistencia_promedio} unit="%" icon={CalendarCheck} trend={trends.asistencia_variacion_mensual}

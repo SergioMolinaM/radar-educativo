@@ -113,6 +113,19 @@ def get_dashboard_summary(
             m = query_one(f"SELECT MAX(mes) AS m FROM asistencia_2025_rbd WHERE {sf}")
             mes = int(m["m"]) if m and m["m"] else 10
 
+        # Total EE en directorio oficial (número real del SLEP)
+        dir_count = query_one(f"""
+            SELECT COUNT(DISTINCT d.rbd) AS total_directorio
+            FROM directorio_2025 d
+            WHERE d.rut_sostenedor IN (
+                SELECT DISTINCT d2.rut_sostenedor
+                FROM directorio_2025 d2
+                JOIN asistencia_2025_rbd a ON d2.rbd = a.rbd
+                WHERE {sf.replace('nombre_slep', 'a.nombre_slep')}
+            )
+        """)
+        total_directorio = int(dir_count['total_directorio']) if dir_count and dir_count['total_directorio'] else 0
+
         # Matrícula 2025 (consistent with adultos filter)
         mat_af = "AND nom_rbd NOT ILIKE '%CEIA%' AND nom_rbd NOT ILIKE '%ADULTO%' AND nom_rbd NOT ILIKE '%NOCTURNO%'" if excluir_adultos else ""
         mat = query_one(f"""
@@ -154,7 +167,9 @@ def get_dashboard_summary(
             "mes": mes,
             "mes_nombre": MES_NOMBRES[mes] if mes < len(MES_NOMBRES) else str(mes),
             "kpis": {
-                "total_establecimientos": total_ee,
+                "total_establecimientos_directorio": total_directorio,
+                "total_establecimientos_con_datos": total_ee,
+                "total_establecimientos": total_directorio,
                 "matricula_total": mat_total,
                 "asistencia_promedio": asist_avg,
                 "ejecucion_presupuestaria": 62.5,  # TODO: Mercado Público API
