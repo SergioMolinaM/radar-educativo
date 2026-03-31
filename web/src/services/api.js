@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { getMockForRequest } from './mockData';
 
 const API_BASE = import.meta.env.VITE_API_URL || '/api';
 
@@ -17,7 +18,24 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
   (res) => res,
   (err) => {
+    // Network error (API unreachable) -> try mock data
+    if (!err.response) {
+      const mockData = getMockForRequest(err.config || {});
+      if (mockData) {
+        console.warn('[RADAR DEMO] API no disponible. Usando datos de demostración para:', err.config?.url);
+        window.__RADAR_DEMO_MODE__ = true;
+        return Promise.resolve({ data: mockData, status: 200, statusText: 'OK (Demo)', headers: {}, config: err.config });
+      }
+    }
+
     if (err.response?.status === 401) {
+      // In demo mode, don't redirect to login on 401
+      if (window.__RADAR_DEMO_MODE__) {
+        const mockData = getMockForRequest(err.config || {});
+        if (mockData) {
+          return Promise.resolve({ data: mockData, status: 200, statusText: 'OK (Demo)', headers: {}, config: err.config });
+        }
+      }
       localStorage.removeItem('token');
       localStorage.removeItem('user');
       window.location.href = '/login';
