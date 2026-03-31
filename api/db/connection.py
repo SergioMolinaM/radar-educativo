@@ -7,7 +7,9 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://postgres:postgres@localhost:5432/radar_edu_dev")
+# Render usa postgres:// pero psycopg3 necesita postgresql://
+_raw_url = os.getenv("DATABASE_URL", "postgresql://postgres:postgres@localhost:5432/radar_edu_dev")
+DATABASE_URL = _raw_url.replace("postgres://", "postgresql://", 1) if _raw_url.startswith("postgres://") else _raw_url
 
 
 def get_connection():

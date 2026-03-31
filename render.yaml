@@ -3,7 +3,7 @@ services:
   - type: web
     name: radar-educativo-api
     runtime: python
-    buildCommand: pip install fastapi uvicorn[standard] python-multipart pydantic python-dotenv pyyaml
+    buildCommand: pip install -r requirements.txt
     startCommand: uvicorn api.main:app --host 0.0.0.0 --port $PORT
     envVars:
       - key: SECRET_KEY
