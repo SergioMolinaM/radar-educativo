@@ -47,3 +47,7 @@ Logos Slep/
 logos_slep/
 *.pdf
 radar_edu_render.dump
+web/.netlify/
+load_pal_barrancas.py
+pal_barrancas_text.txt
+radar_edu_render.dump
