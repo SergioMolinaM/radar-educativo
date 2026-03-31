@@ -38,6 +38,36 @@ def health_check():
     return {"status": "ok", "service": "radar-educativo"}
 
 
+@app.post("/admin/migrate-pal")
+def migrate_pal(secret: str = ""):
+    """One-time PAL data migration endpoint. Remove after use."""
+    if secret != os.getenv("MIGRATE_SECRET", "radar-migrate-2026"):
+        from fastapi import HTTPException
+        raise HTTPException(status_code=403, detail="Forbidden")
+
+    from api.db.connection import get_cursor
+    sql_statements = _get_pal_migration_sql()
+    ok, errors = 0, []
+    with get_cursor() as cur:
+        for stmt in sql_statements:
+            try:
+                cur.execute(stmt)
+                ok += 1
+            except Exception as e:
+                errors.append(f"{str(e)[:80]}: {stmt[:60]}")
+    return {"ok": ok, "errors": errors}
+
+
+def _get_pal_migration_sql():
+    """Return list of SQL statements for PAL data migration."""
+    import pathlib
+    sql_file = pathlib.Path(__file__).parent.parent / "scripts" / "pal_sync_render.sql"
+    if sql_file.exists():
+        content = sql_file.read_text(encoding="utf-8")
+        return [s.strip() for s in content.split(";") if s.strip() and not s.strip().startswith("--")]
+    return []
+
+
 app.include_router(auth.router, prefix="/api/auth", tags=["auth"])
 app.include_router(dashboard.router, prefix="/api/dashboard", tags=["dashboard"])
 app.include_router(alerts.router, prefix="/api/alerts", tags=["alerts"])
