@@ -63,15 +63,15 @@ export default function Landing() {
       flexDirection: 'column',
       alignItems: 'center',
       justifyContent: 'center',
-      padding: '40px 20px',
+      padding: '20px 20px',
     }}>
       {/* Hero */}
-      <div className="animate-fade-in" style={{ textAlign: 'center', marginBottom: 48 }}>
-        <RadarLogo size={80} />
-        <h1 style={{ fontSize: 36, fontWeight: 800, marginTop: 16, marginBottom: 8 }}>
+      <div className="animate-fade-in" style={{ textAlign: 'center', marginBottom: 24 }}>
+        <RadarLogo size={60} />
+        <h1 style={{ fontSize: 30, fontWeight: 800, marginTop: 12, marginBottom: 6 }}>
           <span className="text-gradient">Radar</span> de la Educación Pública
         </h1>
-        <p style={{ fontSize: 18, color: 'var(--text-muted)', maxWidth: 500, margin: '0 auto', lineHeight: 1.6 }}>
+        <p style={{ fontSize: 15, color: 'var(--text-muted)', maxWidth: 480, margin: '0 auto', lineHeight: 1.5 }}>
           Plataforma de gestión integral para Servicios Locales de Educación Pública.
           Datos oficiales, actualizados y accionables.
         </p>
@@ -80,11 +80,11 @@ export default function Landing() {
       {/* Feature Cards */}
       <div style={{
         display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
-        gap: 20,
-        maxWidth: 1000,
+        gridTemplateColumns: 'repeat(3, 1fr)',
+        gap: 14,
+        maxWidth: 900,
         width: '100%',
-        marginBottom: 48,
+        marginBottom: 28,
       }}>
         {features.map((f, i) => (
           <div
@@ -94,7 +94,7 @@ export default function Landing() {
               background: `linear-gradient(135deg, rgba(255,255,255,0.08), ${f.bg})`,
               border: `1px solid ${f.color}44`,
               borderRadius: 16,
-              padding: '28px 24px',
+              padding: '18px 18px',
               animationDelay: `${i * 0.1}s`,
               transition: 'transform 0.2s, box-shadow 0.2s',
               cursor: 'default',
@@ -108,11 +108,11 @@ export default function Landing() {
               e.currentTarget.style.boxShadow = 'none';
             }}
           >
-            <div style={{ fontSize: 32, marginBottom: 12 }}>{f.icon}</div>
-            <h3 style={{ fontSize: 17, fontWeight: 700, color: f.color, marginBottom: 8 }}>
+            <div style={{ fontSize: 24, marginBottom: 8 }}>{f.icon}</div>
+            <h3 style={{ fontSize: 15, fontWeight: 700, color: f.color, marginBottom: 6 }}>
               {f.title}
             </h3>
-            <p style={{ fontSize: 14, color: 'var(--text-muted)', lineHeight: 1.5, margin: 0 }}>
+            <p style={{ fontSize: 12, color: 'var(--text-muted)', lineHeight: 1.4, margin: 0 }}>
               {f.description}
             </p>
           </div>
