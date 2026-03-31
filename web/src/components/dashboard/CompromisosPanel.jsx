@@ -157,8 +157,8 @@ export default function CompromisosPanel() {
         </div>
       </div>
 
-      {/* Two-column grid */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+      {/* Two-column grid — altura limitada */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, maxHeight: 320, overflow: 'hidden' }}>
         {/* Atrasadas */}
         <div className="glass-panel" style={{ overflow: 'hidden' }}>
           <div style={{

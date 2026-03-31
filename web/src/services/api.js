@@ -22,24 +22,13 @@ api.interceptors.response.use(
     return res;
   },
   (err) => {
-    // Network error (API unreachable) -> try mock data
+    // Network error — con plan pago de Render no debería pasar.
+    // NO usar mock data para evitar mezclar datos entre SLEPs.
     if (!err.response) {
-      const mockData = getMockForRequest(err.config || {});
-      if (mockData) {
-        console.warn('[RADAR DEMO] API no disponible. Usando datos de demostración para:', err.config?.url);
-        window.__RADAR_DEMO_MODE__ = true;
-        return Promise.resolve({ data: mockData, status: 200, statusText: 'OK (Demo)', headers: {}, config: err.config });
-      }
+      console.warn('[RADAR] API no disponible:', err.config?.url);
     }
 
     if (err.response?.status === 401) {
-      // In demo mode, don't redirect to login on 401
-      if (window.__RADAR_DEMO_MODE__) {
-        const mockData = getMockForRequest(err.config || {});
-        if (mockData) {
-          return Promise.resolve({ data: mockData, status: 200, statusText: 'OK (Demo)', headers: {}, config: err.config });
-        }
-      }
       localStorage.removeItem('token');
       localStorage.removeItem('user');
       window.location.href = '/';

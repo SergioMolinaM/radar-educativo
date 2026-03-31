@@ -18,9 +18,9 @@ const NAV_MODULES = [
     color: '#3b82f6',
     items: [
       { to: '/dashboard', icon: LayoutDashboard, label: 'Panel general' },
-      { to: '/establecimientos', icon: School, label: 'Establecimientos' },
-      { to: '/indicadores', icon: TrendingUp, label: 'Rendimiento y SIMCE' },
-      { to: '/alertas', icon: AlertTriangle, label: 'Alertas' },
+      { to: '/dashboard/establecimientos', icon: School, label: 'Establecimientos' },
+      { to: '/dashboard/indicadores', icon: TrendingUp, label: 'Rendimiento y SIMCE' },
+      { to: '/dashboard/alertas', icon: AlertTriangle, label: 'Alertas' },
     ],
   },
   {
@@ -29,8 +29,8 @@ const NAV_MODULES = [
     icon: Map,
     color: '#10b981',
     items: [
-      { to: '/mapa', icon: Map, label: 'Mapa territorial' },
-      { to: '/ranking', icon: Trophy, label: 'Panorama comparativo' },
+      { to: '/dashboard/mapa', icon: Map, label: 'Mapa territorial' },
+      { to: '/dashboard/ranking', icon: Trophy, label: 'Panorama comparativo' },
     ],
   },
   {
@@ -39,8 +39,8 @@ const NAV_MODULES = [
     icon: ClipboardCheck,
     color: '#8b5cf6',
     items: [
-      { to: '/plan-anual', icon: ClipboardCheck, label: 'Avance PAL' },
-      { to: '/mi-slep', icon: Building2, label: 'Compromisos CGE' },
+      { to: '/dashboard/plan-anual', icon: ClipboardCheck, label: 'Avance PAL' },
+      { to: '/dashboard/mi-slep', icon: Building2, label: 'Compromisos CGE' },
     ],
   },
   {
@@ -49,7 +49,7 @@ const NAV_MODULES = [
     icon: DollarSign,
     color: '#f59e0b',
     items: [
-      { to: '/financiero', icon: DollarSign, label: 'Ejecución presupuestaria' },
+      { to: '/dashboard/financiero', icon: DollarSign, label: 'Ejecución presupuestaria' },
     ],
   },
   {
@@ -59,9 +59,9 @@ const NAV_MODULES = [
     color: '#64748b',
     separator: true,
     items: [
-      { to: '/comparador', icon: Scale, label: 'Indicadores comparados' },
-      { to: '/resumen', icon: FileText, label: 'Resumen ejecutivo' },
-      { to: '/fuentes', icon: Database, label: 'Fuentes de datos' },
+      { to: '/dashboard/comparador', icon: Scale, label: 'Indicadores comparados' },
+      { to: '/dashboard/resumen', icon: FileText, label: 'Resumen ejecutivo' },
+      { to: '/dashboard/fuentes', icon: Database, label: 'Fuentes de datos' },
     ],
   },
 ];
@@ -169,14 +169,14 @@ export default function Layout() {
             </div>
           </div>
 
-          {/* SLEP Logo */}
+          {/* SLEP Logo — fondo claro para visibilidad */}
           {user?.slep_id && (
-            <div style={{ textAlign: 'center', marginBottom: 10 }}>
+            <div style={{ textAlign: 'center', marginBottom: 10, padding: '8px 12px', background: 'rgba(255,255,255,0.9)', borderRadius: 8 }}>
               <img
                 src={`/logos/${user.slep_id}.png`}
                 alt={slepLabel}
-                style={{ maxWidth: '80%', maxHeight: 50, objectFit: 'contain', opacity: 0.9 }}
-                onError={(e) => { e.target.style.display = 'none'; }}
+                style={{ maxWidth: '100%', maxHeight: 44, objectFit: 'contain' }}
+                onError={(e) => { e.target.parentElement.style.display = 'none'; }}
               />
             </div>
           )}

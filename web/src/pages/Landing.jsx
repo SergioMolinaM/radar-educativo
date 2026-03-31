@@ -40,6 +40,20 @@ export default function Landing() {
       color: '#10b981',
       bg: 'rgba(16, 185, 129, 0.12)',
     },
+    {
+      icon: '💼',
+      title: 'Administración y finanzas',
+      description: 'Ejecución presupuestaria y compras públicas del SLEP en un vistazo.',
+      color: '#f59e0b',
+      bg: 'rgba(245, 158, 11, 0.12)',
+    },
+    {
+      icon: '📋',
+      title: 'Datos oficiales verificados',
+      description: 'Fuentes del Mineduc, Agencia de Calidad y Mercado Público. Sin datos inventados.',
+      color: '#64748b',
+      bg: 'rgba(100, 116, 139, 0.12)',
+    },
   ];
 
   return (
@@ -77,8 +91,8 @@ export default function Landing() {
             key={i}
             className="animate-fade-in"
             style={{
-              background: f.bg,
-              border: `1px solid ${f.color}33`,
+              background: `linear-gradient(135deg, rgba(255,255,255,0.08), ${f.bg})`,
+              border: `1px solid ${f.color}44`,
               borderRadius: 16,
               padding: '28px 24px',
               animationDelay: `${i * 0.1}s`,
@@ -109,12 +123,12 @@ export default function Landing() {
       <button
         onClick={() => navigate('/login')}
         style={{
-          padding: '14px 48px',
+          padding: '16px 56px',
           background: 'linear-gradient(135deg, #3b82f6, #8b5cf6)',
           color: 'white',
           border: 'none',
           borderRadius: 12,
-          fontSize: 16,
+          fontSize: 18,
           fontWeight: 700,
           cursor: 'pointer',
           transition: 'transform 0.2s, box-shadow 0.2s',

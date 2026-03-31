@@ -115,7 +115,7 @@ export default function Dashboard() {
               <AlertTriangle size={18} style={{ color: 'var(--alert-red)' }} />
               Requieren atención
             </h3>
-            <button onClick={() => navigate('/alertas')} style={{ background: 'none', border: 'none', color: 'var(--accent-primary)', fontSize: 12, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4 }}>
+            <button onClick={() => navigate('/dashboard/alertas')} style={{ background: 'none', border: 'none', color: 'var(--accent-primary)', fontSize: 12, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4 }}>
               Ver todas <ChevronRight size={14} />
             </button>
           </div>
