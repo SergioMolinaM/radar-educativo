@@ -16,7 +16,11 @@ api.interceptors.request.use((config) => {
 });
 
 api.interceptors.response.use(
-  (res) => res,
+  (res) => {
+    // API responded successfully — we're NOT in demo mode
+    window.__RADAR_DEMO_MODE__ = false;
+    return res;
+  },
   (err) => {
     // Network error (API unreachable) -> try mock data
     if (!err.response) {
@@ -38,7 +42,7 @@ api.interceptors.response.use(
       }
       localStorage.removeItem('token');
       localStorage.removeItem('user');
-      window.location.href = '/login';
+      window.location.href = '/';
     }
     return Promise.reject(err);
   }

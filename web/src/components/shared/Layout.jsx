@@ -67,7 +67,7 @@ const NAV_MODULES = [
 ];
 
 // Banda contextual: "vista de 90 segundos" para el director
-function ContextBanner({ slepLabel, onToggleDemo, demoActive }) {
+function ContextBanner({ slepLabel }) {
   const now = new Date();
   const weekNum = Math.ceil(((now - new Date(now.getFullYear(), 0, 1)) / 86400000 + 1) / 7);
   const monthNames = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
@@ -107,28 +107,15 @@ function ContextBanner({ slepLabel, onToggleDemo, demoActive }) {
         <span>{slepLabel}</span>
       </div>
       <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 12 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-          <TrendingUp size={14} style={{ color: '#10b981' }} />
-          <span style={{ color: '#10b981', fontWeight: 600 }}>Datos actualizados</span>
-        </div>
-        {onToggleDemo && (
-          <button
-            onClick={onToggleDemo}
-            style={{
-              display: 'flex', alignItems: 'center', gap: 6,
-              padding: '4px 12px', borderRadius: 6, fontSize: 11, fontWeight: 600,
-              letterSpacing: '0.05em', cursor: 'pointer', fontFamily: 'inherit',
-              border: demoActive
-                ? '1px solid var(--alert-red)'
-                : '1px solid var(--border-color)',
-              background: demoActive
-                ? 'rgba(239,68,68,0.12)'
-                : 'rgba(255,255,255,0.05)',
-              color: demoActive ? 'var(--alert-red)' : 'var(--text-muted)',
-            }}
-          >
-            {demoActive ? '✕ SALIR DEMO' : '◼ MODO DEMO'}
-          </button>
+        {window.__RADAR_DEMO_MODE__ ? (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '3px 10px', borderRadius: 6, background: 'rgba(245,158,11,0.12)', border: '1px solid rgba(245,158,11,0.3)' }}>
+            <span style={{ color: '#f59e0b', fontSize: 11, fontWeight: 600 }}>Datos de ejemplo</span>
+          </div>
+        ) : (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <TrendingUp size={14} style={{ color: '#10b981' }} />
+            <span style={{ color: '#10b981', fontWeight: 600 }}>Datos reales</span>
+          </div>
         )}
       </div>
     </div>
@@ -327,7 +314,7 @@ export default function Layout() {
 
       {/* Main content area */}
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
-        <ContextBanner slepLabel={slepLabel} onToggleDemo={() => setDemoMode(!demoMode)} demoActive={demoMode} />
+        <ContextBanner slepLabel={slepLabel} />
         <main style={{ flex: 1, padding: '24px 32px' }}>
           <Outlet />
         </main>
