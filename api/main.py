@@ -58,6 +58,26 @@ def migrate_pal(secret: str = ""):
     return {"ok": ok, "errors": errors}
 
 
+@app.post("/admin/assign-los-parques")
+def assign_los_parques(secret: str = ""):
+    """Assign Los Parques SLEP to Quinta Normal/Renca DAEM schools."""
+    if secret != os.getenv("MIGRATE_SECRET", "radar-migrate-2026"):
+        from fastapi import HTTPException
+        raise HTTPException(status_code=403, detail="Forbidden")
+
+    from api.db.connection import get_cursor
+    rbds = "8508,8564,9985,9986,9987,9991,9992,9993,9994,9995,9996,9998,9999,10000,10001,10005,10006,10012,10197,10200,10201,10202,10204,10205,10207,10210,10212,10216,11831,12113,12243,12273,31037,31153"
+    ok, errors = 0, []
+    with get_cursor() as cur:
+        for table in ["asistencia_2025_rbd", "matricula_2025_rbd", "rendimiento_2025_detalle", "rendimiento_2025_rbd"]:
+            try:
+                cur.execute(f"UPDATE {table} SET nombre_slep = 'LOS PARQUES' WHERE rbd IN ({rbds}) AND (nombre_slep IS NULL OR nombre_slep = '' OR nombre_slep = ' ')")
+                ok += 1
+            except Exception as e:
+                errors.append(str(e)[:80])
+    return {"ok": ok, "errors": errors}
+
+
 def _get_pal_migration_sql():
     """Return list of SQL statements for PAL data migration."""
     import pathlib

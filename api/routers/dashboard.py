@@ -39,6 +39,7 @@ SLEP_NAME_MAP = {
     "valdivia": ["VALDIVIA"],
     "santa_corina": ["SANTA CORINA"],
     "andalien_costa": ["ANDALIÉN COSTA", "ANDALIEN COSTA"],
+    "los_parques": ["LOS PARQUES"],
 }
 
 MES_NOMBRES = ['', 'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',

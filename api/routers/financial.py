@@ -69,7 +69,7 @@ def get_budget_execution(current_user: dict = Depends(get_current_user)):
 
     except Exception as e:
         logger.warning("Falling back to demo execution: %s", e)
-        return {"slep_id": slep_id, **DEMO_EXECUTION}
+        return {"slep_id": slep_id, "source": "demo", "nota": "Datos de ejemplo. Pendiente conexion con datos reales de ejecucion presupuestaria.", **DEMO_EXECUTION}
 
 
 @router.get("/mercado-publico")
@@ -109,7 +109,7 @@ def get_mercado_publico(current_user: dict = Depends(get_current_user)):
 
     except Exception as e:
         logger.warning("Falling back to demo orders: %s", e)
-        return {"slep_id": slep_id, "ordenes_recientes": DEMO_ORDERS}
+        return {"slep_id": slep_id, "source": "demo", "nota": "Datos de ejemplo. Pendiente verificacion codigos Mercado Publico.", "ordenes_recientes": DEMO_ORDERS}
 
 
 def _get_slep_codigo(slep_id: str) -> str | None:

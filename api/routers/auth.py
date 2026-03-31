@@ -33,6 +33,30 @@ DEMO_USERS = {
         "role": "admin_slep",
         "slep_id": "puerto_cordillera",
     },
+    "admin@slep-losparques.cl": {
+        "password": "demo2026",
+        "name": "Administrador Los Parques",
+        "role": "admin_slep",
+        "slep_id": "los_parques",
+    },
+    "admin@slep-santarosa.cl": {
+        "password": "demo2026",
+        "name": "Administrador Santa Rosa",
+        "role": "admin_slep",
+        "slep_id": "santa_rosa",
+    },
+    "admin@slep-colchagua.cl": {
+        "password": "demo2026",
+        "name": "Administrador Colchagua",
+        "role": "admin_slep",
+        "slep_id": "colchagua",
+    },
+    "admin@slep-delpino.cl": {
+        "password": "demo2026",
+        "name": "Administrador Del Pino",
+        "role": "admin_slep",
+        "slep_id": "del_pino",
+    },
 }
 
 

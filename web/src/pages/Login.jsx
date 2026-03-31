@@ -9,10 +9,16 @@ export default function Login() {
   const { login, loading } = useAuth();
   const navigate = useNavigate();
 
+  const [coldStart, setColdStart] = useState(false);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    // Cold start timer: if login takes >5s, show message
+    const timer = setTimeout(() => setColdStart(true), 5000);
     const result = await login(email, password);
+    clearTimeout(timer);
+    setColdStart(false);
     if (result.ok) {
       navigate('/');
     } else {
@@ -84,8 +90,23 @@ export default function Login() {
               opacity: loading ? 0.7 : 1,
             }}
           >
-            {loading ? 'Ingresando...' : 'Ingresar'}
+            {loading ? (coldStart ? 'Iniciando servidor...' : 'Ingresando...') : 'Ingresar'}
           </button>
+
+          {coldStart && (
+            <div style={{
+              marginTop: 12,
+              padding: '10px 14px',
+              background: 'rgba(59,130,246,0.1)',
+              border: '1px solid rgba(59,130,246,0.2)',
+              borderRadius: 8,
+              fontSize: 12,
+              color: 'var(--text-muted)',
+              textAlign: 'center',
+            }}>
+              El servidor se reactiva tras inactividad. Esto tarda ~30 segundos solo la primera vez.
+            </div>
+          )}
         </form>
 
         <p style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 24, textAlign: 'center' }}>
