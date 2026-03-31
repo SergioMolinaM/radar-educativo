@@ -34,19 +34,21 @@ def list_establishments(
         return {"slep_id": sid, "total": 0, "establecimientos": [], "source": "no_data"}
 
     try:
+        # directorio_2025 no tiene nombre_slep, así que filtramos via matricula_2025_rbd
         rows = query_all(f"""
             SELECT
                 d.rbd, d.nom_rbd AS nombre, d.nom_com_rbd AS comuna,
                 d.cod_depe2, d.rural_rbd,
                 COALESCE(m.matricula_total, 0) AS matricula,
+                m.nombre_slep,
                 r.tasa_aprobacion, r.tasa_retiro, r.prom_general, r.prom_asistencia,
                 r.total_alumnos AS alumnos_rendimiento,
                 s.total_sep, s.prioritarios, s.preferentes
             FROM directorio_2025 d
-            LEFT JOIN matricula_2025_rbd m ON d.rbd = m.rbd
+            INNER JOIN matricula_2025_rbd m ON d.rbd = m.rbd
             LEFT JOIN rendimiento_2025_detalle r ON d.rbd = r.rbd
             LEFT JOIN sep_2025_rbd s ON d.rbd = s.rbd
-            WHERE d.nombre_slep IN ({_slep_in_values(sid)})
+            WHERE m.nombre_slep IN ({_slep_in_values(sid)})
               AND d.estado_estab = 1
             ORDER BY d.nom_rbd
         """)
@@ -138,7 +140,7 @@ def get_establishment(rbd: int, current_user: dict = Depends(get_current_user)):
             "telefono": est.get("telefono_rbd"),
             "email": est.get("email_rbd"),
             "rural": est.get("rural_rbd") == 1,
-            "slep": est.get("nombre_slep"),
+            "slep": None,  # directorio_2025 no tiene nombre_slep
             "semaforo": semaforo,
             "source": "2025_real",
             "matricula": {
