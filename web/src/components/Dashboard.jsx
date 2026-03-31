@@ -69,7 +69,9 @@ export default function Dashboard() {
                 {comunas.join(', ')} ·{' '}
               </span>
             )}
-            {summary?.cobertura_datos || `${kpis.ee_con_datos || '?'} EE con datos`}
+            {kpis.ee_escuelas_liceos
+              ? `${kpis.ee_escuelas_liceos} escuelas/liceos + ${kpis.ee_jardines || 0} jardines · Datos de ${kpis.ee_con_datos || '?'} EE`
+              : summary?.cobertura_datos || `${kpis.ee_con_datos || '?'} EE con datos`}
           </p>
         </div>
         <button
@@ -91,10 +93,10 @@ export default function Dashboard() {
       {/* KPI Cards */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16, marginBottom: 24 }}>
         <KpiCard label="Establecimientos" value={kpis.total_establecimientos || kpis.ee_oficial} icon={School}
-          subtitle={kpis.ee_con_datos && kpis.ee_oficial && kpis.ee_con_datos < kpis.ee_oficial
-            ? `${kpis.ee_con_datos} de ${kpis.ee_oficial} con datos`
+          subtitle={kpis.ee_escuelas_liceos
+            ? `${kpis.ee_escuelas_liceos} escuelas/liceos · ${kpis.ee_jardines || 0} jardines`
             : summary?.cobertura_datos}
-          tooltip={{ text: `Total oficial: ${kpis.ee_oficial || '?'} EE (${kpis.ee_escuelas_liceos || '?'} escuelas/liceos + ${kpis.ee_jardines || '?'} jardines). Jardines JUNJI/VTF no reportan asistencia al Mineduc.`, fuente: 'Sitio oficial SLEP + MINEDUC 2025' }} />
+          tooltip={{ text: `Datos de asistencia disponibles para ${kpis.ee_con_datos || '?'} escuelas y liceos. Los jardines infantiles (JUNJI/VTF) no reportan asistencia al sistema Mineduc.`, fuente: 'Sitio oficial SLEP + MINEDUC 2025' }} />
         <KpiCard label="Matrícula total" value={kpis.matricula_total} icon={GraduationCap} trend={trends.matricula_variacion_anual}
           tooltip={{ text: 'Alumnos matriculados en el SLEP', fuente: 'MINEDUC Matrícula 2025' }} />
         <KpiCard label="Asistencia promedio" value={kpis.asistencia_promedio} unit="%" icon={CalendarCheck} trend={trends.asistencia_variacion_mensual}

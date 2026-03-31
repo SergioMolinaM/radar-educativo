@@ -77,8 +77,10 @@ export default function MiSlep() {
       {/* KPIs */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 16, marginBottom: 24 }}>
         <KpiCard label="Establecimientos" value={kpis.total_establecimientos || kpis.ee_oficial} icon={Users}
-          subtitle={overview?.cobertura_datos}
-          tooltip={{ text: `Total oficial: ${kpis.ee_oficial || '?'} EE. Datos para ${kpis.ee_con_datos || '?'} EE.`, fuente: 'Sitio oficial SLEP + MINEDUC 2025' }} />
+          subtitle={kpis.ee_escuelas_liceos
+            ? `${kpis.ee_escuelas_liceos} escuelas/liceos · ${kpis.ee_jardines || 0} jardines`
+            : overview?.cobertura_datos}
+          tooltip={{ text: `Datos de asistencia para ${kpis.ee_con_datos || '?'} escuelas y liceos. Jardines JUNJI/VTF no reportan al Mineduc.`, fuente: 'Sitio oficial SLEP + MINEDUC 2025' }} />
         <KpiCard label="Matrícula total" value={kpis.matricula_total} icon={GraduationCap}
           tooltip={{ text: 'Alumnos matriculados en el SLEP', fuente: 'MINEDUC Matrícula 2025' }} />
         <KpiCard label="Asistencia prom." value={kpis.asistencia_promedio} unit="%" icon={CalendarCheck}
