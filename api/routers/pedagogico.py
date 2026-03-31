@@ -133,6 +133,95 @@ def rendimiento_slep(current_user: dict = Depends(get_current_user)):
         return {"slep_id": slep_id, "resumen_2025": {}, "establecimientos": [], "historico": [], "error": str(e)}
 
 
+@router.get("/egresados")
+def egresados_slep(current_user: dict = Depends(get_current_user)):
+    """Egresados EM 2024 - tasa de egreso y promedio notas por EE del SLEP.
+    Fuente: datosabiertos.mineduc.cl - Egresados EM 2024."""
+    slep_id = current_user["slep_id"]
+    sf = _slep_filter(slep_id)
+    try:
+        rows = query_all(f"""
+            SELECT e.rbd, m.nom_rbd, e.total_alumnos, e.egresados, e.no_egresados,
+                   ROUND((e.egresados::float / NULLIF(e.total_alumnos, 0) * 100)::numeric, 1) AS tasa_egreso,
+                   e.prom_notas_avg
+            FROM egresados_em_2024 e
+            JOIN matricula_2025_rbd m ON e.rbd = m.rbd
+            WHERE m.{sf}
+            ORDER BY tasa_egreso DESC NULLS LAST
+        """)
+
+        total_alumnos = sum(int(r.get("total_alumnos") or 0) for r in rows)
+        total_egresados = sum(int(r.get("egresados") or 0) for r in rows)
+
+        return {
+            "slep_id": slep_id,
+            "resumen": {
+                "total_ee": len(rows),
+                "total_alumnos_4m": total_alumnos,
+                "total_egresados": total_egresados,
+                "tasa_egreso_global": round(total_egresados / max(total_alumnos, 1) * 100, 1),
+            },
+            "establecimientos": [{
+                "rbd": int(r["rbd"]),
+                "nombre": r["nom_rbd"],
+                "total_alumnos": int(r.get("total_alumnos") or 0),
+                "egresados": int(r.get("egresados") or 0),
+                "tasa_egreso": float(r.get("tasa_egreso") or 0),
+                "promedio_notas": float(r.get("prom_notas_avg") or 0),
+            } for r in rows],
+            "source": "egresados_em_2024_real",
+            "fuente": "datosabiertos.mineduc.cl",
+        }
+    except Exception as e:
+        logger.error("Egresados error: %s", e)
+        return {"slep_id": slep_id, "resumen": {}, "establecimientos": [], "error": str(e)}
+
+
+@router.get("/sae")
+def sae_slep(current_user: dict = Depends(get_current_user)):
+    """SAE 2025 - Resultados admision por EE del SLEP (demanda vs capacidad).
+    Fuente: datosabiertos.mineduc.cl - SAE Admision 2026."""
+    slep_id = current_user["slep_id"]
+    sf = _slep_filter(slep_id)
+    try:
+        rows = query_all(f"""
+            SELECT s.rbd_admitido AS rbd, m.nom_rbd,
+                   s.total_admitidos, s.aceptaron, s.rechazaron, s.lista_espera,
+                   ROUND((s.aceptaron::float / NULLIF(s.total_admitidos, 0) * 100)::numeric, 1) AS tasa_aceptacion
+            FROM sae_resultados_2025 s
+            JOIN matricula_2025_rbd m ON s.rbd_admitido = m.rbd
+            WHERE m.{sf}
+            ORDER BY s.total_admitidos DESC
+        """)
+
+        total_admitidos = sum(int(r.get("total_admitidos") or 0) for r in rows)
+        total_aceptaron = sum(int(r.get("aceptaron") or 0) for r in rows)
+
+        return {
+            "slep_id": slep_id,
+            "resumen": {
+                "total_ee_con_admision": len(rows),
+                "total_admitidos": total_admitidos,
+                "total_aceptaron": total_aceptaron,
+                "tasa_aceptacion_global": round(total_aceptaron / max(total_admitidos, 1) * 100, 1),
+            },
+            "establecimientos": [{
+                "rbd": int(r["rbd"]),
+                "nombre": r["nom_rbd"],
+                "admitidos": int(r.get("total_admitidos") or 0),
+                "aceptaron": int(r.get("aceptaron") or 0),
+                "rechazaron": int(r.get("rechazaron") or 0),
+                "lista_espera": int(r.get("lista_espera") or 0),
+                "tasa_aceptacion": float(r.get("tasa_aceptacion") or 0),
+            } for r in rows],
+            "source": "sae_2025_real",
+            "fuente": "datosabiertos.mineduc.cl",
+        }
+    except Exception as e:
+        logger.error("SAE error: %s", e)
+        return {"slep_id": slep_id, "resumen": {}, "establecimientos": [], "error": str(e)}
+
+
 def _get_names(slep_id):
     from api.routers.dashboard import SLEP_NAME_MAP
     return SLEP_NAME_MAP.get(slep_id, [slep_id.upper().replace("_", " ")])

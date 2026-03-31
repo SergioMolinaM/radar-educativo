@@ -76,11 +76,11 @@ export default function Dashboard() {
 
       {/* KPI Cards */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16, marginBottom: 24 }}>
-        <KpiCard label="Establecimientos" value={kpis.total_establecimientos} icon={School2Icon}
-          subtitle={kpis.total_establecimientos_con_datos && kpis.total_establecimientos_con_datos < kpis.total_establecimientos
-            ? `${kpis.total_establecimientos_con_datos} con datos de asistencia`
-            : undefined}
-          tooltip={{ text: `Total: ${kpis.total_establecimientos_directorio || kpis.total_establecimientos} EE en directorio oficial. Datos de asistencia disponibles para ${kpis.total_establecimientos_con_datos || '?'} EE. Excluye jardines JUNJI/VTF no reportados al Mineduc.`, fuente: 'MINEDUC Directorio Oficial 2025', periodo: 'Anual 2025' }} />
+        <KpiCard label="Establecimientos" value={kpis.total_establecimientos || kpis.ee_oficial} icon={School2Icon}
+          subtitle={kpis.ee_con_datos && kpis.ee_oficial && kpis.ee_con_datos < kpis.ee_oficial
+            ? `${kpis.ee_con_datos} de ${kpis.ee_oficial} con datos`
+            : summary?.cobertura_datos}
+          tooltip={{ text: `Total oficial: ${kpis.ee_oficial || '?'} EE (${kpis.ee_escuelas_liceos || '?'} escuelas/liceos + ${kpis.ee_jardines || '?'} jardines). Datos disponibles para ${kpis.ee_con_datos || '?'} EE. Jardines JUNJI/VTF no reportan asistencia al Mineduc.`, fuente: 'Sitio oficial SLEP + MINEDUC 2025', periodo: 'Anual 2025' }} />
         <KpiCard label="Matricula total" value={kpis.matricula_total} icon={GraduationCap} trend={trends.matricula_variacion_anual}
           tooltip={{ text: 'Alumnos matriculados en el SLEP', fuente: 'MINEDUC Matricula 2025', periodo: 'Anual 2025' }} />
         <KpiCard label="Asistencia promedio" value={kpis.asistencia_promedio} unit="%" icon={CalendarCheck} trend={trends.asistencia_variacion_mensual}

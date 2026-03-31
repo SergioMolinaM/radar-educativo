@@ -76,8 +76,9 @@ export default function MiSlep() {
 
       {/* KPIs */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 16, marginBottom: 24 }}>
-        <KpiCard label="Establecimientos" value={kpis.total_establecimientos} icon={Users}
-          tooltip={{ text: 'EE del SLEP (sin ed. adultos)', fuente: 'MINEDUC Directorio 2025' }} />
+        <KpiCard label="Establecimientos" value={kpis.total_establecimientos || kpis.ee_oficial} icon={Users}
+          subtitle={overview?.cobertura_datos}
+          tooltip={{ text: `Total oficial: ${kpis.ee_oficial || '?'} EE. Datos para ${kpis.ee_con_datos || '?'} EE.`, fuente: 'Sitio oficial SLEP + MINEDUC 2025' }} />
         <KpiCard label="Matricula total" value={kpis.matricula_total} icon={GraduationCap}
           tooltip={{ text: 'Alumnos matriculados en el SLEP', fuente: 'MINEDUC Matricula 2025' }} />
         <KpiCard label="Asistencia prom." value={kpis.asistencia_promedio} unit="%" icon={CalendarCheck}
