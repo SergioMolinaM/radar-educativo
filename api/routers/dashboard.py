@@ -12,6 +12,22 @@ logger = logging.getLogger(__name__)
 router = APIRouter()
 
 # Mapping de slep_id → nombre_slep en datos MINEDUC
+# Datos oficiales de cada SLEP: total EE real (escuelas+liceos+jardines), comunas, fuente
+# Fuentes: sitios web oficiales de cada SLEP + educacionpublica.gob.cl (mar 2026)
+SLEP_OFICIAL = {
+    "barrancas": {"ee_total": 76, "escuelas_liceos": 53, "jardines": 23, "comunas": ["Cerro Navia", "Lo Prado", "Pudahuel"], "fuente": "barrancas.educacionpublica.cl"},
+    "puerto_cordillera": {"ee_total": 60, "escuelas_liceos": 50, "jardines": 10, "comunas": ["Coquimbo", "Andacollo"], "fuente": "slepuertocordillera.gob.cl"},
+    "los_parques": {"ee_total": 52, "escuelas_liceos": 34, "jardines": 18, "comunas": ["Quinta Normal", "Renca"], "fuente": "PAL 2026 Los Parques"},
+    "huasco": {"ee_total": 47, "escuelas_liceos": 36, "jardines": 11, "comunas": ["Vallenar", "Alto del Carmen", "Freirina", "Huasco"], "fuente": "educacionpublica.gob.cl"},
+    "costa_araucania": {"ee_total": 91, "escuelas_liceos": 75, "jardines": 16, "comunas": ["Carahue", "Nueva Imperial", "Saavedra", "Teodoro Schmidt", "Tolten"], "fuente": "educacionpublica.gob.cl"},
+    "chinchorro": {"ee_total": 48, "escuelas_liceos": 34, "jardines": 14, "comunas": ["Arica"], "fuente": "educacionpublica.gob.cl"},
+    "santa_rosa": {"ee_total": 91, "escuelas_liceos": 60, "jardines": 31, "comunas": ["San Ramon", "La Cisterna", "Lo Espejo", "San Miguel", "Pedro Aguirre Cerda"], "fuente": "slepsantarosa.gob.cl"},
+    "colchagua": {"ee_total": 69, "escuelas_liceos": 58, "jardines": 11, "comunas": ["San Fernando", "Chimbarongo", "Nancagua", "Placilla"], "fuente": "slepcolchagua.gob.cl"},
+    "del_pino": {"ee_total": 115, "escuelas_liceos": 79, "jardines": 36, "comunas": ["La Pintana", "El Bosque", "San Bernardo", "Calera de Tango"], "fuente": "slepdelpino.gob.cl"},
+    "andalien_sur": {"ee_total": 56, "escuelas_liceos": 42, "jardines": 14, "comunas": ["Concepcion", "Chiguayante", "Florida", "Hualqui"], "fuente": "educacionpublica.gob.cl"},
+    "gabriela_mistral": {"ee_total": 80, "escuelas_liceos": 55, "jardines": 25, "comunas": ["La Granja", "Macul", "San Joaquin"], "fuente": "educacionpublica.gob.cl"},
+}
+
 SLEP_NAME_MAP = {
     "barrancas": ["BARRANCAS"],
     "chinchorro": ["CHINCHORRO"],
@@ -167,15 +183,22 @@ def get_dashboard_summary(
         naranjas = sum(1 for a in alertas if _clasificar_semaforo(float(a['pct_asistencia'] or 0), umbrales) == "naranja")
         verdes = sum(1 for a in alertas if _clasificar_semaforo(float(a['pct_asistencia'] or 0), umbrales) == "verde")
 
+        # Datos oficiales del SLEP (fuente: sitios web oficiales)
+        oficial = SLEP_OFICIAL.get(slep_id, {})
+        ee_oficial_total = oficial.get("ee_total")
+        ee_oficial_escuelas = oficial.get("escuelas_liceos")
+
         return {
             "slep_id": slep_id,
             "source": "2025_real",
             "mes": mes,
             "mes_nombre": MES_NOMBRES[mes] if mes < len(MES_NOMBRES) else str(mes),
             "kpis": {
-                "total_establecimientos_directorio": total_directorio,
-                "total_establecimientos_con_datos": total_ee,
-                "total_establecimientos": total_directorio,
+                "total_establecimientos": ee_oficial_total or total_ee,
+                "ee_con_datos": total_ee,
+                "ee_oficial": ee_oficial_total,
+                "ee_escuelas_liceos": ee_oficial_escuelas,
+                "ee_jardines": oficial.get("jardines"),
                 "matricula_total": mat_total,
                 "asistencia_promedio": asist_avg,
                 "ejecucion_presupuestaria": 62.5,  # TODO: Mercado Público API
@@ -183,6 +206,9 @@ def get_dashboard_summary(
                 "alertas_naranjas": naranjas,
                 "alertas_verdes": verdes,
             },
+            "cobertura_datos": f"{total_ee} de {ee_oficial_total} EE con datos" if ee_oficial_total else f"{total_ee} EE con datos",
+            "comunas": oficial.get("comunas", []),
+            "fuente_oficial": oficial.get("fuente"),
             "tendencias": {
                 "asistencia_variacion_mensual": round(asist_avg - prev_avg, 1) if prev_avg else None,
             },

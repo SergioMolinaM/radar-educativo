@@ -91,6 +91,9 @@ def slep_overview(
         naranjas = sum(1 for a in alertas_q if _clasificar_semaforo(float(a['pct_asistencia'] or 0), umbrales) == "naranja")
         verdes = sum(1 for a in alertas_q if _clasificar_semaforo(float(a['pct_asistencia'] or 0), umbrales) == "verde")
 
+        from api.routers.dashboard import SLEP_OFICIAL
+        oficial = SLEP_OFICIAL.get(slep_id, {})
+
         return {
             "slep_id": slep_id,
             "source": "2025_real",
@@ -98,13 +101,17 @@ def slep_overview(
             "mes_nombre": MESES.get(mes, str(mes)),
             "excluir_adultos": excluir_adultos,
             "kpis": {
-                "total_establecimientos": total_ee,
+                "total_establecimientos": oficial.get("ee_total") or total_ee,
+                "ee_con_datos": total_ee,
+                "ee_oficial": oficial.get("ee_total"),
                 "matricula_total": int(mat['mat_total'] or 0),
                 "asistencia_promedio": float(asist['asist_avg'] or 0) if asist else 0,
                 "alertas_rojas": rojas,
                 "alertas_naranjas": naranjas,
                 "alertas_verdes": verdes,
             },
+            "cobertura_datos": f"{total_ee} de {oficial.get('ee_total')} EE con datos" if oficial.get("ee_total") else f"{total_ee} EE con datos",
+            "comunas": oficial.get("comunas", []),
         }
     except Exception as e:
         logger.info("2025 overview error for %s: %s", slep_id, e)
