@@ -81,12 +81,12 @@ export default function Dashboard() {
             ? `${kpis.ee_con_datos} de ${kpis.ee_oficial} con datos`
             : summary?.cobertura_datos}
           tooltip={{ text: `Total oficial: ${kpis.ee_oficial || '?'} EE (${kpis.ee_escuelas_liceos || '?'} escuelas/liceos + ${kpis.ee_jardines || '?'} jardines). Datos disponibles para ${kpis.ee_con_datos || '?'} EE. Jardines JUNJI/VTF no reportan asistencia al Mineduc.`, fuente: 'Sitio oficial SLEP + MINEDUC 2025', periodo: 'Anual 2025' }} />
-        <KpiCard label="Matricula total" value={kpis.matricula_total} icon={GraduationCap} trend={trends.matricula_variacion_anual}
-          tooltip={{ text: 'Alumnos matriculados en el SLEP', fuente: 'MINEDUC Matricula 2025', periodo: 'Anual 2025' }} />
+        <KpiCard label="Matrícula total" value={kpis.matricula_total} icon={GraduationCap} trend={trends.matricula_variacion_anual}
+          tooltip={{ text: 'Alumnos matriculados en el SLEP', fuente: 'MINEDUC Matrícula 2025', periodo: 'Anual 2025' }} />
         <KpiCard label="Asistencia promedio" value={kpis.asistencia_promedio} unit="%" icon={CalendarCheck} trend={trends.asistencia_variacion_mensual}
           tooltip={{ text: 'Promedio del SLEP (sin ed. adultos)', fuente: 'MINEDUC Asistencia 2025', periodo: summary?.mes_nombre + ' 2025' }} />
-        <KpiCard label="Ejecucion presup." value={kpis.ejecucion_presupuestaria} unit="%" icon={DollarSign} trend={trends.ejecucion_variacion_mensual}
-          tooltip={{ text: 'Porcentaje del presupuesto ejecutado', fuente: 'Mercado Publico', periodo: 'Q1 2026' }} />
+        <KpiCard label="Ejecución presup." value={kpis.ejecucion_presupuestaria} unit="%" icon={DollarSign} trend={trends.ejecucion_variacion_mensual}
+          tooltip={{ text: 'Porcentaje del presupuesto ejecutado', fuente: 'Mercado Público', periodo: 'Q1 2026' }} />
       </div>
 
       {/* Tendencia asistencia mensual 2025 */}
@@ -167,7 +167,7 @@ export default function Dashboard() {
         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
           <thead>
             <tr>
-              {['RBD', 'Nombre', 'Matricula', 'Asistencia', 'Estado', 'Alertas'].map((h) => (
+              {['RBD', 'Nombre', 'Matrícula', 'Asistencia', 'Estado', 'Alertas'].map((h) => (
                 <th key={h} style={thStyle}>{h}</th>
               ))}
             </tr>

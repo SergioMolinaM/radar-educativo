@@ -160,7 +160,7 @@ export default function Layout() {
             <RadarLogo size={34} />
             <div>
               <h1 style={{ fontSize: 14, fontWeight: 700, margin: 0, lineHeight: 1.3 }}>
-                <span className="text-gradient">Radar</span> de la<br/>Educacion Publica
+                <span className="text-gradient">Radar</span> de la<br/>Educación Pública
               </h1>
             </div>
           </div>
@@ -211,7 +211,7 @@ export default function Layout() {
                 {sleps.map((s) => (
                   <button
                     key={s.id}
-                    onClick={() => { switchSlep(s.id, s.name); setSlepOpen(false); navigate('/'); }}
+                    onClick={() => { switchSlep(s.id, s.name); setSlepOpen(false); navigate('/dashboard'); }}
                     style={{
                       width: '100%', padding: '8px 12px',
                       background: s.id === user?.slep_id ? 'rgba(59, 130, 246, 0.15)' : 'transparent',
@@ -293,7 +293,7 @@ export default function Layout() {
             }}
           >
             <LogOut size={13} />
-            Cerrar sesion
+            Cerrar sesión
           </button>
           <div style={{ marginTop: 12, fontSize: 9, color: 'var(--text-muted)', opacity: 0.5, letterSpacing: '0.05em' }}>
             © 2026 Tercera Letra SpA

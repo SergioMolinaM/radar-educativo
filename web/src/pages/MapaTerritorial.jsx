@@ -47,11 +47,11 @@ export default function MapaTerritorial() {
         {withCoords.length} establecimientos georreferenciados de {ees.length} total · {comunas.length} comunas
       </p>
       <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 16, lineHeight: 1.6 }}>
-        Cada circulo representa un establecimiento. El tamano indica matricula y el color el estado del semaforo
-        (<span style={{ color: '#ef4444' }}>rojo</span> = critico,
-        <span style={{ color: '#f59e0b' }}> naranja</span> = atencion,
+        Cada círculo representa un establecimiento. El tamaño indica matrícula y el color el estado del semáforo
+        (<span style={{ color: '#ef4444' }}>rojo</span> = crítico,
+        <span style={{ color: '#f59e0b' }}> naranja</span> = atención,
         <span style={{ color: '#10b981' }}> verde</span> = esperado).
-        Haz clic en un circulo para ver detalle. Fuente: Coordenadas MINEDUC 2025.
+        Haz clic en un círculo para ver detalle. Fuente: Coordenadas MINEDUC 2025.
       </div>
 
       {/* KPIs */}

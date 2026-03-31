@@ -30,12 +30,12 @@ export default function IndicadoresPedagogicos() {
         Indicadores Pedagógicos
       </h2>
       <p style={{ color: 'var(--text-muted)', fontSize: 15, marginBottom: 6 }}>
-        Rendimiento academico y resultados SIMCE del SLEP
+        Rendimiento académico y resultados SIMCE del SLEP
       </p>
       <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 16, lineHeight: 1.6 }}>
-        <strong>Rendimiento:</strong> tasas de aprobacion, reprobacion y retiro de cada establecimiento (MINEDUC 2025).
-        Permite identificar donde se concentra la desercion y el bajo rendimiento.
-        <strong> SIMCE:</strong> promedios de lectura y matematica por nivel, comparando resultados dentro del SLEP (Agencia de Calidad 2024).
+        <strong>Rendimiento:</strong> tasas de aprobación, reprobación y retiro de cada establecimiento (MINEDUC 2025).
+        Permite identificar donde se concentra la deserción y el bajo rendimiento.
+        <strong> SIMCE:</strong> promedios de lectura y matemática por nivel, comparando resultados dentro del SLEP (Agencia de Calidad 2024).
       </div>
 
       {/* Tab selector */}
@@ -59,7 +59,7 @@ export default function IndicadoresPedagogicos() {
       {tab === 'simce' ? <SimceView data={simce} /> : <RendimientoView data={rend} />}
 
       <div style={{ fontSize: 12, color: 'var(--text-muted)', lineHeight: 1.7, padding: '16px 0', borderTop: '1px solid var(--border-color)', marginTop: 16 }}>
-        <strong>Fuentes:</strong> SIMCE — Agencia de Calidad de la Educacion, resultados oficiales 2024.
+        <strong>Fuentes:</strong> SIMCE — Agencia de Calidad de la Educación, resultados oficiales 2024.
         Los promedios mostrados corresponden al SLEP (no al promedio nacional).
         Rendimiento — MINEDUC Datos Abiertos 2025. &middot; Tercera Letra SpA
       </div>
@@ -98,7 +98,7 @@ function SimceView({ data }) {
               </div>
               <div>
                 <div style={{ fontSize: 26, fontWeight: 700, color: d.matematica < 250 ? '#ef4444' : '#8b5cf6' }}>{d.matematica}</div>
-                <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>Matematica</div>
+                <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>Matemática</div>
               </div>
             </div>
             <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 6 }}>{d.n_ee} establecimientos evaluados</div>
@@ -121,19 +121,19 @@ function SimceView({ data }) {
             <Tooltip contentStyle={{ background: '#1e293b', border: 'none', borderRadius: 8, fontSize: 13 }} />
             <Legend wrapperStyle={{ fontSize: 13 }} />
             <Bar dataKey="lectura" name="Lectura" fill={COLORES.lectura} radius={[6, 6, 0, 0]} barSize={40} />
-            <Bar dataKey="matematica" name="Matematica" fill={COLORES.matematica} radius={[6, 6, 0, 0]} barSize={40} />
+            <Bar dataKey="matematica" name="Matemática" fill={COLORES.matematica} radius={[6, 6, 0, 0]} barSize={40} />
           </BarChart>
         </ResponsiveContainer>
       </div>
 
       {/* Detail table */}
       <div className="glass-panel" style={{ padding: 24 }}>
-        <h3 style={{ fontSize: 16, fontWeight: 600, marginBottom: 16 }}>Detalle por establecimiento (ultimo anio)</h3>
+        <h3 style={{ fontSize: 16, fontWeight: 600, marginBottom: 16 }}>Detalle por establecimiento (último año)</h3>
         <div style={{ maxHeight: 400, overflowY: 'auto' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 14 }}>
             <thead style={{ position: 'sticky', top: 0, background: 'rgba(15,23,42,0.95)' }}>
               <tr>
-                {['RBD', 'Nombre', 'Nivel', 'Lectura', 'Matematica', 'Estado'].map(h => (
+                {['RBD', 'Nombre', 'Nivel', 'Lectura', 'Matemática', 'Estado'].map(h => (
                   <th key={h} style={thStyle}>{h}</th>
                 ))}
               </tr>
@@ -190,7 +190,7 @@ function RendimientoView({ data }) {
       {/* KPIs */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))', gap: 16, marginBottom: 24 }}>
         <KpiBox label="Total alumnos" value={r.total_alumnos?.toLocaleString('es-CL')} />
-        <KpiBox label="Tasa aprobacion" value={`${r.tasa_aprobacion}%`} color={r.tasa_aprobacion >= 90 ? '#22c55e' : r.tasa_aprobacion >= 85 ? '#f59e0b' : '#ef4444'} />
+        <KpiBox label="Tasa aprobación" value={`${r.tasa_aprobacion}%`} color={r.tasa_aprobacion >= 90 ? '#22c55e' : r.tasa_aprobacion >= 85 ? '#f59e0b' : '#ef4444'} />
         <KpiBox label="Promedio general" value={r.promedio_general} />
         <KpiBox label="Prom. asistencia" value={`${r.promedio_asistencia}%`} />
       </div>
@@ -222,13 +222,13 @@ function RendimientoView({ data }) {
         {/* Trend */}
         {histData.length > 1 && (
           <div className="glass-panel" style={{ padding: 24 }}>
-            <h3 style={{ fontSize: 16, fontWeight: 600, marginBottom: 16 }}>Evolucion tasa de aprobacion</h3>
+            <h3 style={{ fontSize: 16, fontWeight: 600, marginBottom: 16 }}>Evolución tasa de aprobación</h3>
             <ResponsiveContainer width="100%" height={200}>
               <LineChart data={histData}>
                 <XAxis dataKey="anio" tick={{ fill: '#94a3b8', fontSize: 13 }} axisLine={false} tickLine={false} />
                 <YAxis domain={[70, 100]} tick={{ fill: '#94a3b8', fontSize: 11 }} axisLine={false} tickLine={false} />
                 <Tooltip contentStyle={{ background: '#1e293b', border: 'none', borderRadius: 8 }} formatter={v => `${v}%`} />
-                <Line type="monotone" dataKey="tasa_aprobacion" stroke="#22c55e" strokeWidth={2.5} dot={{ r: 5 }} name="Aprobacion %" />
+                <Line type="monotone" dataKey="tasa_aprobacion" stroke="#22c55e" strokeWidth={2.5} dot={{ r: 5 }} name="Aprobación %" />
               </LineChart>
             </ResponsiveContainer>
           </div>
@@ -242,7 +242,7 @@ function RendimientoView({ data }) {
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 14 }}>
             <thead style={{ position: 'sticky', top: 0, background: 'rgba(15,23,42,0.95)' }}>
               <tr>
-                {['#', 'RBD', 'Nombre', 'Alumnos', 'Aprobacion', 'Retiro', 'Promedio'].map(h => (
+                {['#', 'RBD', 'Nombre', 'Alumnos', 'Aprobación', 'Retiro', 'Promedio'].map(h => (
                   <th key={h} style={thStyle}>{h}</th>
                 ))}
               </tr>

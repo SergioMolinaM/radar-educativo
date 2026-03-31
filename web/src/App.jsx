@@ -16,10 +16,11 @@ import PlanAnual from './pages/PlanAnual';
 import MapaTerritorial from './pages/MapaTerritorial';
 import FuentesDatos from './pages/FuentesDatos';
 import IndicadoresPedagogicos from './pages/IndicadoresPedagogicos';
+import Landing from './pages/Landing';
 
 function ProtectedRoute({ children }) {
   const { user } = useAuth();
-  if (!user) return <Navigate to="/login" replace />;
+  if (!user) return <Navigate to="/" replace />;
   return children;
 }
 
@@ -28,8 +29,9 @@ function AppRoutes() {
 
   return (
     <Routes>
-      <Route path="/login" element={user ? <Navigate to="/" replace /> : <Login />} />
-      <Route path="/" element={<ProtectedRoute><Layout /></ProtectedRoute>}>
+      <Route path="/" element={user ? <Navigate to="/dashboard" replace /> : <Landing />} />
+      <Route path="/login" element={user ? <Navigate to="/dashboard" replace /> : <Login />} />
+      <Route path="/dashboard" element={<ProtectedRoute><Layout /></ProtectedRoute>}>
         <Route index element={<Dashboard />} />
         <Route path="alertas" element={<Alertas />} />
         <Route path="establecimientos" element={<Establecimientos />} />

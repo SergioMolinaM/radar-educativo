@@ -103,7 +103,7 @@ export default function EstablecimientoReal() {
               </ResponsiveContainer>
               <div style={{ flex: 1, paddingLeft: 16 }}>
                 <div style={{ fontSize: 28, fontWeight: 700, color: '#22c55e' }}>{rend.tasa_aprobacion}%</div>
-                <div style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 12 }}>Tasa de aprobacion</div>
+                <div style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 12 }}>Tasa de aprobación</div>
                 {pieData.map((d, i) => (
                   <div key={d.name} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, marginBottom: 4 }}>
                     <div style={{ width: 10, height: 10, borderRadius: '50%', background: PIE_COLORS[i], flexShrink: 0 }} />
@@ -122,10 +122,10 @@ export default function EstablecimientoReal() {
       {/* SEP Detail */}
       {sep.total_sep > 0 && (
         <div className="glass-panel" style={{ padding: 24, marginBottom: 24 }}>
-          <h3 style={{ fontSize: 16, fontWeight: 600, marginBottom: 16 }}>Subvencion Escolar Preferencial (SEP)</h3>
+          <h3 style={{ fontSize: 16, fontWeight: 600, marginBottom: 16 }}>Subvención Escolar Preferencial (SEP)</h3>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 16 }}>
-            <StatBox label="Total alumnos SEP" value={sep.total_sep} sub={`${sep.pct_sep}% de la matricula`} />
-            <StatBox label="Prioritarios" value={sep.prioritarios} sub="Maximo nivel de vulnerabilidad" color="#ef4444" />
+            <StatBox label="Total alumnos SEP" value={sep.total_sep} sub={`${sep.pct_sep}% de la matrícula`} />
+            <StatBox label="Prioritarios" value={sep.prioritarios} sub="Máximo nivel de vulnerabilidad" color="#ef4444" />
             <StatBox label="Preferentes" value={sep.preferentes} sub="Nivel intermedio" color="#f97316" />
           </div>
         </div>
@@ -133,12 +133,12 @@ export default function EstablecimientoReal() {
 
       {/* Analisis de riesgos */}
       <div className="glass-panel" style={{ padding: 24, marginBottom: 24 }}>
-        <h3 style={{ fontSize: 16, fontWeight: 600, marginBottom: 16 }}>Analisis de riesgos</h3>
+        <h3 style={{ fontSize: 16, fontWeight: 600, marginBottom: 16 }}>Análisis de riesgos</h3>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
           <RiskIndicator label="Asistencia" active={data.asistencia_actual < 80}
-            detail={data.asistencia_actual < 80 ? `${data.asistencia_actual}% - bajo umbral critico 80%` : `${data.asistencia_actual}% - aceptable`} />
-          <RiskIndicator label="Aprobacion" active={rend.tasa_aprobacion > 0 && rend.tasa_aprobacion < 85}
-            detail={rend.tasa_aprobacion ? `${rend.tasa_aprobacion}% de aprobacion` : 'Sin datos'} />
+            detail={data.asistencia_actual < 80 ? `${data.asistencia_actual}% - bajo umbral crítico 80%` : `${data.asistencia_actual}% - aceptable`} />
+          <RiskIndicator label="Aprobación" active={rend.tasa_aprobacion > 0 && rend.tasa_aprobacion < 85}
+            detail={rend.tasa_aprobacion ? `${rend.tasa_aprobacion}% de aprobación` : 'Sin datos'} />
           <RiskIndicator label="Retiro escolar" active={rend.tasa_retiro > 5}
             detail={rend.tasa_retiro ? `${rend.tasa_retiro}% de retiro` : 'Sin datos'} />
           <RiskIndicator label="Vulnerabilidad SEP" active={sep.pct_sep > 80}
@@ -150,8 +150,8 @@ export default function EstablecimientoReal() {
             Estado: {data.semaforo?.toUpperCase()}
           </div>
           <div style={{ fontSize: 13, color: 'var(--text-muted)', lineHeight: 1.6 }}>
-            {data.semaforo === 'rojo' && 'Este establecimiento requiere intervencion inmediata. Revise plan de accion y contacte al equipo directivo.'}
-            {data.semaforo === 'naranja' && 'Requiere monitoreo activo. Agende revision con el equipo directivo dentro de las proximas 2 semanas.'}
+            {data.semaforo === 'rojo' && 'Este establecimiento requiere intervención inmediata. Revise plan de acción y contacte al equipo directivo.'}
+            {data.semaforo === 'naranja' && 'Requiere monitoreo activo. Agende revisión con el equipo directivo dentro de las próximas 2 semanas.'}
             {data.semaforo === 'verde' && 'Indicadores dentro de rangos aceptables. Mantener monitoreo regular.'}
           </div>
         </div>
@@ -159,7 +159,7 @@ export default function EstablecimientoReal() {
 
       {/* Disclosure */}
       <div style={{ fontSize: 12, color: 'var(--text-muted)', lineHeight: 1.7, padding: '12px 0', borderTop: '1px solid var(--border-color)' }}>
-        <strong>Fuentes:</strong> Asistencia y matricula - MINEDUC SIGE 2025.
+        <strong>Fuentes:</strong> Asistencia y matrícula - MINEDUC SIGE 2025.
         Rendimiento - MINEDUC Datos Abiertos 2025. Alumnos SEP - MINEDUC Abril 2025.
         Semaforos y alertas calculados por Radar de la Educación Pública en base a umbrales definidos.
         &middot; Tercera Letra SpA &middot; {data.source === '2025_real' ? 'Datos reales verificados' : 'Datos parciales'}

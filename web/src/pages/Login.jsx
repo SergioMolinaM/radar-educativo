@@ -20,7 +20,7 @@ export default function Login() {
     clearTimeout(timer);
     setColdStart(false);
     if (result.ok) {
-      navigate('/');
+      navigate('/dashboard');
     } else {
       setError(result.error);
     }

@@ -128,10 +128,10 @@ export default function CompromisosPanel() {
             border: '1px solid rgba(59, 130, 246, 0.1)',
             fontSize: 11, color: 'var(--text-muted)', lineHeight: 1.7,
           }}>
-            <strong style={{ color: 'var(--accent-primary)' }}>¿De donde vienen estas tareas?</strong> Se generan automaticamente desde tres fuentes:
+            <strong style={{ color: 'var(--accent-primary)' }}>¿De dónde vienen estas tareas?</strong> Se generan automáticamente desde tres fuentes:
             el <strong>calendario normativo</strong> (plazos legales CGE, ADP, PMG),
             el <strong>Plan Anual Local</strong> al cargarse, y
-            las <strong>alertas del sistema</strong> cuando un indicador requiere accion.
+            las <strong>alertas del sistema</strong> cuando un indicador requiere acción.
             El equipo directivo marca avance o completado.
           </div>
         </div>
@@ -152,7 +152,7 @@ export default function CompromisosPanel() {
             background: 'rgba(245,158,11,0.12)', color: 'var(--alert-orange)',
             border: '1px solid rgba(245,158,11,0.2)',
           }}>
-            <Clock size={12} /> {resumen.total_proximos} proximas
+            <Clock size={12} /> {resumen.total_proximos} próximas
           </span>
         </div>
       </div>
@@ -172,7 +172,7 @@ export default function CompromisosPanel() {
               fontSize: 10, fontWeight: 700, padding: '3px 8px', borderRadius: 10,
               background: 'rgba(239,68,68,0.12)', color: 'var(--alert-red)',
             }}>
-              Accion requerida
+              Acción requerida
             </span>
           </div>
           <div>
@@ -195,7 +195,7 @@ export default function CompromisosPanel() {
             padding: '14px 20px', borderBottom: '1px solid var(--border-color)',
           }}>
             <span style={{ fontSize: 12, fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--text-muted)' }}>
-              Proximas a vencer
+              Próximas a vencer
             </span>
             <span style={{
               fontSize: 10, fontWeight: 700, padding: '3px 8px', borderRadius: 10,
@@ -207,7 +207,7 @@ export default function CompromisosPanel() {
           <div>
             {proximos.length === 0 ? (
               <div style={{ padding: 24, textAlign: 'center', color: 'var(--text-muted)', fontSize: 13 }}>
-                Sin compromisos proximos
+                Sin compromisos próximos
               </div>
             ) : (
               proximos.map((item) => (

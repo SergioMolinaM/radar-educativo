@@ -1,0 +1,141 @@
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../hooks/useAuth';
+import RadarLogo from '../components/shared/RadarLogo';
+
+export default function Landing() {
+  const navigate = useNavigate();
+  const { user } = useAuth();
+
+  if (user) {
+    navigate('/dashboard');
+    return null;
+  }
+
+  const features = [
+    {
+      icon: '📊',
+      title: 'Monitoreo en tiempo real',
+      description: 'Asistencia, rendimiento y SIMCE de todos tus establecimientos en un solo lugar.',
+      color: '#3b82f6',
+      bg: 'rgba(59, 130, 246, 0.12)',
+    },
+    {
+      icon: '🎯',
+      title: 'Seguimiento del PAL',
+      description: 'Indicadores, compromisos y avance del Plan Anual Local con datos reales.',
+      color: '#8b5cf6',
+      bg: 'rgba(139, 92, 246, 0.12)',
+    },
+    {
+      icon: '🚨',
+      title: 'Alertas inteligentes',
+      description: 'Detecta establecimientos en riesgo antes de que sea tarde. Umbrales configurables.',
+      color: '#ef4444',
+      bg: 'rgba(239, 68, 68, 0.12)',
+    },
+    {
+      icon: '🗺️',
+      title: 'Mapa territorial',
+      description: 'Visualiza tu territorio con datos georeferenciados por comuna y establecimiento.',
+      color: '#10b981',
+      bg: 'rgba(16, 185, 129, 0.12)',
+    },
+  ];
+
+  return (
+    <div style={{
+      minHeight: '100vh',
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      justifyContent: 'center',
+      padding: '40px 20px',
+    }}>
+      {/* Hero */}
+      <div className="animate-fade-in" style={{ textAlign: 'center', marginBottom: 48 }}>
+        <RadarLogo size={80} />
+        <h1 style={{ fontSize: 36, fontWeight: 800, marginTop: 16, marginBottom: 8 }}>
+          <span className="text-gradient">Radar</span> de la Educaci&oacute;n P&uacute;blica
+        </h1>
+        <p style={{ fontSize: 18, color: 'var(--text-muted)', maxWidth: 500, margin: '0 auto', lineHeight: 1.6 }}>
+          Plataforma de gesti&oacute;n integral para Servicios Locales de Educaci&oacute;n P&uacute;blica.
+          Datos reales del Mineduc, actualizados y accionables.
+        </p>
+      </div>
+
+      {/* Feature Cards */}
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
+        gap: 20,
+        maxWidth: 1000,
+        width: '100%',
+        marginBottom: 48,
+      }}>
+        {features.map((f, i) => (
+          <div
+            key={i}
+            className="animate-fade-in"
+            style={{
+              background: f.bg,
+              border: `1px solid ${f.color}33`,
+              borderRadius: 16,
+              padding: '28px 24px',
+              animationDelay: `${i * 0.1}s`,
+              transition: 'transform 0.2s, box-shadow 0.2s',
+              cursor: 'default',
+            }}
+            onMouseEnter={e => {
+              e.currentTarget.style.transform = 'translateY(-4px)';
+              e.currentTarget.style.boxShadow = `0 8px 30px ${f.color}22`;
+            }}
+            onMouseLeave={e => {
+              e.currentTarget.style.transform = 'translateY(0)';
+              e.currentTarget.style.boxShadow = 'none';
+            }}
+          >
+            <div style={{ fontSize: 32, marginBottom: 12 }}>{f.icon}</div>
+            <h3 style={{ fontSize: 17, fontWeight: 700, color: f.color, marginBottom: 8 }}>
+              {f.title}
+            </h3>
+            <p style={{ fontSize: 14, color: 'var(--text-muted)', lineHeight: 1.5, margin: 0 }}>
+              {f.description}
+            </p>
+          </div>
+        ))}
+      </div>
+
+      {/* CTA */}
+      <button
+        onClick={() => navigate('/login')}
+        style={{
+          padding: '14px 48px',
+          background: 'linear-gradient(135deg, #3b82f6, #8b5cf6)',
+          color: 'white',
+          border: 'none',
+          borderRadius: 12,
+          fontSize: 16,
+          fontWeight: 700,
+          cursor: 'pointer',
+          transition: 'transform 0.2s, box-shadow 0.2s',
+          boxShadow: '0 4px 20px rgba(59, 130, 246, 0.4)',
+        }}
+        onMouseEnter={e => {
+          e.currentTarget.style.transform = 'scale(1.05)';
+          e.currentTarget.style.boxShadow = '0 8px 30px rgba(59, 130, 246, 0.5)';
+        }}
+        onMouseLeave={e => {
+          e.currentTarget.style.transform = 'scale(1)';
+          e.currentTarget.style.boxShadow = '0 4px 20px rgba(59, 130, 246, 0.4)';
+        }}
+      >
+        Ingresar al Radar
+      </button>
+
+      {/* Footer */}
+      <p style={{ marginTop: 32, fontSize: 12, color: 'var(--text-muted)', opacity: 0.6 }}>
+        Tercera Letra &middot; Datos fuente: MINEDUC, Agencia de Calidad, Mercado P&uacute;blico
+      </p>
+    </div>
+  );
+}

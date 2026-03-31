@@ -34,10 +34,10 @@ export default function Financiero() {
   return (
     <div className="animate-fade-in">
       <h2 style={{ fontSize: 26, fontWeight: 700, marginBottom: 4 }}>Financiero</h2>
-      <p style={{ color: 'var(--text-muted)', fontSize: 15, marginBottom: 6 }}>Ejecucion presupuestaria y compras publicas</p>
+      <p style={{ color: 'var(--text-muted)', fontSize: 15, marginBottom: 6 }}>Ejecución presupuestaria y compras públicas</p>
       <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 16, lineHeight: 1.6 }}>
-        Este modulo permite monitorear la ejecucion del presupuesto y las ordenes de compra del SLEP en Mercado Publico.
-        Ayuda a identificar sub-ejecucion temprana y verificar que las compras esten alineadas con las prioridades del PAL.
+        Este módulo permite monitorear la ejecución del presupuesto y las órdenes de compra del SLEP en Mercado Público.
+        Ayuda a identificar sub-ejecución temprana y verificar que las compras estén alineadas con las prioridades del PAL.
       </div>
       <div style={{ background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.3)', borderRadius: 8, padding: '10px 16px', marginBottom: 24, fontSize: 14, color: '#f59e0b' }}>
         ⚠️ <strong>Vista demostración</strong> — Los datos financieros se conectarán con la API de Mercado Público del SLEP. Las cifras mostradas son ilustrativas.

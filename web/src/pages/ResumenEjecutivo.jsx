@@ -82,7 +82,7 @@ export default function ResumenEjecutivo() {
         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
           <thead>
             <tr>
-              {['Establecimiento', 'Comuna', 'Matricula', 'Asistencia', 'Estado'].map((h) => (
+              {['Establecimiento', 'Comuna', 'Matrícula', 'Asistencia', 'Estado'].map((h) => (
                 <th key={h} style={thStyle}>{h}</th>
               ))}
             </tr>
@@ -136,7 +136,7 @@ export default function ResumenEjecutivo() {
       {compromisos && (compromisos.atrasados?.length > 0 || compromisos.proximos?.length > 0) && (
         <div className="glass-panel" style={{ padding: 24, marginBottom: 16 }}>
           <h3 style={{ fontSize: 16, fontWeight: 700, marginBottom: 16 }}>
-            Compromisos de Gestion
+            Compromisos de Gestión
             <span style={{ fontSize: 12, fontWeight: 400, color: 'var(--text-muted)', marginLeft: 8 }}>
               {compromisos.resumen?.total_activos} activos
             </span>
@@ -150,7 +150,7 @@ export default function ResumenEjecutivo() {
               <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                 <thead>
                   <tr>
-                    {['Hito', 'Instrumento', 'Responsable', 'Dias atraso'].map(h => (
+                    {['Hito', 'Instrumento', 'Responsable', 'Días atraso'].map(h => (
                       <th key={h} style={thStyle}>{h}</th>
                     ))}
                   </tr>
@@ -161,7 +161,7 @@ export default function ResumenEjecutivo() {
                       <td style={tdStyle}>{c.hito}</td>
                       <td style={tdStyle}><span style={{ padding: '2px 6px', borderRadius: 4, fontSize: 11, fontWeight: 700, background: 'rgba(239,68,68,0.1)', color: 'var(--alert-red)' }}>{c.instrumento}</span></td>
                       <td style={tdStyle}>{c.responsable}</td>
-                      <td style={{ ...tdStyle, color: 'var(--alert-red)', fontWeight: 700 }}>{c.dias_atraso} dias</td>
+                      <td style={{ ...tdStyle, color: 'var(--alert-red)', fontWeight: 700 }}>{c.dias_atraso} días</td>
                     </tr>
                   ))}
                 </tbody>

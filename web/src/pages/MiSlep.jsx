@@ -79,8 +79,8 @@ export default function MiSlep() {
         <KpiCard label="Establecimientos" value={kpis.total_establecimientos || kpis.ee_oficial} icon={Users}
           subtitle={overview?.cobertura_datos}
           tooltip={{ text: `Total oficial: ${kpis.ee_oficial || '?'} EE. Datos para ${kpis.ee_con_datos || '?'} EE.`, fuente: 'Sitio oficial SLEP + MINEDUC 2025' }} />
-        <KpiCard label="Matricula total" value={kpis.matricula_total} icon={GraduationCap}
-          tooltip={{ text: 'Alumnos matriculados en el SLEP', fuente: 'MINEDUC Matricula 2025' }} />
+        <KpiCard label="Matrícula total" value={kpis.matricula_total} icon={GraduationCap}
+          tooltip={{ text: 'Alumnos matriculados en el SLEP', fuente: 'MINEDUC Matrícula 2025' }} />
         <KpiCard label="Asistencia prom." value={kpis.asistencia_promedio} unit="%" icon={CalendarCheck}
           tooltip={{ text: 'Promedio del SLEP (sin ed. adultos)', fuente: 'MINEDUC Asistencia 2025', periodo: overview?.mes_nombre }} />
         <KpiCard label="Vulnerabilidad" value={kpis.vulnerabilidad_promedio || '—'} unit={kpis.vulnerabilidad_promedio ? '%' : ''} icon={ShieldAlert}
@@ -90,7 +90,7 @@ export default function MiSlep() {
       <div style={{ display: 'grid', gridTemplateColumns: '280px 1fr', gap: 16, marginBottom: 24 }}>
         {/* Semáforo resumen */}
         <div className="glass-panel" style={{ padding: 24 }}>
-          <h3 style={{ fontSize: 15, fontWeight: 600, marginBottom: 8 }}>Distribucion semaforo</h3>
+          <h3 style={{ fontSize: 15, fontWeight: 600, marginBottom: 8 }}>Distribución semáforo</h3>
           <div style={{ fontSize: 10, color: 'var(--text-muted)', marginBottom: 12, lineHeight: 1.6 }}>
             Rojo: asistencia &lt;75% · Naranja: 75-82% · Verde: &ge;82%<br/>
             Umbrales configurables por el SLEP
