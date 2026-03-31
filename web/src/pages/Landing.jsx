@@ -59,7 +59,7 @@ export default function Landing() {
         </h1>
         <p style={{ fontSize: 18, color: 'var(--text-muted)', maxWidth: 500, margin: '0 auto', lineHeight: 1.6 }}>
           Plataforma de gesti&oacute;n integral para Servicios Locales de Educaci&oacute;n P&uacute;blica.
-          Datos reales del Mineduc, actualizados y accionables.
+          Datos oficiales, actualizados y accionables.
         </p>
       </div>
 
