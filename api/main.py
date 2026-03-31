@@ -61,7 +61,11 @@ def migrate_pal(secret: str = ""):
 def _get_pal_migration_sql():
     """Return list of SQL statements for PAL data migration."""
     import pathlib
-    sql_file = pathlib.Path(__file__).parent.parent / "scripts" / "pal_sync_render.sql"
+    # Try multiple paths (local dev vs Render)
+    base = pathlib.Path(__file__).parent.parent
+    sql_file = base / "scripts" / "pal_sync_render.sql"
+    if not sql_file.exists():
+        sql_file = base / "api" / "scripts" / "pal_sync_render.sql"
     if sql_file.exists():
         content = sql_file.read_text(encoding="utf-8")
         return [s.strip() for s in content.split(";") if s.strip() and not s.strip().startswith("--")]
