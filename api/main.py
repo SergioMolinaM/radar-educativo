@@ -78,6 +78,33 @@ def assign_los_parques(secret: str = ""):
     return {"ok": ok, "errors": errors}
 
 
+@app.post("/admin/migrate-new-tables")
+def migrate_new_tables(secret: str = ""):
+    """Load parvularia + SIMCE 2024 tables into Render DB."""
+    if secret != os.getenv("MIGRATE_SECRET", "radar-migrate-2026"):
+        from fastapi import HTTPException
+        raise HTTPException(status_code=403, detail="Forbidden")
+
+    from api.db.connection import get_cursor
+    import pathlib
+    sql_file = pathlib.Path(__file__).parent / "scripts" / "new_tables_sync.sql"
+    if not sql_file.exists():
+        return {"error": "SQL file not found"}
+
+    content = sql_file.read_text(encoding="utf-8")
+    stmts = [s.strip() for s in content.split(";") if s.strip() and not s.strip().startswith("--")]
+
+    ok, errs = 0, 0
+    with get_cursor() as cur:
+        for stmt in stmts:
+            try:
+                cur.execute(stmt)
+                ok += 1
+            except Exception:
+                errs += 1
+    return {"ok": ok, "errors": errs, "total": len(stmts)}
+
+
 def _get_pal_migration_sql():
     """Return list of SQL statements for PAL data migration."""
     import pathlib
