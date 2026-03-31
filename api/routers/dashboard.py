@@ -80,8 +80,13 @@ def _clasificar_semaforo(asistencia: float, umbrales: dict) -> str:
 
 
 def _slep_filter(slep_id: str) -> str:
-    """Build SQL IN clause for SLEP name variants."""
-    names = SLEP_NAME_MAP.get(slep_id, [slep_id.upper().replace("_", " ")])
+    """Build SQL IN clause for SLEP name variants. Only allows known SLEPs."""
+    if slep_id not in SLEP_NAME_MAP:
+        # Sanitize: only allow alphanumeric + spaces to prevent SQL injection
+        safe_name = "".join(c for c in slep_id.upper().replace("_", " ") if c.isalnum() or c == " ")
+        names = [safe_name]
+    else:
+        names = SLEP_NAME_MAP[slep_id]
     placeholders = ", ".join([f"'{n}'" for n in names])
     return f"nombre_slep IN ({placeholders})"
 

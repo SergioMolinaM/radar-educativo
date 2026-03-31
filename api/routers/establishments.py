@@ -149,15 +149,15 @@ def get_establishment(rbd: int, current_user: dict = Depends(get_current_user)):
                 "mujeres": int(mat.get("mujeres_total", 0)) if mat else 0,
             },
             "rendimiento": {
-                "total_alumnos": int(rend["total_alumnos"]),
-                "aprobados": int(rend["aprobados"]),
-                "reprobados": int(rend["reprobados"]),
-                "retirados": int(rend["retirados"]),
+                "total_alumnos": int(rend.get("total_alumnos") or 0),
+                "aprobados": int(rend.get("aprobados") or 0),
+                "reprobados": int(rend.get("reprobados") or 0),
+                "retirados": int(rend.get("retirados") or 0),
                 "trasladados": int(rend.get("trasladados") or 0),
-                "tasa_aprobacion": float(rend["tasa_aprobacion"]),
-                "tasa_retiro": float(rend["tasa_retiro"]),
-                "promedio_general": float(rend["prom_general"]),
-                "promedio_asistencia": float(rend["prom_asistencia"]),
+                "tasa_aprobacion": float(rend.get("tasa_aprobacion") or 0),
+                "tasa_retiro": float(rend.get("tasa_retiro") or 0),
+                "promedio_general": float(rend.get("prom_general") or 0),
+                "promedio_asistencia": float(rend.get("prom_asistencia") or 0),
             } if rend else None,
             "sep": {
                 "total": int(sep["total_sep"]),
@@ -169,14 +169,14 @@ def get_establishment(rbd: int, current_user: dict = Depends(get_current_user)):
                 {
                     "mes": int(a["mes"]),
                     "mes_nombre": mes_nombres[int(a["mes"])],
-                    "asistencia": float(a["pct_asistencia"]),
-                    "alumnos": int(a["total_alumnos"]),
+                    "asistencia": float(a.get("pct_asistencia") or 0),
+                    "alumnos": int(a.get("total_alumnos") or 0),
                 }
                 for a in asist_meses
             ],
             "asistencia_anual": {
                 "promedio": asist_prom,
-                "total_alumnos": int(asist_anual["total_alumnos"]),
+                "total_alumnos": int(asist_anual.get("total_alumnos") or 0),
                 "cronica_grave": int(asist_anual.get("cat_1") or 0),
                 "cronica": int(asist_anual.get("cat_2") or 0),
                 "en_riesgo": int(asist_anual.get("cat_3") or 0),
@@ -190,7 +190,11 @@ def get_establishment(rbd: int, current_user: dict = Depends(get_current_user)):
 
 
 def _slep_in_values(slep_id: str) -> str:
-    """Return comma-separated quoted SLEP names for SQL IN clause."""
+    """Return comma-separated quoted SLEP names for SQL IN clause. Sanitized."""
     from api.routers.dashboard import SLEP_NAME_MAP
-    names = SLEP_NAME_MAP.get(slep_id, [slep_id.upper().replace("_", " ")])
+    if slep_id not in SLEP_NAME_MAP:
+        safe_name = "".join(c for c in slep_id.upper().replace("_", " ") if c.isalnum() or c == " ")
+        names = [safe_name]
+    else:
+        names = SLEP_NAME_MAP[slep_id]
     return ", ".join([f"'{n}'" for n in names])

@@ -23,8 +23,8 @@ def export_excel(current_user: dict = Depends(get_current_user)):
         from fastapi import HTTPException
         raise HTTPException(status_code=500, detail="openpyxl no instalado")
 
-    summary = get_dashboard_summary(current_user)
-    semaforos = get_semaforos(current_user)
+    summary = get_dashboard_summary(current_user=current_user)
+    semaforos = get_semaforos(current_user=current_user)
 
     wb = Workbook()
 
