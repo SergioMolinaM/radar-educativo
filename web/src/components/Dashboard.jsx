@@ -55,26 +55,39 @@ export default function Dashboard() {
     .sort((a, b) => a.asistencia - b.asistencia)
     .slice(0, 5);
 
+  // Build "Tu día hoy" — top 3 urgent actions
+  const alertasNoLeidas = alertas.filter(a => !a.leida && (a.severity === 'critical' || a.severity === 'warning'));
+  const hoyActions = [
+    ...alertasNoLeidas.slice(0, 2).map(a => ({
+      text: a.mensaje,
+      type: 'alerta',
+      color: a.severity === 'critical' ? '#ef4444' : '#f59e0b',
+    })),
+    ...(kpis.alertas_rojas > 0 ? [{
+      text: `${kpis.alertas_rojas} establecimientos con asistencia bajo 75% requieren intervención`,
+      type: 'brecha',
+      color: '#ef4444',
+    }] : []),
+  ].slice(0, 3);
+
   return (
     <div className="animate-fade-in">
-      {/* Header con contexto del SLEP */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 20 }}>
+      {/* Header operativo */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 16 }}>
         <div>
-          <h2 style={{ fontSize: 28, fontWeight: 700, marginBottom: 4 }}>
-            Buenos días
+          <h2 style={{ fontSize: 26, fontWeight: 700, marginBottom: 4 }}>
+            Estado del SLEP hoy
           </h2>
-          <p style={{ color: 'var(--text-muted)', fontSize: 15, margin: 0 }}>
+          <p style={{ color: 'var(--text-muted)', fontSize: 14, margin: 0 }}>
             {comunas.length > 0 && (
               <span>
                 <MapPin size={14} style={{ verticalAlign: 'middle', marginRight: 4 }} />
                 {comunas.join(', ')} ·{' '}
               </span>
             )}
-            {kpis.ee_escuelas_liceos
-              ? `${kpis.total_establecimientos || kpis.ee_oficial} EE en el SLEP — ${kpis.ee_escuelas_liceos} escuelas/liceos + ${kpis.ee_jardines || 0} jardines infantiles`
-              : kpis.total_establecimientos
-                ? `${kpis.total_establecimientos} establecimientos en el SLEP`
-                : summary?.cobertura_datos || 'Datos cargados'}
+            {kpis.total_establecimientos || kpis.ee_oficial} EE en el SLEP
+            ({kpis.ee_con_datos || '?'} con datos cargados)
+            {kpis.ee_escuelas_liceos ? ` — ${kpis.ee_escuelas_liceos} escuelas/liceos + ${kpis.ee_jardines || 0} jardines` : ''}
           </p>
         </div>
         <button
@@ -92,6 +105,40 @@ export default function Dashboard() {
           <Download size={14} /> Exportar
         </button>
       </div>
+
+      {/* TU DÍA HOY — top 3 acciones urgentes */}
+      {hoyActions.length > 0 && (
+        <div style={{
+          marginBottom: 20, padding: '16px 20px', borderRadius: 14,
+          background: 'linear-gradient(135deg, rgba(249,115,22,0.08), rgba(239,68,68,0.06))',
+          border: '1px solid rgba(249,115,22,0.2)',
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+            <AlertTriangle size={16} style={{ color: '#f97316' }} />
+            <span style={{ fontSize: 14, fontWeight: 700, color: '#f97316' }}>
+              Requiere tu atención hoy
+            </span>
+          </div>
+          {hoyActions.map((a, i) => (
+            <div key={i} style={{
+              display: 'flex', alignItems: 'flex-start', gap: 10,
+              padding: '8px 0',
+              borderTop: i > 0 ? '1px solid rgba(255,255,255,0.06)' : 'none',
+            }}>
+              <span style={{
+                width: 22, height: 22, borderRadius: 6, flexShrink: 0,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                background: `${a.color}18`, color: a.color, fontSize: 12, fontWeight: 700,
+              }}>
+                {i + 1}
+              </span>
+              <span style={{ fontSize: 13, color: 'var(--text-primary)', lineHeight: 1.5 }}>
+                {a.text}
+              </span>
+            </div>
+          ))}
+        </div>
+      )}
 
       {/* KPI Cards */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16, marginBottom: 24 }}>
@@ -237,12 +284,12 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Acceso rápido a secciones clave */}
+      {/* Acciones rápidas — orientadas a acción, no solo navegación */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 12 }}>
-        <QuickLink icon="🗺️" label="Mapa territorial" desc="Visualiza tu territorio" color="#10b981" to="/mapa" navigate={navigate} />
-        <QuickLink icon="🎯" label="Avance PAL" desc="Indicadores y compromisos" color="#8b5cf6" to="/plan-anual" navigate={navigate} />
-        <QuickLink icon="📊" label="SIMCE 2024" desc="Resultados por nivel" color="#3b82f6" to="/indicadores" navigate={navigate} />
-        <QuickLink icon="🏫" label="Establecimientos" desc={`${kpis.ee_con_datos || '?'} EE con datos`} color="#f59e0b" to="/establecimientos" navigate={navigate} />
+        <QuickLink icon="🚨" label="Ver alertas activas" desc={`${kpis.alertas_rojas || 0} EE en rojo`} color="#ef4444" to="/alertas" navigate={navigate} />
+        <QuickLink icon="🎯" label="Revisar avance PAL" desc="Indicadores y compromisos" color="#8b5cf6" to="/plan-anual" navigate={navigate} />
+        <QuickLink icon="📊" label="Detectar brechas" desc="Comparar establecimientos" color="#f97316" to="/ranking" navigate={navigate} />
+        <QuickLink icon="🗺️" label="Explorar territorio" desc={`${kpis.total_establecimientos || '?'} EE (${kpis.ee_con_datos || '?'} con datos)`} color="#10b981" to="/mapa" navigate={navigate} />
       </div>
     </div>
   );
