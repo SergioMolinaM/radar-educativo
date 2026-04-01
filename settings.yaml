@@ -1,0 +1,23 @@
+# Global Platform Settings
+project_name: radar-data-platform
+environment: ${ENV:-development}
+
+database:
+  name: radar_db
+  engine: postgresql
+  host: localhost
+  port: 5432
+
+paths:
+  raw: data/raw
+  staging: data/staging
+  processed: data/processed
+  logs: logs
+
+processing:
+  batch_size: 1000
+  parallel_jobs: 4
+
+logging:
+  level: INFO
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"

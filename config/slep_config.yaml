@@ -1,0 +1,13 @@
+sleps:
+- id: slep_barrancas
+  name: Servicio Local de Educación Pública Barrancas
+  rut: 72.899.900-8
+  codigo_organismo: MOCK_TEMP
+  region: RM
+  modo_financiero: mock
+- id: slep_puerto_cordillera
+  name: Servicio Local de Educación Pública Puerto Cordillera
+  rut: PENDIENTE
+  codigo_organismo: MOCK_TEMP
+  region: COQUIMBO
+  modo_financiero: mock

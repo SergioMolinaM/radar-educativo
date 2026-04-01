@@ -1,0 +1,26 @@
+# Official Approved Data Sources
+sources:
+  mineduc:
+    full_name: "Ministerio de Educación"
+    website: "https://datosabiertos.mineduc.cl/"
+    frequency: annual
+
+  agencia:
+    full_name: "Agencia de Calidad de la Educación"
+    website: "https://www.agenciaeducacion.cl/"
+    frequency: annual
+
+  datos_gob:
+    full_name: "Portal de Datos Públicos"
+    website: "https://datos.gob.cl/"
+    frequency: adhoc
+
+  junaeb:
+    full_name: "Junta Nacional de Auxilio Escolar y Becas"
+    website: "https://www.junaeb.cl/datos-abiertos"
+    frequency: annual
+
+  dep:
+    full_name: "Departamento de Evaluación, Medición y Registro Educacional"
+    website: "https://demre.cl/"
+    frequency: annual

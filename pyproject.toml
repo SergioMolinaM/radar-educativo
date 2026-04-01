@@ -1,0 +1,46 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "radar-data-platform"
+version = "0.1.0"
+description = "Professional data platform for radar data processing"
+authors = [
+    { name = "Radar Data Platform Team" }
+]
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = [
+    "pandas",
+    "polars",
+    "duckdb",
+    "pydantic",
+    "python-dotenv",
+    "pyyaml",
+    "requests",
+    "beautifulsoup4",
+    "lxml",
+    "psycopg[binary]",
+    "sqlalchemy",
+    "rich",
+    "typer",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "black",
+    "isort",
+    "flake8",
+    "mypy",
+]
+
+[tool.black]
+line-length = 88
+
+[tool.isort]
+profile = "black"
+
+[tool.setuptools]
+packages = ["agents", "services", "scripts"]

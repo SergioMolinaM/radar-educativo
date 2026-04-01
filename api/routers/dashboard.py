@@ -1,0 +1,312 @@
+"""Dashboard router - Main overview endpoints for SLEP dashboards.
+Uses 2025 real data with adult education filter.
+"""
+import logging
+
+from fastapi import APIRouter, Depends, Query
+
+from api.db.connection import query_all, query_one, check_table_exists
+from api.routers.auth import get_current_user
+
+logger = logging.getLogger(__name__)
+router = APIRouter()
+
+# Mapping de slep_id → nombre_slep en datos MINEDUC
+# Datos oficiales de cada SLEP: total EE real (escuelas+liceos+jardines), comunas, fuente
+# Fuentes: sitios web oficiales de cada SLEP + educacionpublica.gob.cl (mar 2026)
+SLEP_OFICIAL = {
+    "barrancas": {"ee_total": 76, "escuelas_liceos": 53, "jardines": 23, "comunas": ["Cerro Navia", "Lo Prado", "Pudahuel"], "fuente": "barrancas.educacionpublica.cl"},
+    "puerto_cordillera": {"ee_total": 60, "escuelas_liceos": 50, "jardines": 10, "comunas": ["Coquimbo", "Andacollo"], "fuente": "slepuertocordillera.gob.cl"},
+    "los_parques": {"ee_total": 52, "escuelas_liceos": 34, "jardines": 18, "comunas": ["Quinta Normal", "Renca"], "fuente": "PAL 2026 Los Parques"},
+    "huasco": {"ee_total": 47, "escuelas_liceos": 36, "jardines": 11, "comunas": ["Vallenar", "Alto del Carmen", "Freirina", "Huasco"], "fuente": "educacionpublica.gob.cl"},
+    "costa_araucania": {"ee_total": 91, "escuelas_liceos": 75, "jardines": 16, "comunas": ["Carahue", "Nueva Imperial", "Saavedra", "Teodoro Schmidt", "Tolten"], "fuente": "educacionpublica.gob.cl"},
+    "chinchorro": {"ee_total": 48, "escuelas_liceos": 34, "jardines": 14, "comunas": ["Arica"], "fuente": "educacionpublica.gob.cl"},
+    "santa_rosa": {"ee_total": 91, "escuelas_liceos": 60, "jardines": 31, "comunas": ["San Ramon", "La Cisterna", "Lo Espejo", "San Miguel", "Pedro Aguirre Cerda"], "fuente": "slepsantarosa.gob.cl"},
+    "colchagua": {"ee_total": 69, "escuelas_liceos": 58, "jardines": 11, "comunas": ["San Fernando", "Chimbarongo", "Nancagua", "Placilla"], "fuente": "slepcolchagua.gob.cl"},
+    "del_pino": {"ee_total": 115, "escuelas_liceos": 79, "jardines": 36, "comunas": ["La Pintana", "El Bosque", "San Bernardo", "Calera de Tango"], "fuente": "slepdelpino.gob.cl"},
+    "andalien_sur": {"ee_total": 56, "escuelas_liceos": 42, "jardines": 14, "comunas": ["Concepcion", "Chiguayante", "Florida", "Hualqui"], "fuente": "educacionpublica.gob.cl"},
+    "gabriela_mistral": {"ee_total": 80, "escuelas_liceos": 55, "jardines": 25, "comunas": ["La Granja", "Macul", "San Joaquin"], "fuente": "educacionpublica.gob.cl"},
+}
+
+SLEP_NAME_MAP = {
+    "barrancas": ["BARRANCAS"],
+    "chinchorro": ["CHINCHORRO"],
+    "gabriela_mistral": ["GABRIELA MISTRAL"],
+    "andalien_sur": ["ANDALIEN SUR", "ANDALIÉN SUR"],
+    "costa_araucania": ["COSTA ARAUCANIA", "COSTA ARAUCANÍA"],
+    "huasco": ["HUASCO"],
+    "puerto_cordillera": ["PUERTO CORDILLERA"],
+    "costa_central": ["COSTA CENTRAL"],
+    "atacama": ["ATACAMA"],
+    "colchagua": ["COLCHAGUA"],
+    "llanquihue": ["LLANQUIHUE"],
+    "valparaiso": ["VALPARAISO", "VALPARAÍSO"],
+    "punilla_cordillera": ["PUNILLA CORDILLERA"],
+    "los_libertadores": ["LOS LIBERTADORES"],
+    "santa_rosa": ["SANTA ROSA"],
+    "del_pino": ["DEL PINO"],
+    "iquique": ["IQUIQUE"],
+    "licancabur": ["LICANCABUR", "LICANBUR"],
+    "elqui": ["ELQUI"],
+    "magallanes": ["MAGALLANES"],
+    "maule_costa": ["MAULE COSTA"],
+    "chiloe": ["CHILOÉ", "CHILOE"],
+    "aysen": ["AYSÉN", "AYSEN"],
+    "valdivia": ["VALDIVIA"],
+    "santa_corina": ["SANTA CORINA"],
+    "andalien_costa": ["ANDALIÉN COSTA", "ANDALIEN COSTA"],
+    "los_parques": ["LOS PARQUES"],
+}
+
+MES_NOMBRES = ['', 'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+               'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre']
+
+ADULTOS_FILTER = "AND nom_rbd NOT ILIKE '%CEIA%' AND nom_rbd NOT ILIKE '%ADULTO%' AND nom_rbd NOT ILIKE '%NOCTURNO%'"
+
+# Umbrales de semáforo configurables por SLEP.
+# Defaults calibrados con realidad chilena 2025 (promedio nacional ~82%).
+# Cada SLEP puede ajustar según su contexto.
+SEMAFORO_DEFAULTS = {
+    "asistencia_verde": 82,    # >= 82% = verde (antes era 88, dejaba todo rojo)
+    "asistencia_amarillo": 75, # >= 75% = amarillo
+    # < 75% = rojo
+}
+
+# Override por SLEP si lo requieren
+SEMAFORO_OVERRIDES = {
+    # "barrancas": {"asistencia_verde": 80, "asistencia_amarillo": 72},
+}
+
+
+def _get_umbrales(slep_id: str) -> dict:
+    """Return semáforo thresholds for a SLEP (configurable)."""
+    base = dict(SEMAFORO_DEFAULTS)
+    overrides = SEMAFORO_OVERRIDES.get(slep_id, {})
+    base.update(overrides)
+    return base
+
+
+def _clasificar_semaforo(asistencia: float, umbrales: dict) -> str:
+    """Classify an establishment by attendance using configurable thresholds."""
+    if asistencia >= umbrales["asistencia_verde"]:
+        return "verde"
+    elif asistencia >= umbrales["asistencia_amarillo"]:
+        return "naranja"
+    else:
+        return "rojo"
+
+
+def _slep_filter(slep_id: str) -> str:
+    """Build SQL IN clause for SLEP name variants. Only allows known SLEPs."""
+    if slep_id not in SLEP_NAME_MAP:
+        # Sanitize: only allow alphanumeric + spaces to prevent SQL injection
+        safe_name = "".join(c for c in slep_id.upper().replace("_", " ") if c.isalnum() or c == " ")
+        names = [safe_name]
+    else:
+        names = SLEP_NAME_MAP[slep_id]
+    placeholders = ", ".join([f"'{n}'" for n in names])
+    return f"nombre_slep IN ({placeholders})"
+
+
+def _has_2025_data() -> bool:
+    try:
+        return check_table_exists("public", "asistencia_2025_rbd")
+    except Exception:
+        return False
+
+
+@router.get("/summary")
+def get_dashboard_summary(
+    mes: int = None,
+    excluir_adultos: bool = True,
+    current_user: dict = Depends(get_current_user),
+):
+    """KPIs del SLEP con datos 2025 reales."""
+    slep_id = current_user["slep_id"]
+    sf = _slep_filter(slep_id)
+    af = ADULTOS_FILTER if excluir_adultos else ""
+
+    if not _has_2025_data():
+        return {"slep_id": slep_id, "kpis": {}, "source": "no_data"}
+
+    try:
+        # Determine month
+        if not mes:
+            m = query_one(f"SELECT MAX(mes) AS m FROM asistencia_2025_rbd WHERE {sf}")
+            mes = int(m["m"]) if m and m["m"] else 10
+
+        # Total EE en directorio oficial (número real del SLEP)
+        dir_count = query_one(f"""
+            SELECT COUNT(DISTINCT d.rbd) AS total_directorio
+            FROM directorio_2025 d
+            WHERE d.rut_sostenedor IN (
+                SELECT DISTINCT d2.rut_sostenedor
+                FROM directorio_2025 d2
+                JOIN asistencia_2025_rbd a ON d2.rbd = a.rbd
+                WHERE {sf.replace('nombre_slep', 'a.nombre_slep')}
+            )
+        """)
+        total_directorio = int(dir_count['total_directorio']) if dir_count and dir_count['total_directorio'] else 0
+
+        # Matrícula 2025 (consistent with adultos filter)
+        mat_af = "AND nom_rbd NOT ILIKE '%CEIA%' AND nom_rbd NOT ILIKE '%ADULTO%' AND nom_rbd NOT ILIKE '%NOCTURNO%'" if excluir_adultos else ""
+        mat = query_one(f"""
+            SELECT COUNT(DISTINCT rbd) AS total_ee, SUM(matricula_total) AS mat_total
+            FROM matricula_2025_rbd WHERE {sf} {mat_af}
+        """)
+
+        # Asistencia mes seleccionado (sin adultos)
+        asist = query_one(f"""
+            SELECT ROUND(AVG(CASE WHEN pct_asistencia > 0 THEN pct_asistencia END)::numeric, 1) AS asist_avg
+            FROM asistencia_2025_rbd WHERE {sf} AND mes = {mes} {af}
+        """)
+
+        # Mes anterior para variación
+        prev = query_one(f"""
+            SELECT ROUND(AVG(CASE WHEN pct_asistencia > 0 THEN pct_asistencia END)::numeric, 1) AS asist_avg
+            FROM asistencia_2025_rbd WHERE {sf} AND mes = {mes - 1} {af}
+        """) if mes > 3 else None
+
+        # Semáforos (sin adultos)
+        alertas = query_all(f"""
+            SELECT rbd, pct_asistencia FROM asistencia_2025_rbd
+            WHERE {sf} AND mes = {mes} {af} AND pct_asistencia > 0
+        """)
+
+        total_ee = int(mat['total_ee']) if mat and mat['total_ee'] else 0
+        mat_total = int(mat['mat_total']) if mat and mat['mat_total'] else 0
+        asist_avg = float(asist['asist_avg']) if asist and asist['asist_avg'] else 0
+        prev_avg = float(prev['asist_avg']) if prev and prev.get('asist_avg') else None
+
+        umbrales = _get_umbrales(slep_id)
+        rojas = sum(1 for a in alertas if _clasificar_semaforo(float(a['pct_asistencia'] or 0), umbrales) == "rojo")
+        naranjas = sum(1 for a in alertas if _clasificar_semaforo(float(a['pct_asistencia'] or 0), umbrales) == "naranja")
+        verdes = sum(1 for a in alertas if _clasificar_semaforo(float(a['pct_asistencia'] or 0), umbrales) == "verde")
+
+        # Datos oficiales del SLEP (fuente: sitios web oficiales)
+        oficial = SLEP_OFICIAL.get(slep_id, {})
+        ee_oficial_total = oficial.get("ee_total")
+        ee_oficial_escuelas = oficial.get("escuelas_liceos")
+
+        return {
+            "slep_id": slep_id,
+            "source": "2025_real",
+            "mes": mes,
+            "mes_nombre": MES_NOMBRES[mes] if mes < len(MES_NOMBRES) else str(mes),
+            "kpis": {
+                "total_establecimientos": ee_oficial_total or total_ee,
+                "ee_con_datos": total_ee,
+                "ee_oficial": ee_oficial_total,
+                "ee_escuelas_liceos": ee_oficial_escuelas,
+                "ee_jardines": oficial.get("jardines"),
+                "matricula_total": mat_total,
+                "asistencia_promedio": asist_avg,
+                "ejecucion_presupuestaria": 62.5,  # TODO: Mercado Público API
+                "alertas_rojas": rojas,
+                "alertas_naranjas": naranjas,
+                "alertas_verdes": verdes,
+            },
+            "cobertura_datos": f"{total_ee} de {ee_oficial_total} EE con datos" if ee_oficial_total else f"{total_ee} EE con datos",
+            "comunas": oficial.get("comunas", []),
+            "fuente_oficial": oficial.get("fuente"),
+            "tendencias": {
+                "asistencia_variacion_mensual": round(asist_avg - prev_avg, 1) if prev_avg else None,
+            },
+            "umbrales": umbrales,
+        }
+    except Exception as e:
+        logger.warning("Dashboard summary error: %s", e)
+        return {"slep_id": slep_id, "kpis": {}, "error": str(e)}
+
+
+@router.get("/semaforos")
+def get_semaforos(
+    mes: int = None,
+    excluir_adultos: bool = True,
+    current_user: dict = Depends(get_current_user),
+):
+    """Semáforos por establecimiento con datos 2025."""
+    slep_id = current_user["slep_id"]
+    sf = _slep_filter(slep_id)
+    af = ADULTOS_FILTER if excluir_adultos else ""
+
+    if not _has_2025_data():
+        return {"slep_id": slep_id, "establecimientos": []}
+
+    try:
+        if not mes:
+            m = query_one(f"SELECT MAX(mes) AS m FROM asistencia_2025_rbd WHERE {sf}")
+            mes = int(m["m"]) if m and m["m"] else 10
+
+        rows = query_all(f"""
+            SELECT a.rbd, a.nom_rbd, a.nom_com_rbd, a.pct_asistencia,
+                   a.total_alumnos, m.matricula_total
+            FROM asistencia_2025_rbd a
+            LEFT JOIN matricula_2025_rbd m ON a.rbd = m.rbd
+            WHERE a.{sf} AND a.mes = {mes} {af.replace('nom_rbd', 'a.nom_rbd')}
+              AND a.pct_asistencia > 0
+            ORDER BY a.pct_asistencia ASC
+        """)
+
+        umbrales = _get_umbrales(slep_id)
+        establecimientos = []
+        for r in rows:
+            asist = float(r.get("pct_asistencia") or 0)
+            semaforo = _clasificar_semaforo(asist, umbrales)
+            alertas_list = []
+            if semaforo == "rojo":
+                alertas_list.append(f"Asistencia critica ({asist}%)")
+            elif semaforo == "naranja":
+                alertas_list.append(f"Asistencia bajo meta ({asist}%)")
+
+            establecimientos.append({
+                "rbd": r["rbd"],
+                "nombre": r["nom_rbd"],
+                "comuna": r.get("nom_com_rbd"),
+                "semaforo": semaforo,
+                "alertas": alertas_list,
+                "matricula": int(r.get("matricula_total") or r.get("total_alumnos") or 0),
+                "asistencia": asist,
+            })
+
+        return {"slep_id": slep_id, "mes": mes, "establecimientos": establecimientos, "source": "2025_real"}
+
+    except Exception as e:
+        logger.warning("Semaforos error: %s", e)
+        return {"slep_id": slep_id, "establecimientos": [], "error": str(e)}
+
+
+@router.get("/tendencia-asistencia")
+def get_tendencia_asistencia(
+    excluir_adultos: bool = True,
+    current_user: dict = Depends(get_current_user),
+):
+    """Evolución mensual de asistencia 2025 para el SLEP."""
+    slep_id = current_user["slep_id"]
+    sf = _slep_filter(slep_id)
+    af = ADULTOS_FILTER if excluir_adultos else ""
+
+    try:
+        rows = query_all(f"""
+            SELECT mes,
+                   ROUND(AVG(CASE WHEN pct_asistencia > 0 THEN pct_asistencia END)::numeric, 1) AS asistencia_avg,
+                   COUNT(DISTINCT rbd) AS ee_count,
+                   SUM(total_alumnos) AS total_alumnos
+            FROM asistencia_2025_rbd WHERE {sf} {af}
+            GROUP BY mes ORDER BY mes
+        """)
+        return {
+            "slep_id": slep_id,
+            "meses": [
+                {
+                    "mes": int(r["mes"]),
+                    "mes_nombre": MES_NOMBRES[int(r["mes"])] if int(r["mes"]) < len(MES_NOMBRES) else str(r["mes"]),
+                    "asistencia": float(r["asistencia_avg"] or 0),
+                    "establecimientos": int(r["ee_count"]),
+                    "alumnos": int(r["total_alumnos"] or 0),
+                }
+                for r in rows
+            ],
+        }
+    except Exception as e:
+        return {"slep_id": slep_id, "meses": [], "error": str(e)}

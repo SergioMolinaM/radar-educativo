@@ -1,0 +1,6 @@
+sleps:
+  - id: slep_barrancas
+    name: "Servicio Local de Educación Pública Barrancas"
+    rut: "72.899.900-8"
+    codigo_organismo: "PENDIENTE"  # Esperando que el usuario provea el código oficial
+    region: "RM"
