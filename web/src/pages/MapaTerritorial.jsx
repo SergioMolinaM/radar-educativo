@@ -85,18 +85,18 @@ export default function MapaTerritorial() {
               scrollWheelZoom={true}>
               <TileLayer
                 attribution='&copy; <a href="https://carto.com">CARTO</a>'
-                url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
+                url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
               />
               {withCoords.map((e) => (
                 <CircleMarker
                   key={e.rbd}
                   center={[e.latitud, e.longitud]}
-                  radius={Math.max(4, Math.min(12, (e.matricula || 100) / 80))}
+                  radius={Math.max(7, Math.min(16, (e.matricula || 100) / 55))}
                   pathOptions={{
-                    color: SEMAFORO_COLORS[e.semaforo] || '#10b981',
+                    color: '#ffffff',
                     fillColor: SEMAFORO_COLORS[e.semaforo] || '#10b981',
-                    fillOpacity: 0.7,
-                    weight: 1,
+                    fillOpacity: 0.85,
+                    weight: 2,
                   }}
                   eventHandlers={{
                     click: () => setSelected(e),
@@ -129,6 +129,16 @@ export default function MapaTerritorial() {
               ))}
             </MapContainer>
           )}
+          {/* Instrucción visual */}
+          <div style={{
+            position: 'absolute', bottom: 12, left: '50%', transform: 'translateX(-50%)',
+            zIndex: 1000, padding: '6px 14px', borderRadius: 20,
+            background: '#ffffff', color: '#334155',
+            boxShadow: '0 2px 12px rgba(0,0,0,0.15)',
+            fontSize: 11, fontWeight: 600, pointerEvents: 'none',
+          }}>
+            Haz clic en un punto para ver el detalle del establecimiento
+          </div>
         </div>
 
         {/* Sidebar: comunas */}

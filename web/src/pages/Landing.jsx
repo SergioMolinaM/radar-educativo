@@ -119,6 +119,54 @@ export default function Landing() {
         ))}
       </div>
 
+      {/* Tabla comparativa — Por qué Radar */}
+      <div className="animate-fade-in" style={{
+        maxWidth: 900, width: '100%', marginBottom: 28,
+        background: 'rgba(255,255,255,0.04)',
+        border: '1px solid rgba(255,255,255,0.1)',
+        borderRadius: 16, padding: '24px 28px',
+      }}>
+        <h3 style={{ fontSize: 18, fontWeight: 700, marginBottom: 4, textAlign: 'center' }}>
+          ¿Por qué <span className="text-gradient">Radar</span>?
+        </h3>
+        <p style={{ fontSize: 12, color: 'var(--text-muted)', textAlign: 'center', marginBottom: 16 }}>
+          Comparado con otras plataformas de gestión educativa (IDEA, SIGE, Data Observatory)
+        </p>
+        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
+          <thead>
+            <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+              <th style={{ textAlign: 'left', padding: '8px 12px', color: 'var(--text-muted)', fontWeight: 600 }}>Capacidad</th>
+              <th style={{ textAlign: 'center', padding: '8px 12px', color: 'var(--text-muted)', fontWeight: 600, width: 140 }}>Otras plataformas</th>
+              <th style={{ textAlign: 'center', padding: '8px 12px', color: '#f97316', fontWeight: 700, width: 140 }}>Radar</th>
+            </tr>
+          </thead>
+          <tbody>
+            {[
+              ['Visualización de datos', true, true],
+              ['Alertas automáticas al equipo directivo', false, true],
+              ['Cruce de instrumentos (PAL + CGE + ENEP + SIMCE)', false, true],
+              ['Compromisos con countdown y responsables', false, true],
+              ['Proyección de cumplimiento a fin de año', false, true],
+              ['Acciones sugeridas por indicador', false, true],
+              ['Espacio de trabajo diario para el equipo', false, true],
+            ].map(([cap, otros, radar], i) => (
+              <tr key={i} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                <td style={{ padding: '8px 12px', color: 'var(--text-primary)' }}>{cap}</td>
+                <td style={{ textAlign: 'center', padding: '8px 12px' }}>
+                  {otros
+                    ? <span style={{ color: '#10b981', fontWeight: 700 }}>Si</span>
+                    : <span style={{ color: '#ef4444', fontWeight: 700 }}>No</span>
+                  }
+                </td>
+                <td style={{ textAlign: 'center', padding: '8px 12px' }}>
+                  <span style={{ color: '#10b981', fontWeight: 700 }}>Si</span>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
       {/* CTA */}
       <button
         onClick={() => navigate('/login')}
