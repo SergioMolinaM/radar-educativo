@@ -43,14 +43,14 @@ export default function Landing() {
     {
       icon: '💼',
       title: 'Administración y finanzas',
-      description: 'Ejecución presupuestaria y compras públicas del SLEP en un vistazo.',
+      description: 'Ejecución presupuestaria del SLEP en un vistazo. Integración financiera en desarrollo.',
       color: '#f59e0b',
       bg: 'rgba(245, 158, 11, 0.12)',
     },
     {
       icon: '📋',
       title: 'Datos oficiales y del SLEP',
-      description: 'Fuentes del Mineduc, Agencia de Calidad, Mercado Público y datos propios del SLEP.',
+      description: 'Fuentes del Mineduc, Agencia de Calidad, ENEP y datos propios del SLEP.',
       color: '#64748b',
       bg: 'rgba(100, 116, 139, 0.12)',
     },
@@ -72,8 +72,8 @@ export default function Landing() {
           <span className="text-gradient">Radar</span> de la Educación Pública
         </h1>
         <p style={{ fontSize: 15, color: 'var(--text-muted)', maxWidth: 480, margin: '0 auto', lineHeight: 1.5 }}>
-          Plataforma de gestión integral para Servicios Locales de Educación Pública.
-          Datos oficiales, actualizados y accionables.
+          Tu espacio de trabajo diario como equipo directivo SLEP.
+          Alertas, brechas y acciones concretas — no solo datos.
         </p>
       </div>
 
@@ -148,7 +148,7 @@ export default function Landing() {
 
       {/* Footer */}
       <p style={{ marginTop: 32, fontSize: 12, color: 'var(--text-muted)', opacity: 0.6 }}>
-        Tercera Letra · Datos fuente: MINEDUC, Agencia de Calidad, Mercado Público
+        Tercera Letra · Datos fuente: MINEDUC, Agencia de Calidad, ENEP, PAL oficiales
       </p>
     </div>
   );

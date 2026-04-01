@@ -30,7 +30,7 @@ const NAV_MODULES = [
     color: '#10b981',
     items: [
       { to: '/dashboard/mapa', icon: Map, label: 'Mapa territorial' },
-      { to: '/dashboard/ranking', icon: Trophy, label: 'Panorama comparativo' },
+      { to: '/dashboard/ranking', icon: Trophy, label: 'Brechas entre EE' },
     ],
   },
   {

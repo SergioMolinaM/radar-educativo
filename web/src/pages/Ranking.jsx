@@ -49,7 +49,7 @@ export default function Ranking() {
 
   return (
     <div className="animate-fade-in">
-      <h2 style={{ fontSize: 22, fontWeight: 700, marginBottom: 4 }}>Panorama comparativo</h2>
+      <h2 style={{ fontSize: 22, fontWeight: 700, marginBottom: 4 }}>Comparador de brechas entre establecimientos</h2>
       <p style={{ color: 'var(--text-muted)', fontSize: 14, marginBottom: 24 }}>
         {ranking.length} establecimientos &middot; Datos 2025
       </p>

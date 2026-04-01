@@ -122,17 +122,25 @@ export default function CompromisosPanel() {
           <p style={{ fontSize: 13, color: 'var(--text-muted)', margin: 0, lineHeight: 1.6 }}>
             Hitos activos por instrumento — CGE · PAL · PMG · CDC · ADP
           </p>
+          {/* Globo cómic blanco */}
           <div style={{
-            marginTop: 8, padding: '8px 12px', borderRadius: 6,
-            background: 'rgba(59, 130, 246, 0.06)',
-            border: '1px solid rgba(59, 130, 246, 0.1)',
-            fontSize: 11, color: 'var(--text-muted)', lineHeight: 1.7,
+            marginTop: 8, padding: '10px 14px', borderRadius: 12,
+            background: '#ffffff', color: '#334155',
+            boxShadow: '0 2px 12px rgba(0,0,0,0.08)',
+            fontSize: 11, lineHeight: 1.7, position: 'relative',
           }}>
-            <strong style={{ color: 'var(--accent-primary)' }}>¿De dónde vienen estas tareas?</strong> Se generan automáticamente desde tres fuentes:
+            <div style={{
+              position: 'absolute', top: -7, left: 16,
+              width: 0, height: 0,
+              borderLeft: '7px solid transparent',
+              borderRight: '7px solid transparent',
+              borderBottom: '7px solid #ffffff',
+            }} />
+            <strong style={{ color: '#2563eb' }}>¿De dónde vienen estas tareas?</strong> Se generan automáticamente desde tres fuentes:
             el <strong>calendario normativo</strong> (plazos legales CGE, ADP, PMG),
             el <strong>Plan Anual Local</strong> al cargarse, y
             las <strong>alertas del sistema</strong> cuando un indicador requiere acción.
-            El equipo directivo marca avance o completado.
+            Los <strong>responsables</strong> se asignan desde el organigrama del SLEP. En modo demo son ficticios y editables.
           </div>
         </div>
         <div style={{ display: 'flex', gap: 8 }}>

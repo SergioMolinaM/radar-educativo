@@ -108,7 +108,7 @@ export default function Dashboard() {
         <KpiCard label="Asistencia promedio" value={kpis.asistencia_promedio} unit="%" icon={CalendarCheck} trend={trends.asistencia_variacion_mensual}
           tooltip={{ text: 'Porcentaje promedio de asistencia de escuelas y liceos del SLEP. No incluye educación de adultos ni jardines JUNJI.', fuente: 'MINEDUC Asistencia 2025', periodo: summary?.mes_nombre + ' 2025' }} />
         <KpiCard label="Ejecución presup." value={kpis.ejecucion_presupuestaria} unit="%" icon={DollarSign}
-          tooltip={{ text: 'Porcentaje del presupuesto anual del SLEP ejecutado a la fecha. Incluye gastos en personal, bienes, transferencias e inversión.', fuente: 'Mercado Público', periodo: 'Q1 2026' }} />
+          tooltip={{ text: 'Porcentaje del presupuesto anual del SLEP ejecutado a la fecha. Este dato se actualizará con la integración al sistema financiero del SLEP (en desarrollo).', fuente: 'Estimación interna', periodo: 'Q1 2026' }} />
       </div>
 
       {/* ENEP — Objetivos Estratégicos con alertas */}

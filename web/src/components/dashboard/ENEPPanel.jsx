@@ -2,17 +2,16 @@
  * ENEPPanel — Seguimiento de Objetivos Estratégicos ENEP
  *
  * Muestra el estado de los 5 OE del SLEP Barrancas con alertas cuando
- * un indicador está bajo la meta. Esto es lo que IDEA NO hace:
- * IDEA muestra los datos; Radar alerta cuando algo va mal.
+ * un indicador está bajo la meta. Detecta brechas y sugiere acciones.
  *
- * Datos: SLEP Barrancas 2025 (extraídos de plataforma IDEA)
+ * Datos: SLEP Barrancas 2025 (fuente: plataforma IDEA ENEP)
  */
 
 import { useState, useEffect, useRef } from 'react';
 import { AlertTriangle, TrendingDown, TrendingUp, Minus, ChevronRight, Info } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
-// Datos reales SLEP Barrancas 2025 — fuente: IDEA ENEP
+// Datos reales SLEP Barrancas 2025 — fuente: ENEP (plataforma IDEA)
 const ENEP_BARRANCAS = {
   slep: 'Barrancas',
   ee: 53,
@@ -381,8 +380,8 @@ export default function ENEPPanel({ fullPage = false }) {
         }} />
         <strong style={{ color: '#2563eb' }}>¿Qué es la ENEP?</strong>{' '}
         La Estrategia Nacional de Educación Pública define 5 Objetivos Estratégicos que todos los SLEPs deben cumplir.
-        Radar monitorea automáticamente cada indicador y alerta cuando está bajo la meta.{' '}
-        <em style={{ color: '#f97316' }}>IDEA muestra datos; Radar dice cuándo actuar.</em>
+        Radar cruza estos objetivos con el PAL y el CGE, detecta brechas automáticamente y sugiere acciones concretas al equipo directivo.{' '}
+        <em style={{ color: '#64748b' }}>Fuente: ENEP vía plataforma IDEA.</em>
       </div>
     </div>
   );
