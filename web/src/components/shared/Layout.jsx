@@ -307,8 +307,9 @@ export default function Layout() {
             <LogOut size={13} />
             Cerrar sesión
           </button>
-          <div style={{ marginTop: 12, fontSize: 9, color: 'var(--text-muted)', opacity: 0.5, letterSpacing: '0.05em' }}>
-            © 2026 Tercera Letra SpA
+          <div style={{ marginTop: 12, fontSize: 9, color: 'var(--text-muted)', opacity: 0.5, lineHeight: 1.6 }}>
+            <div>\u00a9 {new Date().getFullYear()} Tercera Letra SpA</div>
+            <div style={{ opacity: 0.7 }}>Datos oficiales actualizados seg\u00fan disponibilidad</div>
           </div>
         </div>
       </aside>
