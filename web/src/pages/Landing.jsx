@@ -15,20 +15,20 @@ export default function Landing() {
   }
 
   const features = [
-    { icon: '\ud83d\udcca', title: 'Monitoreo en tiempo real', description: 'Asistencia, rendimiento y SIMCE de todos tus establecimientos en un solo lugar.', color: '#3b82f6', bg: 'rgba(59, 130, 246, 0.12)' },
-    { icon: '\ud83c\udfaf', title: 'Seguimiento del PAL', description: 'Indicadores, compromisos y avance del Plan Anual Local con datos reales.', color: '#8b5cf6', bg: 'rgba(139, 92, 246, 0.12)' },
-    { icon: '\ud83d\udea8', title: 'Alertas inteligentes', description: 'Detecta establecimientos en riesgo antes de que sea tarde.', color: '#ef4444', bg: 'rgba(239, 68, 68, 0.12)' },
-    { icon: '\ud83d\uddfa\ufe0f', title: 'Mapa territorial', description: 'Visualiza tu territorio con datos georeferenciados por comuna.', color: '#10b981', bg: 'rgba(16, 185, 129, 0.12)' },
-    { icon: '\ud83d\udcbc', title: 'Administraci\u00f3n y finanzas', description: 'Ejecuci\u00f3n presupuestaria del SLEP. Integraci\u00f3n financiera en desarrollo.', color: '#f59e0b', bg: 'rgba(245, 158, 11, 0.12)' },
-    { icon: '\ud83d\udccb', title: 'Datos oficiales', description: 'Fuentes del Mineduc, Agencia de Calidad, ENEP y datos propios del SLEP.', color: '#64748b', bg: 'rgba(100, 116, 139, 0.12)' },
+    { icon: '📊', title: 'Monitoreo en tiempo real', description: 'Asistencia, rendimiento y SIMCE de todos tus establecimientos en un solo lugar.', color: '#3b82f6', bg: 'rgba(59, 130, 246, 0.12)' },
+    { icon: '🎯', title: 'Seguimiento del PAL', description: 'Indicadores, compromisos y avance del Plan Anual Local con datos reales.', color: '#8b5cf6', bg: 'rgba(139, 92, 246, 0.12)' },
+    { icon: '🚨', title: 'Alertas inteligentes', description: 'Detecta establecimientos en riesgo antes de que sea tarde.', color: '#ef4444', bg: 'rgba(239, 68, 68, 0.12)' },
+    { icon: '🗺️', title: 'Mapa territorial', description: 'Visualiza tu territorio con datos georeferenciados por comuna.', color: '#10b981', bg: 'rgba(16, 185, 129, 0.12)' },
+    { icon: '💼', title: 'Administración y finanzas', description: 'Ejecución presupuestaria del SLEP. Integración financiera en desarrollo.', color: '#f59e0b', bg: 'rgba(245, 158, 11, 0.12)' },
+    { icon: '📋', title: 'Datos oficiales', description: 'Fuentes del Mineduc, Agencia de Calidad, ENEP y datos propios del SLEP.', color: '#64748b', bg: 'rgba(100, 116, 139, 0.12)' },
   ];
 
   const comparativa = [
-    ['Visualizaci\u00f3n de datos', true, true],
-    ['Alertas autom\u00e1ticas al equipo directivo', false, true],
+    ['Visualización de datos', true, true],
+    ['Alertas automáticas al equipo directivo', false, true],
     ['Cruce de instrumentos (PAL + CGE + ENEP + SIMCE)', false, true],
     ['Compromisos con countdown y responsables', false, true],
-    ['Proyecci\u00f3n de cumplimiento a fin de a\u00f1o', false, true],
+    ['Proyección de cumplimiento a fin de año', false, true],
     ['Acciones sugeridas por indicador', false, true],
     ['Espacio de trabajo diario para el equipo', false, true],
   ];
@@ -44,7 +44,7 @@ export default function Landing() {
       <div className="animate-fade-in" style={{ textAlign: 'center', marginBottom: 20 }}>
         <RadarLogo size={54} />
         <h1 style={{ fontSize: 30, fontWeight: 800, marginTop: 10, marginBottom: 6 }}>
-          <span className="text-gradient">Radar</span> de la Educaci\u00f3n P\u00fablica
+          <span className="text-gradient">Radar</span> de la Educación Pública
         </h1>
         <p style={{ fontSize: 15, color: 'var(--text-muted)', maxWidth: 480, margin: '0 auto', lineHeight: 1.5 }}>
           Tu espacio de trabajo diario como equipo directivo SLEP.
@@ -99,7 +99,7 @@ export default function Landing() {
             color: 'var(--text-muted)', fontSize: 14, fontWeight: 600, cursor: 'pointer',
           }}
         >
-          \u00bfPor qu\u00e9 <span className="text-gradient" style={{ marginLeft: 4, marginRight: 4 }}>Radar</span>?
+          {'¿Por qué'} <span className="text-gradient" style={{ marginLeft: 4, marginRight: 4 }}>Radar</span>{'?'}
           {showTable ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
         </button>
 
@@ -110,7 +110,7 @@ export default function Landing() {
             borderRadius: '0 0 14px 14px', padding: '16px 24px',
           }}>
             <p style={{ fontSize: 12, color: 'var(--text-muted)', textAlign: 'center', marginBottom: 12, marginTop: 0 }}>
-              Comparado con otras plataformas de gesti\u00f3n educativa (IDEA, SIGE, Data Observatory)
+              Comparado con otras plataformas de gestión educativa (IDEA, SIGE, Data Observatory)
             </p>
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
               <thead>
@@ -125,10 +125,10 @@ export default function Landing() {
                   <tr key={i} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
                     <td style={{ padding: '7px 12px', color: 'var(--text-primary)' }}>{cap}</td>
                     <td style={{ textAlign: 'center', padding: '7px 12px' }}>
-                      {otros ? <span style={{ color: '#10b981', fontWeight: 700 }}>S\u00ed</span> : <span style={{ color: '#ef4444', fontWeight: 700 }}>No</span>}
+                      {otros ? <span style={{ color: '#10b981', fontWeight: 700 }}>{'Sí'}</span> : <span style={{ color: '#ef4444', fontWeight: 700 }}>No</span>}
                     </td>
                     <td style={{ textAlign: 'center', padding: '7px 12px' }}>
-                      <span style={{ color: '#10b981', fontWeight: 700 }}>S\u00ed</span>
+                      <span style={{ color: '#10b981', fontWeight: 700 }}>{'Sí'}</span>
                     </td>
                   </tr>
                 ))}
@@ -138,13 +138,13 @@ export default function Landing() {
         )}
       </div>
 
-      {/* Footer — Copyright + Fuente */}
+      {/* Footer */}
       <div style={{ textAlign: 'center', marginTop: 16 }}>
         <p style={{ fontSize: 12, color: 'var(--text-muted)', opacity: 0.7, margin: '0 0 4px' }}>
-          \u00a9 {new Date().getFullYear()} Tercera Letra SpA. Todos los derechos reservados.
+          {'© '}{new Date().getFullYear()}{' Tercera Letra SpA. Todos los derechos reservados.'}
         </p>
         <p style={{ fontSize: 11, color: 'var(--text-muted)', opacity: 0.5, margin: 0 }}>
-          Fuente: Datos oficiales que se actualizan seg\u00fan est\u00e9n disponibles.
+          {'Fuente: Datos oficiales que se actualizan según estén disponibles.'}
         </p>
       </div>
     </div>
