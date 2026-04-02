@@ -6,32 +6,32 @@
 import { AlertTriangle, School, ChevronRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
-// Datos cruzados — en producción vendrían del API
+// Datos cruzados reales — EE con peores indicadores del SLEP Barrancas
 const EE_CRUZADOS = [
   {
-    rbd: 10004, nombre: 'Liceo Polivalente Cerro Navia', comuna: 'Cerro Navia',
+    rbd: 24754, nombre: 'CEIA Georgina Salas Dinamarca', comuna: 'Cerro Navia',
     dimensiones: [
-      { nombre: 'Asistencia', valor: '79,8%', estado: 'rojo', meta: '82%' },
-      { nombre: 'SIMCE 4° Lect.', valor: '242 pts', estado: 'rojo', meta: '260 pts' },
-      { nombre: 'Retención 1° Medio', valor: '84%', estado: 'rojo', meta: '95%' },
+      { nombre: 'Asistencia', valor: '51,1%', estado: 'rojo', meta: '80%' },
+      { nombre: 'Retención', valor: 'Bajo meta', estado: 'rojo', meta: '90%' },
+      { nombre: 'Titulación TP', valor: 'Bajo meta', estado: 'rojo', meta: '65%' },
     ],
-    alerta: 'Triple rojo: asistencia, aprendizaje y retención bajo meta',
+    alerta: 'Triple rojo: asistencia crítica (51%), retención y titulación bajo meta. CEIA adultos requiere plan especial.',
   },
   {
-    rbd: 10008, nombre: 'Escuela Especial Santa Teresa', comuna: 'Cerro Navia',
+    rbd: 24804, nombre: 'Escuela Especial Sgto. Candelaria', comuna: 'Cerro Navia',
     dimensiones: [
-      { nombre: 'Asistencia', valor: '76,2%', estado: 'rojo', meta: '82%' },
-      { nombre: 'Dotación', valor: '2 vacantes', estado: 'rojo', meta: '0 vacantes' },
+      { nombre: 'Asistencia', valor: '64,2%', estado: 'rojo', meta: '80%' },
+      { nombre: 'Dotación', valor: 'Incompleta', estado: 'rojo', meta: 'Completa' },
     ],
-    alerta: 'Doble rojo: asistencia crítica + dotación incompleta',
+    alerta: 'Doble rojo: asistencia muy baja en escuela especial + dotación incompleta.',
   },
   {
-    rbd: 10016, nombre: 'Jardín Infantil Semillita', comuna: 'Pudahuel',
+    rbd: 10091, nombre: 'Liceo Profesora Gladys Valenzuela', comuna: 'Lo Prado',
     dimensiones: [
-      { nombre: 'Asistencia', valor: '78,3%', estado: 'rojo', meta: '82%' },
-      { nombre: 'PME', valor: '15%', estado: 'rojo', meta: '60%' },
+      { nombre: 'Asistencia', valor: '71,6%', estado: 'rojo', meta: '80%' },
+      { nombre: 'SIMCE', valor: 'Bajo promedio', estado: 'rojo', meta: 'Promedio nacional' },
     ],
-    alerta: 'Doble rojo: asistencia + PME muy bajo',
+    alerta: 'Doble rojo: asistencia bajo 80% + resultados SIMCE bajo promedio.',
   },
 ];
 
