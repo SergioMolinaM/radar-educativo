@@ -130,32 +130,33 @@ export const mockDashboard = {
       matricula: e.matricula,
     })),
   },
+  // Asistencia real SLEP Barrancas 2025 — Fuente: MINEDUC Asistencia Declarada mensual
   tendenciaAsistencia: {
     meses: [
-      { mes: '2025-03', mes_nombre: 'Mar', asistencia: 89.2 },
-      { mes: '2025-04', mes_nombre: 'Abr', asistencia: 87.8 },
-      { mes: '2025-05', mes_nombre: 'May', asistencia: 86.1 },
-      { mes: '2025-06', mes_nombre: 'Jun', asistencia: 84.5 },
-      { mes: '2025-08', mes_nombre: 'Ago', asistencia: 85.9 },
-      { mes: '2025-09', mes_nombre: 'Sep', asistencia: 87.3 },
-      { mes: '2025-10', mes_nombre: 'Oct', asistencia: 88.0 },
-      { mes: '2025-11', mes_nombre: 'Nov', asistencia: 87.5 },
-      { mes: '2025-12', mes_nombre: 'Dic', asistencia: 86.2 },
-      { mes: '2026-03', mes_nombre: 'Mar 26', asistencia: 88.7 },
+      { mes: '2025-03', mes_nombre: 'Mar', asistencia: 84.3 },
+      { mes: '2025-04', mes_nombre: 'Abr', asistencia: 79.0 },
+      { mes: '2025-05', mes_nombre: 'May', asistencia: 74.8 },
+      { mes: '2025-06', mes_nombre: 'Jun', asistencia: 63.3 },
+      { mes: '2025-07', mes_nombre: 'Jul', asistencia: 77.2 },
+      { mes: '2025-08', mes_nombre: 'Ago', asistencia: 75.3 },
+      { mes: '2025-09', mes_nombre: 'Sep', asistencia: 75.9 },
+      { mes: '2025-10', mes_nombre: 'Oct', asistencia: 75.1 },
+      { mes: '2025-11', mes_nombre: 'Nov', asistencia: 74.4 },
+      { mes: '2025-12', mes_nombre: 'Dic', asistencia: 75.0 },
     ],
   },
 };
 
-// ─── ALERTS ─────────────────────────────────────────────────────
+// ─── ALERTS — generadas desde semáforo real de asistencia marzo 2025 ─────────
 export const mockAlerts = [
-  { id: 1, tipo: 'asistencia', severity: 'critical', mensaje: 'Jardín Infantil Semillita: asistencia bajo 80% por 3 semanas consecutivas', rbd: 10016, fecha: '2026-03-28', leida: false },
-  { id: 2, tipo: 'asistencia', severity: 'critical', mensaje: 'Liceo Polivalente Cerro Navia: asistencia bajo 80% por 2 semanas', rbd: 10004, fecha: '2026-03-27', leida: false },
-  { id: 3, tipo: 'asistencia', severity: 'critical', mensaje: 'Escuela Especial Santa Teresa: asistencia crónica bajo 80%', rbd: 10008, fecha: '2026-03-26', leida: true },
-  { id: 4, tipo: 'financiero', severity: 'warning', mensaje: 'Liceo Industrial de Cerro Navia: ejecución presupuestaria bajo 60%', rbd: 10013, fecha: '2026-03-25', leida: false },
-  { id: 5, tipo: 'matricula', severity: 'warning', mensaje: 'Escuela Básica Los Nogales: baja de 15 estudiantes en marzo', rbd: 10011, fecha: '2026-03-24', leida: true },
-  { id: 6, tipo: 'pedagogico', severity: 'info', mensaje: 'Resultados SIMCE 4° básico disponibles para análisis', rbd: null, fecha: '2026-03-20', leida: true },
-  { id: 7, tipo: 'infraestructura', severity: 'warning', mensaje: 'Escuela Básica Presidente Salvador Allende: mantención pendiente gimnasio', rbd: 10003, fecha: '2026-03-18', leida: true },
-  { id: 8, tipo: 'dotacion', severity: 'info', mensaje: 'Liceo Bicentenario de Pudahuel: 2 vacantes docentes sin cubrir', rbd: 10002, fecha: '2026-03-15', leida: true },
+  { id: 1, tipo: 'asistencia', severity: 'critical', mensaje: 'CEIA Georgina Salas Dinamarca (Cerro Navia): asistencia 51,1% — muy bajo umbral 80%', rbd: 24754, fecha: '2026-03-28', leida: false },
+  { id: 2, tipo: 'asistencia', severity: 'critical', mensaje: 'Escuela Especial Sgto. Candelaria (Cerro Navia): asistencia 64,2%', rbd: 24804, fecha: '2026-03-28', leida: false },
+  { id: 3, tipo: 'asistencia', severity: 'critical', mensaje: 'Liceo Profesora Gladys Valenzuela (Lo Prado): asistencia 71,6%', rbd: 10091, fecha: '2026-03-27', leida: false },
+  { id: 4, tipo: 'asistencia', severity: 'critical', mensaje: 'Escuela Melvin Jones (Pudahuel): asistencia 71,9%', rbd: 10123, fecha: '2026-03-27', leida: false },
+  { id: 5, tipo: 'asistencia', severity: 'critical', mensaje: 'Escuela Herminda de la Victoria (Cerro Navia): asistencia 73,2%', rbd: 10088, fecha: '2026-03-26', leida: true },
+  { id: 6, tipo: 'asistencia', severity: 'warning', mensaje: 'Liceo Polivalente Los Heroes (Cerro Navia): asistencia 76,1%', rbd: 10075, fecha: '2026-03-26', leida: true },
+  { id: 7, tipo: 'asistencia', severity: 'warning', mensaje: 'Escuela Villa Los Boldos (Pudahuel): asistencia 77,1%', rbd: 10131, fecha: '2026-03-25', leida: true },
+  { id: 8, tipo: 'asistencia', severity: 'warning', mensaje: 'Liceo Centro Experimental Pudahuel Caren: asistencia 79,4%', rbd: 10077, fecha: '2026-03-25', leida: true },
 ];
 
 // ─── ESTABLISHMENTS ─────────────────────────────────────────────

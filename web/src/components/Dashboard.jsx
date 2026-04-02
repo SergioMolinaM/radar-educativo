@@ -254,7 +254,7 @@ export default function Dashboard() {
         {tendencia?.meses?.length > 0 && (
           <div className="glass-panel" style={{ padding: 20 }}>
             <h3 style={{ fontSize: 16, fontWeight: 600, marginBottom: 14 }}>
-              Asistencia mensual 2025
+              Asistencia mensual 2025 (datos reales MINEDUC)
               <span style={{ fontSize: 12, fontWeight: 400, color: 'var(--text-muted)', marginLeft: 8 }}>
                 {tendencia.meses.length} meses
               </span>
@@ -263,7 +263,7 @@ export default function Dashboard() {
               <LineChart data={tendencia.meses}>
                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" />
                 <XAxis dataKey="mes_nombre" tick={{ fill: '#94a3b8', fontSize: 11 }} axisLine={false} tickLine={false} />
-                <YAxis domain={[60, 100]} tick={{ fill: '#94a3b8', fontSize: 11 }} axisLine={false} tickLine={false} />
+                <YAxis domain={[50, 100]} tick={{ fill: '#94a3b8', fontSize: 11 }} axisLine={false} tickLine={false} />
                 <Tooltip contentStyle={{ background: '#1e293b', border: 'none', borderRadius: 8, fontSize: 13 }} formatter={(v) => [`${v}%`, 'Asistencia']} />
                 <ReferenceLine y={82} stroke="var(--alert-green)" strokeDasharray="4 4" label={{ value: 'Meta 82%', fill: 'var(--alert-green)', fontSize: 10 }} />
                 <Line type="monotone" dataKey="asistencia" stroke="var(--accent-primary)" strokeWidth={2.5} dot={{ r: 4, fill: 'var(--accent-primary)' }} />
