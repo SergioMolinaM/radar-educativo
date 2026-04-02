@@ -8,33 +8,34 @@ export default function KpiCard({ label, value, unit, trend, icon: Icon, tooltip
   const animatedValue = useCountUp(typeof value === 'number' ? value : 0);
 
   return (
-    <div className="glass-panel" style={{ padding: '22px 26px' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-        <span style={{ fontSize: 15, color: 'var(--text-muted)', display: 'flex', alignItems: 'center' }}>
+    <div className="glass-panel" style={{ padding: '12px 18px' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <span style={{ fontSize: 12, color: 'var(--text-muted)', display: 'flex', alignItems: 'center' }}>
           {label}
           {tooltip && <InfoTooltip {...tooltip} />}
         </span>
-        {Icon && <Icon size={20} style={{ color: 'var(--accent-primary)', opacity: 0.7 }} />}
+        {Icon && <Icon size={16} style={{ color: 'var(--accent-primary)', opacity: 0.6 }} />}
       </div>
-      <div style={{ fontSize: 34, fontWeight: 700, marginTop: 8 }}>
-        {typeof value === 'number' ? animatedValue.toLocaleString('es-CL') : value}
-        {unit && <span style={{ fontSize: 16, fontWeight: 400, color: 'var(--text-muted)', marginLeft: 4 }}>{unit}</span>}
+      <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginTop: 4 }}>
+        <span style={{ fontSize: 24, fontWeight: 700 }}>
+          {typeof value === 'number' ? animatedValue.toLocaleString('es-CL') : value}
+        </span>
+        {unit && <span style={{ fontSize: 13, fontWeight: 400, color: 'var(--text-muted)' }}>{unit}</span>}
+        {trend !== undefined && typeof trend === 'number' && (
+          <span style={{ display: 'flex', alignItems: 'center', gap: 3, fontSize: 11, color: trendColor, marginLeft: 'auto' }}>
+            <TrendIcon size={12} />
+            {trend > 0 ? '+' : ''}{trend}%
+          </span>
+        )}
       </div>
-      {trend !== undefined && typeof trend === 'number' && (
-        <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginTop: 8, fontSize: 14, color: trendColor }}>
-          <TrendIcon size={15} />
-          {trend > 0 ? '+' : ''}{trend}% vs mes anterior
-        </div>
-      )}
       {typeof trend === 'string' && (
-        <div style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 6 }}>{trend}</div>
+        <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>{trend}</div>
       )}
-      {/* Detail line: e.g. "40 escuelas/liceos + 13 jardines" */}
       {detail && (
-        <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 6, lineHeight: 1.5 }}>{detail}</div>
+        <div style={{ fontSize: 10, color: 'var(--text-muted)', marginTop: 3 }}>{detail}</div>
       )}
       {subtitle && !detail && (
-        <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 4, opacity: 0.8 }}>{subtitle}</div>
+        <div style={{ fontSize: 10, color: 'var(--text-muted)', marginTop: 2, opacity: 0.8 }}>{subtitle}</div>
       )}
     </div>
   );

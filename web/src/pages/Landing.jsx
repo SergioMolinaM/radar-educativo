@@ -99,7 +99,7 @@ export default function Landing() {
             color: 'var(--text-muted)', fontSize: 14, fontWeight: 600, cursor: 'pointer',
           }}
         >
-          {'¿Por qué'} <span className="text-gradient" style={{ marginLeft: 4, marginRight: 4 }}>Radar</span>{'?'}
+          {'¿Por qué '}<span className="text-gradient">Radar</span>{'?'}
           {showTable ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
         </button>
 

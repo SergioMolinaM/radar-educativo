@@ -68,13 +68,12 @@ const NAV_MODULES = [
 ];
 
 // Banda contextual: "vista de 90 segundos" para el director
-function ContextBanner({ slepLabel }) {
+function ContextBanner({ slepLabel, userName }) {
   const now = new Date();
   const weekNum = Math.ceil(((now - new Date(now.getFullYear(), 0, 1)) / 86400000 + 1) / 7);
-  const monthNames = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
-  const dayNames = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+  const monthNames = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+  const dayNames = ['dom','lun','mar','mié','jue','vie','sáb'];
 
-  // Calcular días hábiles transcurridos en el mes (aprox)
   const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
   let diasHabiles = 0;
   for (let d = new Date(startOfMonth); d <= now; d.setDate(d.getDate() + 1)) {
@@ -83,41 +82,31 @@ function ContextBanner({ slepLabel }) {
 
   return (
     <div style={{
-      display: 'flex',
-      alignItems: 'center',
-      gap: 24,
-      padding: '10px 32px',
+      display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+      padding: '7px 32px',
       background: 'rgba(15, 23, 42, 0.6)',
       borderBottom: '1px solid var(--border-color)',
-      fontSize: 12,
-      color: 'var(--text-muted)',
-      flexWrap: 'wrap',
+      fontSize: 11, color: 'var(--text-muted)',
     }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-        <Calendar size={14} style={{ color: '#3b82f6' }} />
-        <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+        <span>
+          <Calendar size={12} style={{ verticalAlign: 'middle', marginRight: 4, color: '#3b82f6' }} />
           {dayNames[now.getDay()]} {now.getDate()} {monthNames[now.getMonth()]} {now.getFullYear()}
+        </span>
+        <span style={{ color: 'var(--border-color)' }}>|</span>
+        <span>
+          <Clock size={12} style={{ verticalAlign: 'middle', marginRight: 4, color: '#10b981' }} />
+          Sem. {weekNum > 9 ? weekNum - 9 : weekNum} · {diasHabiles} días hábiles
+        </span>
+        <span style={{ color: 'var(--border-color)' }}>|</span>
+        <span>
+          <Users size={12} style={{ verticalAlign: 'middle', marginRight: 4, color: '#f59e0b' }} />
+          {slepLabel}
         </span>
       </div>
       <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-        <Clock size={14} style={{ color: '#10b981' }} />
-        <span>Semana escolar {weekNum > 9 ? weekNum - 9 : weekNum} · {diasHabiles} días hábiles en {monthNames[now.getMonth()].toLowerCase()}</span>
-      </div>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-        <Users size={14} style={{ color: '#f59e0b' }} />
-        <span>{slepLabel}</span>
-      </div>
-      <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 12 }}>
-        {window.__RADAR_DEMO_MODE__ ? (
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '3px 10px', borderRadius: 6, background: 'rgba(245,158,11,0.12)', border: '1px solid rgba(245,158,11,0.3)' }}>
-            <span style={{ color: '#f59e0b', fontSize: 11, fontWeight: 600 }}>Datos de ejemplo</span>
-          </div>
-        ) : (
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-            <TrendingUp size={14} style={{ color: '#10b981' }} />
-            <span style={{ color: '#10b981', fontWeight: 600 }}>Datos reales</span>
-          </div>
-        )}
+        <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{userName || 'Usuario'}</span>
+        <span style={{ color: 'var(--text-muted)' }}>· {slepLabel}</span>
       </div>
     </div>
   );
@@ -291,10 +280,13 @@ export default function Layout() {
         {/* User info + logout */}
         <div style={{ padding: '12px 16px', borderTop: '1px solid var(--border-color)' }}>
           <div style={{ fontSize: 12, color: 'var(--text-primary)', fontWeight: 600, marginBottom: 2 }}>
-            {user?.name}
+            {user?.nombre || user?.name || 'Usuario'}
           </div>
-          <div style={{ fontSize: 10, color: 'var(--text-muted)', marginBottom: 8 }}>
-            Director(a) · {slepLabel}
+          <div style={{ fontSize: 10, color: 'var(--text-muted)', marginBottom: 4 }}>
+            {user?.rol === 'admin' ? 'Administrador' : user?.rol || 'Usuario'} · {slepLabel}
+          </div>
+          <div style={{ fontSize: 9, color: 'var(--accent-primary)', opacity: 0.7, marginBottom: 8 }}>
+            {user?.email}
           </div>
           <button
             onClick={handleLogout}
@@ -316,7 +308,7 @@ export default function Layout() {
 
       {/* Main content area */}
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
-        <ContextBanner slepLabel={slepLabel} />
+        <ContextBanner slepLabel={slepLabel} userName={user?.nombre || user?.name} />
         <main style={{ flex: 1, padding: '24px 32px' }}>
           <Outlet />
         </main>
