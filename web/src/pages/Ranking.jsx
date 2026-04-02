@@ -76,7 +76,7 @@ export default function Ranking() {
             Top 5 - {m.invert ? 'Menor' : 'Mayor'} {m.label}
           </h3>
           {top5.map((e, i) => (
-            <div key={e.rbd} onClick={() => navigate(`/establecimientos/${e.rbd}`)}
+            <div key={e.rbd} onClick={() => navigate(`/dashboard/establecimientos/${e.rbd}`)}
               style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 0', borderBottom: '1px solid var(--border-color)', cursor: 'pointer' }}
             >
               <span style={{
@@ -105,7 +105,7 @@ export default function Ranking() {
             Bottom 5 - {m.invert ? 'Mayor' : 'Menor'} {m.label}
           </h3>
           {bottom5.map((e, i) => (
-            <div key={e.rbd} onClick={() => navigate(`/establecimientos/${e.rbd}`)}
+            <div key={e.rbd} onClick={() => navigate(`/dashboard/establecimientos/${e.rbd}`)}
               style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 0', borderBottom: '1px solid var(--border-color)', cursor: 'pointer' }}
             >
               <span style={{
@@ -142,7 +142,7 @@ export default function Ranking() {
             </thead>
             <tbody>
               {ranking.map((e, i) => (
-                <tr key={e.rbd} onClick={() => navigate(`/establecimientos/${e.rbd}`)} style={{ cursor: 'pointer' }}
+                <tr key={e.rbd} onClick={() => navigate(`/dashboard/establecimientos/${e.rbd}`)} style={{ cursor: 'pointer' }}
                   onMouseEnter={(ev) => (ev.currentTarget.style.background = 'rgba(255,255,255,0.03)')}
                   onMouseLeave={(ev) => (ev.currentTarget.style.background = 'transparent')}
                 >

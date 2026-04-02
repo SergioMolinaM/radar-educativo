@@ -40,9 +40,9 @@ const INDICADORES_PROYECCION = [
   },
   {
     nombre: 'Ejecución presupuestaria',
-    actual: 38.07, meta: 90.0, unidad: '%',
+    actual: 78.4, meta: 90.0, unidad: '%',
     menorEsMejor: false,
-    avanceMensual: 6.5,
+    avanceMensual: 2.5,
     mesesRestantes: 9,
     instrumento: 'CGE',
   },

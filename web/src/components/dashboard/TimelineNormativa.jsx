@@ -11,7 +11,7 @@ const HITOS_2026 = [
   { id: 3, fecha: '2026-04-15', hito: 'Diagnóstico DIA Lectura — 4° básico (todos los EE)', instrumento: 'PAL', area: 'UTP' },
   { id: 4, fecha: '2026-04-30', hito: 'Evaluación PME primer trimestre — reporte de avance', instrumento: 'PME', area: 'Planificación' },
   { id: 5, fecha: '2026-05-15', hito: 'Reporte trimestral ejecución presupuestaria Q1', instrumento: 'CGE', area: 'Finanzas' },
-  { id: 6, fecha: '2026-05-30', hito: 'Diagnóstico capacitación liderazgo directivo (52 EE)', instrumento: 'PAL', area: 'RRHH' },
+  { id: 6, fecha: '2026-05-30', hito: 'Diagnóstico capacitación liderazgo directivo (todos los EE)', instrumento: 'PAL', area: 'RRHH' },
   { id: 7, fecha: '2026-06-30', hito: 'Informe semestral CGE al Consejo Local', instrumento: 'CGE', area: 'Director Ejecutivo' },
   { id: 8, fecha: '2026-06-30', hito: 'Reporte intermedio PAL — avance indicadores', instrumento: 'PAL', area: 'Planificación' },
   { id: 9, fecha: '2026-07-15', hito: 'Diagnóstico DIA Lectura y Matemática — todos los niveles', instrumento: 'PAL', area: 'UTP' },

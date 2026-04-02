@@ -115,7 +115,7 @@ export default function MapaTerritorial() {
                         {e.rural && <><span>Tipo:</span><b>Rural</b></>}
                       </div>
                       <div style={{ marginTop: 6, display: 'flex', gap: 8 }}>
-                        <a href={`/establecimientos/${e.rbd}`} style={{ fontSize: 12, color: '#3b82f6', textDecoration: 'none', fontWeight: 600 }}>
+                        <a href={`/dashboard/establecimientos/${e.rbd}`} style={{ fontSize: 12, color: '#3b82f6', textDecoration: 'none', fontWeight: 600 }}>
                           Ver detalle →
                         </a>
                         <a href={`https://mi.mineduc.cl/mvc/mime/portada?rbd=${e.rbd}`} target="_blank" rel="noopener"
@@ -176,7 +176,7 @@ export default function MapaTerritorial() {
                 Asistencia: <b style={{ color: SEMAFORO_COLORS[selected.semaforo] }}>{selected.asistencia_pct}%</b><br />
                 {selected.rural && <span>Rural</span>}
               </div>
-              <a href={`/mi-slep/${selected.rbd}`} style={{
+              <a href={`/dashboard/establecimientos/${selected.rbd}`} style={{
                 display: 'inline-block', marginTop: 8, fontSize: 11,
                 color: '#3b82f6', textDecoration: 'none', fontWeight: 600,
               }}>

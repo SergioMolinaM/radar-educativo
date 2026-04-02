@@ -69,7 +69,7 @@ export default function Dashboard() {
       color: a.severity === 'critical' ? '#ef4444' : '#f59e0b',
     })),
     ...(kpis.alertas_rojas > 0 ? [{
-      text: `${kpis.alertas_rojas} establecimientos con asistencia bajo 75% requieren intervención`,
+      text: `${kpis.alertas_rojas} establecimientos con asistencia bajo 80% requieren intervención`,
       type: 'brecha',
       color: '#ef4444',
     }] : []),
@@ -202,7 +202,7 @@ export default function Dashboard() {
             boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
             fontSize: 12, lineHeight: 1.5,
           }}>
-            <strong style={{ color: '#ef4444' }}>{kpis.alertas_rojas || 0} establecimientos en rojo</strong> — asistencia bajo 75%.
+            <strong style={{ color: '#ef4444' }}>{kpis.alertas_rojas || 0} establecimientos en rojo</strong> — asistencia bajo 80%.
             {top5criticos.length > 0 && ` El más crítico: ${top5criticos[0]?.nombre?.slice(0, 30)} (${top5criticos[0]?.asistencia}%).`}
           </div>
 
@@ -210,7 +210,7 @@ export default function Dashboard() {
           {top5criticos.map((e, i) => (
             <div
               key={e.rbd}
-              onClick={() => navigate(`/establecimientos/${e.rbd}`)}
+              onClick={() => navigate(`/dashboard/establecimientos/${e.rbd}`)}
               style={{
                 display: 'flex', alignItems: 'center', gap: 12,
                 padding: '10px 12px', borderRadius: 8, cursor: 'pointer',
@@ -296,17 +296,17 @@ export default function Dashboard() {
             boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
             fontSize: 11, lineHeight: 1.5, textAlign: 'center',
           }}>
-            <Target size={12} style={{ verticalAlign: 'middle', color: '#2563eb' }} /> Umbrales asistencia: <strong style={{ color: '#ef4444' }}>Rojo</strong> &lt;75% · <strong style={{ color: '#f59e0b' }}>Naranja</strong> 75-82% · <strong style={{ color: '#10b981' }}>Verde</strong> &ge;82%
+            <Target size={12} style={{ verticalAlign: 'middle', color: '#2563eb' }} /> Umbrales asistencia: <strong style={{ color: '#ef4444' }}>Rojo</strong> &lt;80% · <strong style={{ color: '#f59e0b' }}>Naranja</strong> 80-88% · <strong style={{ color: '#10b981' }}>Verde</strong> &ge;88%
           </div>
         </div>
       </div>
 
       {/* Acciones rápidas — orientadas a acción, no solo navegación */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 12 }}>
-        <QuickLink icon="🚨" label="Ver alertas activas" desc={`${kpis.alertas_rojas || 0} EE en rojo`} color="#ef4444" to="/alertas" navigate={navigate} />
-        <QuickLink icon="🎯" label="Revisar avance PAL" desc="Indicadores y compromisos" color="#8b5cf6" to="/plan-anual" navigate={navigate} />
-        <QuickLink icon="📊" label="Detectar brechas" desc="Comparar establecimientos" color="#f97316" to="/ranking" navigate={navigate} />
-        <QuickLink icon="🗺️" label="Explorar territorio" desc={`${kpis.total_establecimientos || '?'} EE (${kpis.ee_con_datos || '?'} con datos)`} color="#10b981" to="/mapa" navigate={navigate} />
+        <QuickLink icon="🚨" label="Ver alertas activas" desc={`${kpis.alertas_rojas || 0} EE en rojo`} color="#ef4444" to="/dashboard/alertas" navigate={navigate} />
+        <QuickLink icon="🎯" label="Revisar avance PAL" desc="Indicadores y compromisos" color="#8b5cf6" to="/dashboard/plan-anual" navigate={navigate} />
+        <QuickLink icon="📊" label="Detectar brechas" desc="Comparar establecimientos" color="#f97316" to="/dashboard/ranking" navigate={navigate} />
+        <QuickLink icon="🗺️" label="Explorar territorio" desc={`${kpis.total_establecimientos || '?'} EE (${kpis.ee_con_datos || '?'} con datos)`} color="#10b981" to="/dashboard/mapa" navigate={navigate} />
       </div>
     </div>
   );
