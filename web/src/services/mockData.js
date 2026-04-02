@@ -147,16 +147,16 @@ export const mockDashboard = {
   },
 };
 
-// ─── ALERTS — generadas desde semáforo real de asistencia marzo 2025 ─────────
+// ─── ALERTS — basadas en datos reales 2025, para seguimiento en 2026 ─────────
 export const mockAlerts = [
-  { id: 1, tipo: 'asistencia', severity: 'critical', mensaje: 'CEIA Georgina Salas Dinamarca (Cerro Navia): asistencia 51,1% — muy bajo umbral 80%', rbd: 24754, fecha: '2026-03-28', leida: false },
-  { id: 2, tipo: 'asistencia', severity: 'critical', mensaje: 'Escuela Especial Sgto. Candelaria (Cerro Navia): asistencia 64,2%', rbd: 24804, fecha: '2026-03-28', leida: false },
-  { id: 3, tipo: 'asistencia', severity: 'critical', mensaje: 'Liceo Profesora Gladys Valenzuela (Lo Prado): asistencia 71,6%', rbd: 10091, fecha: '2026-03-27', leida: false },
-  { id: 4, tipo: 'asistencia', severity: 'critical', mensaje: 'Escuela Melvin Jones (Pudahuel): asistencia 71,9%', rbd: 10123, fecha: '2026-03-27', leida: false },
-  { id: 5, tipo: 'asistencia', severity: 'critical', mensaje: 'Escuela Herminda de la Victoria (Cerro Navia): asistencia 73,2%', rbd: 10088, fecha: '2026-03-26', leida: true },
-  { id: 6, tipo: 'asistencia', severity: 'warning', mensaje: 'Liceo Polivalente Los Heroes (Cerro Navia): asistencia 76,1%', rbd: 10075, fecha: '2026-03-26', leida: true },
-  { id: 7, tipo: 'asistencia', severity: 'warning', mensaje: 'Escuela Villa Los Boldos (Pudahuel): asistencia 77,1%', rbd: 10131, fecha: '2026-03-25', leida: true },
-  { id: 8, tipo: 'asistencia', severity: 'warning', mensaje: 'Liceo Centro Experimental Pudahuel Caren: asistencia 79,4%', rbd: 10077, fecha: '2026-03-25', leida: true },
+  { id: 1, tipo: 'asistencia', severity: 'critical', mensaje: 'CEIA Georgina Salas (Cerro Navia): cerr\u00f3 2025 con 51,1% asistencia — verificar situaci\u00f3n 2026', rbd: 24754, fecha: '2026-03-28', leida: false },
+  { id: 2, tipo: 'asistencia', severity: 'critical', mensaje: 'Esc. Especial Sgto. Candelaria (Cerro Navia): cerr\u00f3 2025 con 64,2% — requiere plan de asistencia', rbd: 24804, fecha: '2026-03-28', leida: false },
+  { id: 3, tipo: 'asistencia', severity: 'critical', mensaje: 'Liceo Prof. Gladys Valenzuela (Lo Prado): cerr\u00f3 2025 con 71,6% — seguimiento prioritario', rbd: 10091, fecha: '2026-03-27', leida: false },
+  { id: 4, tipo: 'asistencia', severity: 'critical', mensaje: 'Esc. Melvin Jones (Pudahuel): cerr\u00f3 2025 con 71,9% — revisar inicio 2026', rbd: 10123, fecha: '2026-03-27', leida: false },
+  { id: 5, tipo: 'asistencia', severity: 'critical', mensaje: 'Esc. Herminda de la Victoria (Cerro Navia): cerr\u00f3 2025 con 73,2%', rbd: 10088, fecha: '2026-03-26', leida: true },
+  { id: 6, tipo: 'asistencia', severity: 'warning', mensaje: 'Liceo Los Heroes (Cerro Navia): cerr\u00f3 2025 con 76,1% — monitorear marzo 2026', rbd: 10075, fecha: '2026-03-26', leida: true },
+  { id: 7, tipo: 'asistencia', severity: 'warning', mensaje: 'Esc. Villa Los Boldos (Pudahuel): cerr\u00f3 2025 con 77,1%', rbd: 10131, fecha: '2026-03-25', leida: true },
+  { id: 8, tipo: 'asistencia', severity: 'warning', mensaje: 'Liceo Pudahuel Caren: cerr\u00f3 2025 con 79,4% — cerca del umbral', rbd: 10077, fecha: '2026-03-25', leida: true },
 ];
 
 // ─── ESTABLISHMENTS ─────────────────────────────────────────────

@@ -69,7 +69,7 @@ export default function Dashboard() {
       color: a.severity === 'critical' ? '#ef4444' : '#f59e0b',
     })),
     ...(kpis.alertas_rojas > 0 ? [{
-      text: `${kpis.alertas_rojas} establecimientos con asistencia bajo 80% requieren intervención`,
+      text: `${kpis.alertas_rojas} establecimientos cerraron 2025 con asistencia bajo 80% — verificar estado actual 2026`,
       type: 'brecha',
       color: '#ef4444',
     }] : []),
@@ -202,7 +202,7 @@ export default function Dashboard() {
             boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
             fontSize: 12, lineHeight: 1.5,
           }}>
-            <strong style={{ color: '#ef4444' }}>{kpis.alertas_rojas || 0} establecimientos en rojo</strong> — asistencia bajo 80%.
+            <strong style={{ color: '#ef4444' }}>{kpis.alertas_rojas || 0} EE cerraron 2025 bajo 80% asistencia</strong> — requieren seguimiento prioritario en 2026.
             {top5criticos.length > 0 && ` El más crítico: ${top5criticos[0]?.nombre?.slice(0, 30)} (${top5criticos[0]?.asistencia}%).`}
           </div>
 
@@ -296,7 +296,7 @@ export default function Dashboard() {
             boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
             fontSize: 11, lineHeight: 1.5, textAlign: 'center',
           }}>
-            <Target size={12} style={{ verticalAlign: 'middle', color: '#2563eb' }} /> Umbrales asistencia: <strong style={{ color: '#ef4444' }}>Rojo</strong> &lt;80% · <strong style={{ color: '#f59e0b' }}>Naranja</strong> 80-88% · <strong style={{ color: '#10b981' }}>Verde</strong> &ge;88%
+            <Target size={12} style={{ verticalAlign: 'middle', color: '#2563eb' }} /> Basado en asistencia 2025: <strong style={{ color: '#ef4444' }}>Rojo</strong> &lt;80% · <strong style={{ color: '#f59e0b' }}>Naranja</strong> 80-88% · <strong style={{ color: '#10b981' }}>Verde</strong> &ge;88% — verificar datos 2026 cuando estén disponibles
           </div>
         </div>
       </div>

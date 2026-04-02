@@ -48,10 +48,10 @@ export default function SemaforoCruzado() {
         <div>
           <h3 style={{ fontSize: 16, fontWeight: 700, margin: 0, display: 'flex', alignItems: 'center', gap: 8 }}>
             <AlertTriangle size={18} style={{ color: '#ef4444' }} />
-            Alertas cruzadas — EE con problemas en múltiples áreas
+            EE con alertas cruzadas (datos 2025)
           </h3>
           <p style={{ fontSize: 12, color: 'var(--text-muted)', margin: '4px 0 0' }}>
-            {EE_CRUZADOS.length} establecimientos con rojo en 2 o más dimensiones
+            {EE_CRUZADOS.length} EE cerraron 2025 con problemas en 2 o más dimensiones — seguimiento prioritario 2026
           </p>
         </div>
       </div>

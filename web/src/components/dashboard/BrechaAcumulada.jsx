@@ -73,10 +73,10 @@ export default function BrechaAcumulada() {
         <div>
           <h3 style={{ fontSize: 16, fontWeight: 700, margin: 0, display: 'flex', alignItems: 'center', gap: 8 }}>
             <Target size={18} style={{ color: '#f97316' }} />
-            Proyección a diciembre 2026
+            {'Proyección a diciembre 2026'}
           </h3>
           <p style={{ fontSize: 12, color: 'var(--text-muted)', margin: '4px 0 0' }}>
-            A este ritmo, ¿se cumplen las metas?
+            {'Desde la línea base 2025: ¿se cumplen las metas si se mantiene el ritmo?'}
           </p>
         </div>
         <div style={{ display: 'flex', gap: 8 }}>
@@ -129,7 +129,7 @@ export default function BrechaAcumulada() {
                 <span style={{ fontSize: 10, color: 'var(--text-muted)', marginLeft: 8, fontWeight: 400 }}>{r.instrumento}</span>
               </div>
               <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>
-                Actual: <strong>{r.actual}{r.unidad}</strong> → Proyectado dic: <strong style={{ color: r.llegaAMeta ? '#10b981' : '#ef4444' }}>{r.proyectado}{r.unidad}</strong> · Meta: {r.meta}{r.unidad}
+                Base 2025: <strong>{r.actual}{r.unidad}</strong> {' → '} Proyectado dic 2026: <strong style={{ color: r.llegaAMeta ? '#10b981' : '#ef4444' }}>{r.proyectado}{r.unidad}</strong> · Meta: {r.meta}{r.unidad}
               </div>
             </div>
 
