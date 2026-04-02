@@ -77,7 +77,7 @@ export default function Establecimientos() {
         {resumen.total} establecimientos {excluirAdultos ? '(sin ed. adultos)' : '(todos)'} &middot; {mesNombre} 2025
       </p>
       <div style={{ display: 'flex', gap: 16, fontSize: 12, color: 'var(--text-muted)', marginBottom: 16 }}>
-        <span>Semaforo: <span style={{ color: '#ef4444' }}>●</span> Rojo &lt;75% · <span style={{ color: '#f59e0b' }}>●</span> Naranja 75-82% · <span style={{ color: '#10b981' }}>●</span> Verde &ge;82%</span>
+        <span>Semaforo: <span style={{ color: '#ef4444' }}>●</span> Rojo &lt;80% · <span style={{ color: '#f59e0b' }}>●</span> Naranja 80-88% · <span style={{ color: '#10b981' }}>●</span> Verde &ge;88%</span>
         <span style={{ opacity: 0.6 }}>Fuente: MINEDUC 2025 · Haz clic en un establecimiento para ver su detalle</span>
       </div>
 
@@ -177,7 +177,7 @@ export default function Establecimientos() {
           <tbody>
             {filtered.map(e => (
               <tr key={e.rbd}
-                onClick={() => navigate(`/establecimientos/${e.rbd}`)}
+                onClick={() => navigate(`/dashboard/establecimientos/${e.rbd}`)}
                 style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', cursor: 'pointer' }}
                 onMouseOver={ev => ev.currentTarget.style.background = 'rgba(255,255,255,0.03)'}
                 onMouseOut={ev => ev.currentTarget.style.background = 'transparent'}

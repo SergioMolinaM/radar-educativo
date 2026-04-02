@@ -162,8 +162,8 @@ export default function Dashboard() {
           tooltip={{ text: 'Alumnos matriculados en escuelas, liceos y jardines del SLEP. No incluye educación de adultos.', fuente: 'MINEDUC Matrícula 2025' }} />
         <KpiCard label="Asistencia promedio" value={kpis.asistencia_promedio} unit="%" icon={CalendarCheck} trend={trends.asistencia_variacion_mensual}
           tooltip={{ text: 'Porcentaje promedio de asistencia de escuelas y liceos del SLEP. No incluye educación de adultos ni jardines JUNJI.', fuente: 'MINEDUC Asistencia 2025', periodo: summary?.mes_nombre + ' 2025' }} />
-        <KpiCard label="Ejecución presup." value={kpis.ejecucion_presupuestaria} unit="%" icon={DollarSign}
-          tooltip={{ text: 'Porcentaje del presupuesto anual del SLEP ejecutado a la fecha. Este dato se actualizará con la integración al sistema financiero del SLEP (en desarrollo).', fuente: 'Estimación interna', periodo: 'Q1 2026' }} />
+        <KpiCard label="Ejecución presup." value={kpis.ejecucion_presupuestaria ?? '—'} unit={kpis.ejecucion_presupuestaria != null ? '%' : ''} icon={DollarSign}
+          tooltip={{ text: 'Sin datos reales disponibles. Se integrará con sistema financiero del SLEP.', fuente: 'Pendiente integración', periodo: '—' }} />
       </div>
 
       {/* Semáforo cruzado — EE con problemas en múltiples áreas (va primero: acción inmediata) */}

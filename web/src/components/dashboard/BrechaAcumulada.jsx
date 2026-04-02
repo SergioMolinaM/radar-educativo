@@ -76,7 +76,7 @@ export default function BrechaAcumulada() {
             {'Proyección a diciembre 2026'}
           </h3>
           <p style={{ fontSize: 12, color: 'var(--text-muted)', margin: '4px 0 0' }}>
-            {'Desde la línea base 2025: ¿se cumplen las metas si se mantiene el ritmo?'}
+            {'Desde la línea base 2025: ¿se cumplen las metas si se mantiene el ritmo? (Tasas de avance mensual son estimadas)'}
           </p>
         </div>
         <div style={{ display: 'flex', gap: 8 }}>
@@ -158,7 +158,7 @@ export default function BrechaAcumulada() {
           borderBottom: '7px solid #ffffff',
         }} />
         <strong style={{ color: '#2563eb' }}>¿Cómo se calcula?</strong>{' '}
-        Se proyecta el valor a diciembre usando la tendencia mensual actual. Si al ritmo actual no se alcanza la meta, Radar alerta para que el equipo directivo pueda intervenir a tiempo.
+        Proyección estimada desde línea base 2025. Las tasas de avance son aproximadas y se ajustarán con datos 2026 cuando estén disponibles.
       </div>
     </div>
   );

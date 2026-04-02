@@ -6,32 +6,33 @@
 import { AlertTriangle, School, ChevronRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
-// Datos cruzados reales — EE con peores indicadores del SLEP Barrancas
+// Datos cruzados — solo indicadores verificables de ESTABLECIMIENTOS (MINEDUC 2025)
 const EE_CRUZADOS = [
   {
     rbd: 24754, nombre: 'CEIA Georgina Salas Dinamarca', comuna: 'Cerro Navia',
     dimensiones: [
       { nombre: 'Asistencia', valor: '51,1%', estado: 'rojo', meta: '80%' },
-      { nombre: 'Retención', valor: 'Bajo meta', estado: 'rojo', meta: '90%' },
-      { nombre: 'Titulación TP', valor: 'Bajo meta', estado: 'rojo', meta: '65%' },
+      { nombre: 'Aprobación', valor: '39,9%', estado: 'rojo', meta: '85%' },
+      { nombre: 'Retiro', valor: '9,6%', estado: 'rojo', meta: '<5%' },
     ],
-    alerta: 'Triple rojo: asistencia crítica (51%), retención y titulación bajo meta. CEIA adultos requiere plan especial.',
+    alerta: 'Triple rojo (datos reales MINEDUC): asistencia 51,1%, aprobación 39,9%, retiro 9,6%. CEIA adultos requiere plan especial.',
   },
   {
     rbd: 24804, nombre: 'Escuela Especial Sgto. Candelaria', comuna: 'Cerro Navia',
     dimensiones: [
       { nombre: 'Asistencia', valor: '64,2%', estado: 'rojo', meta: '80%' },
-      { nombre: 'Dotación', valor: 'Incompleta', estado: 'rojo', meta: 'Completa' },
+      { nombre: 'Retiro', valor: '5,6%', estado: 'naranja', meta: '<5%' },
     ],
-    alerta: 'Doble rojo: asistencia muy baja en escuela especial + dotación incompleta.',
+    alerta: 'Asistencia muy baja en escuela especial (64,2%) + retiro sobre meta (5,6%). Datos reales MINEDUC 2025.',
   },
   {
     rbd: 10091, nombre: 'Liceo Profesora Gladys Valenzuela', comuna: 'Lo Prado',
     dimensiones: [
       { nombre: 'Asistencia', valor: '71,6%', estado: 'rojo', meta: '80%' },
-      { nombre: 'SIMCE', valor: 'Bajo promedio', estado: 'rojo', meta: 'Promedio nacional' },
+      { nombre: 'Aprobación', valor: '75,5%', estado: 'rojo', meta: '85%' },
+      { nombre: 'Retiro', valor: '6,1%', estado: 'rojo', meta: '<5%' },
     ],
-    alerta: 'Doble rojo: asistencia bajo 80% + resultados SIMCE bajo promedio.',
+    alerta: 'Triple rojo (datos reales MINEDUC): asistencia 71,6%, aprobación 75,5%, retiro 6,1%.',
   },
 ];
 

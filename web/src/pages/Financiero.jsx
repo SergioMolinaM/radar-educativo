@@ -24,9 +24,10 @@ export default function Financiero() {
 
   if (loading) return <p style={{ color: 'var(--text-muted)', padding: 40 }}>Cargando datos financieros...</p>;
 
-  const barData = (execution?.por_establecimiento || []).map((e) => ({
-    name: e.nombre.length > 18 ? e.nombre.slice(0, 18) + '...' : e.nombre,
-    ejecutado: e.pct,
+  const rawBarData = execution?.por_establecimiento || [];
+  const barData = rawBarData.map((e) => ({
+    name: e.nombre?.length > 18 ? e.nombre.slice(0, 18) + '...' : (e.nombre || ''),
+    ejecutado: e.pct || 0,
   }));
 
   const formatCLP = (n) => '$' + (n / 1000000).toFixed(0) + 'M';
@@ -39,8 +40,23 @@ export default function Financiero() {
         Este módulo permite monitorear la ejecución del presupuesto y las órdenes de compra del SLEP en Mercado Público.
         Ayuda a identificar sub-ejecución temprana y verificar que las compras estén alineadas con las prioridades del PAL.
       </div>
-      <div style={{ background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.3)', borderRadius: 8, padding: '10px 16px', marginBottom: 24, fontSize: 14, color: '#f59e0b' }}>
-        ⚠️ <strong>Vista demostración</strong> — Los datos financieros se conectarán con la API de Mercado Público del SLEP. Las cifras mostradas son ilustrativas.
+      {/* Banner prominente — sin datos reales */}
+      <div style={{
+        padding: '20px 28px', marginBottom: 24, borderRadius: 16,
+        background: '#ffffff', color: '#334155',
+        boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
+        fontSize: 15, lineHeight: 1.7, position: 'relative',
+        border: '2px solid #f59e0b',
+      }}>
+        <div style={{
+          position: 'absolute', top: -10, left: 24,
+          width: 0, height: 0,
+          borderLeft: '10px solid transparent', borderRight: '10px solid transparent',
+          borderBottom: '10px solid #ffffff',
+        }} />
+        <strong style={{ color: '#f59e0b', fontSize: 16 }}>Esta sección no tiene datos reales integrados.</strong>
+        <br />
+        Los valores mostrados son ilustrativos. Se integrará con el sistema financiero del SLEP.
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16, marginBottom: 24 }}>
@@ -53,14 +69,20 @@ export default function Financiero() {
         {/* Ejecución por establecimiento */}
         <div className="glass-panel" style={{ padding: 24 }}>
           <h3 style={{ fontSize: 15, fontWeight: 600, marginBottom: 16 }}>Ejecución por establecimiento</h3>
-          <ResponsiveContainer width="100%" height={250}>
-            <BarChart data={barData} layout="vertical" barSize={18}>
-              <XAxis type="number" domain={[0, 100]} tick={{ fill: '#94a3b8', fontSize: 11 }} axisLine={false} tickLine={false} />
-              <YAxis type="category" dataKey="name" width={140} tick={{ fill: '#94a3b8', fontSize: 11 }} axisLine={false} tickLine={false} />
-              <Tooltip contentStyle={{ background: '#1e293b', border: 'none', borderRadius: 8, fontSize: 13 }} formatter={(v) => `${v}%`} />
-              <Bar dataKey="ejecutado" fill="var(--accent-primary)" radius={[0, 4, 4, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
+          {barData.length > 0 ? (
+            <ResponsiveContainer width="100%" height={250}>
+              <BarChart data={barData} layout="vertical" barSize={18}>
+                <XAxis type="number" domain={[0, 100]} tick={{ fill: '#94a3b8', fontSize: 11 }} axisLine={false} tickLine={false} />
+                <YAxis type="category" dataKey="name" width={140} tick={{ fill: '#94a3b8', fontSize: 11 }} axisLine={false} tickLine={false} />
+                <Tooltip contentStyle={{ background: '#1e293b', border: 'none', borderRadius: 8, fontSize: 13 }} formatter={(v) => `${v}%`} />
+                <Bar dataKey="ejecutado" fill="var(--accent-primary)" radius={[0, 4, 4, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          ) : (
+            <p style={{ color: 'var(--text-muted)', fontSize: 13, textAlign: 'center', padding: 40 }}>
+              Sin datos de ejecución por establecimiento. Se integrará con el sistema financiero del SLEP.
+            </p>
+          )}
         </div>
 
         {/* Órdenes de compra */}

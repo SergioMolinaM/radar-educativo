@@ -94,7 +94,7 @@ export default function MiSlep() {
         <div className="glass-panel" style={{ padding: 24 }}>
           <h3 style={{ fontSize: 15, fontWeight: 600, marginBottom: 8 }}>Distribución semáforo</h3>
           <div style={{ fontSize: 10, color: 'var(--text-muted)', marginBottom: 12, lineHeight: 1.6 }}>
-            Rojo: asistencia &lt;75% · Naranja: 75-82% · Verde: &ge;82%<br/>
+            Rojo: asistencia &lt;80% · Naranja: 80-88% · Verde: &ge;88%<br/>
             Umbrales configurables por el SLEP
           </div>
           <ResponsiveContainer width="100%" height={180}>
@@ -202,7 +202,7 @@ export default function MiSlep() {
                   </thead>
                   <tbody>
                     {filtered.map((e) => (
-                      <tr key={e.rbd} onClick={() => navigate(`/mi-slep/${e.rbd}`)}
+                      <tr key={e.rbd} onClick={() => navigate(`/dashboard/mi-slep/${e.rbd}`)}
                         style={{ cursor: 'pointer', transition: 'background 0.2s' }}
                         onMouseEnter={(ev) => (ev.currentTarget.style.background = 'rgba(255,255,255,0.03)')}
                         onMouseLeave={(ev) => (ev.currentTarget.style.background = 'transparent')}
@@ -210,7 +210,7 @@ export default function MiSlep() {
                         <td style={tdStyle}>{e.rbd}</td>
                         <td style={tdStyle}>{e.nombre}</td>
                         <td style={tdStyle}>{e.matricula.toLocaleString('es-CL')}</td>
-                        <td style={{ ...tdStyle, color: (e.asistencia_pct || 0) < 75 ? 'var(--alert-red)' : (e.asistencia_pct || 0) < 82 ? 'var(--alert-orange)' : 'var(--text-main)', fontWeight: (e.asistencia_pct || 0) < 75 ? 700 : 400 }}>
+                        <td style={{ ...tdStyle, color: (e.asistencia_pct || 0) < 80 ? 'var(--alert-red)' : (e.asistencia_pct || 0) < 88 ? 'var(--alert-orange)' : 'var(--text-main)', fontWeight: (e.asistencia_pct || 0) < 80 ? 700 : 400 }}>
                           {(e.asistencia_pct || 0)}%
                         </td>
                         <td style={{ ...tdStyle, color: e.vulnerabilidad_pct > 70 ? 'var(--alert-red)' : 'var(--text-muted)' }}>

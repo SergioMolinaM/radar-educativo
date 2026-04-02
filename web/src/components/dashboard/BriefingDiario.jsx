@@ -26,12 +26,12 @@ function buildBriefingItems(kpis, alertas) {
     });
   }
 
-  // 2. Compromisos vencidos (simulado — en prod vendría del API)
+  // 2. Compromisos del calendario normativo
   items.push({
     prioridad: 'critica',
     icon: Clock,
-    titulo: '3 compromisos institucionales vencidos',
-    detalle: 'Plan OE1 inasistencia, dotación docente TP y reporte OE4. Atraso de 1 a 7 días.',
+    titulo: 'Compromisos pendientes del calendario normativo',
+    detalle: 'Revisar hitos próximos del PAL y CGE. Verificar estado en calendario de compromisos.',
     link: '/dashboard/mi-slep',
     linkText: 'Ver compromisos',
   });
@@ -40,14 +40,14 @@ function buildBriefingItems(kpis, alertas) {
   items.push({
     prioridad: 'alerta',
     icon: TrendingDown,
-    titulo: '3 de 5 indicadores clave no alcanzan meta al ritmo actual',
-    detalle: 'Inasistencia crónica, docentes en norma y titulación TP proyectan brecha a diciembre.',
+    titulo: 'Indicadores clave con brecha proyectada a diciembre',
+    detalle: 'Revisar proyección de brechas: inasistencia crónica, docentes en norma y titulación TP requieren aceleración.',
     link: '/dashboard/enep',
     linkText: 'Ver proyección',
   });
 
   // 4. Próximo hito normativo
-  const diasDIA = 13; // días hasta DIA Lectura 15 abril
+  const diasDIA = Math.ceil((new Date('2026-04-15') - new Date()) / (1000*60*60*24));
   items.push({
     prioridad: 'info',
     icon: Calendar,
@@ -62,7 +62,7 @@ function buildBriefingItems(kpis, alertas) {
     prioridad: 'alerta',
     icon: School,
     titulo: '3 EE con problemas en múltiples dimensiones',
-    detalle: 'Liceo Polivalente Cerro Navia: triple rojo (asistencia + SIMCE + retención).',
+    detalle: 'CEIA Georgina Salas: asistencia 51,1% + aprobación 39,9%. Requiere intervención integral.',
     link: '/dashboard/establecimientos',
     linkText: 'Ver establecimientos',
   });

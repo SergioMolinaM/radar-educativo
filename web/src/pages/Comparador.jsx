@@ -88,7 +88,19 @@ export default function Comparador() {
         </button>
       </div>
 
-      {error && <div style={{ color: 'var(--alert-red)', marginBottom: 16 }}>{error}</div>}
+      {error && (
+        <div style={{
+          padding: '20px 28px', marginBottom: 24, borderRadius: 16,
+          background: '#ffffff', color: '#334155',
+          boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
+          fontSize: 14, lineHeight: 1.7,
+          border: '2px solid #3b82f6',
+        }}>
+          <strong style={{ color: '#3b82f6' }}>El comparador requiere seleccionar establecimientos.</strong>
+          <br />
+          En modo demo, usa la vista de Brechas entre EE para comparar. La API de comparación no está disponible en este momento.
+        </div>
+      )}
 
       {establecimientos.length > 0 && (
         <>

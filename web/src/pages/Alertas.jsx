@@ -1,13 +1,19 @@
 import { useState, useEffect } from 'react';
-import { AlertTriangle, Filter } from 'lucide-react';
+import { AlertTriangle } from 'lucide-react';
 import { alertsApi } from '../services/api';
-import SemaforoTag from '../components/shared/SemaforoTag';
 
 const FILTERS = [
   { value: '', label: 'Todas' },
-  { value: 'rojo', label: 'Rojas' },
-  { value: 'naranja', label: 'Naranjas' },
+  { value: 'critical', label: 'Críticas' },
+  { value: 'warning', label: 'Advertencias' },
+  { value: 'info', label: 'Info' },
 ];
+
+const SEVERITY_STYLES = {
+  critical: { color: '#ef4444', bg: 'rgba(239,68,68,0.08)', label: 'Crítica' },
+  warning: { color: '#f59e0b', bg: 'rgba(245,158,11,0.08)', label: 'Advertencia' },
+  info: { color: '#3b82f6', bg: 'rgba(59,130,246,0.08)', label: 'Info' },
+};
 
 export default function Alertas() {
   const [alerts, setAlerts] = useState([]);
@@ -17,7 +23,11 @@ export default function Alertas() {
   useEffect(() => {
     setLoading(true);
     alertsApi.list(filter || undefined)
-      .then(({ data }) => setAlerts(data.alerts || []))
+      .then(({ data }) => {
+        let list = data.alerts || data || [];
+        if (!Array.isArray(list)) list = [];
+        setAlerts(list);
+      })
       .catch(() => {})
       .finally(() => setLoading(false));
   }, [filter]);
@@ -63,33 +73,32 @@ export default function Alertas() {
         </div>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-          {alerts.map((a) => (
-            <div key={a.id} className="glass-panel" style={{ padding: 20 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                  <AlertTriangle size={18} style={{ color: a.severidad === 'rojo' ? 'var(--alert-red)' : 'var(--alert-orange)' }} />
-                  <div>
-                    <div style={{ fontWeight: 600, fontSize: 14 }}>{a.establecimiento}</div>
-                    <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>RBD {a.rbd} &middot; {a.fecha_deteccion}</div>
+          {alerts.map((a) => {
+            const sev = SEVERITY_STYLES[a.severity] || SEVERITY_STYLES.info;
+            return (
+              <div key={a.id} className="glass-panel" style={{ padding: 20, opacity: a.leida ? 0.7 : 1 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                    <AlertTriangle size={18} style={{ color: sev.color }} />
+                    <div>
+                      <div style={{ fontWeight: 600, fontSize: 14 }}>
+                        {a.tipo?.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}
+                        {!a.leida && <span style={{ marginLeft: 8, fontSize: 10, color: sev.color, fontWeight: 700 }}>NUEVA</span>}
+                      </div>
+                      <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>RBD {a.rbd} &middot; {a.fecha}</div>
+                    </div>
                   </div>
+                  <span style={{
+                    fontSize: 11, padding: '3px 10px', borderRadius: 12,
+                    background: sev.bg, color: sev.color, fontWeight: 600,
+                  }}>
+                    {sev.label}
+                  </span>
                 </div>
-                <SemaforoTag value={a.severidad} size="sm" />
+                <p style={{ fontSize: 14, margin: '0 0 8px', lineHeight: 1.5 }}>{a.mensaje}</p>
               </div>
-              <p style={{ fontSize: 14, margin: '0 0 8px', lineHeight: 1.5 }}>{a.mensaje}</p>
-              <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 10 }}>
-                Valor actual: <strong>{a.valor}</strong> · Umbral: {a.umbral} · Tipo: {a.tipo?.replace(/_/g, ' ')}
-              </div>
-              <div style={{
-                padding: '10px 14px',
-                background: 'rgba(59, 130, 246, 0.08)',
-                borderRadius: 8,
-                fontSize: 13,
-                color: 'var(--accent-primary)',
-              }}>
-                <strong>¿Qué hacer?</strong> {a.accion_sugerida}
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>
