@@ -9,6 +9,9 @@ import { dashboardApi, alertsApi, slepApi } from '../services/api';
 import KpiCard from './shared/KpiCard';
 import CompromisosPanel from './dashboard/CompromisosPanel';
 import ENEPPanel from './dashboard/ENEPPanel';
+import TimelineNormativa from './dashboard/TimelineNormativa';
+import BrechaAcumulada from './dashboard/BrechaAcumulada';
+import SemaforoCruzado from './dashboard/SemaforoCruzado';
 
 const PIE_COLORS = ['var(--alert-red)', 'var(--alert-orange)', 'var(--alert-green)'];
 
@@ -160,6 +163,15 @@ export default function Dashboard() {
 
       {/* ENEP — Objetivos Estratégicos con alertas */}
       <ENEPPanel />
+
+      {/* Semáforo cruzado — EE con problemas en múltiples áreas */}
+      <SemaforoCruzado />
+
+      {/* Proyección y calendario en 2 columnas */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 0 }}>
+        <BrechaAcumulada />
+        <TimelineNormativa />
+      </div>
 
       {/* Fila principal: Compromisos + Alertas urgentes */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 24 }}>
