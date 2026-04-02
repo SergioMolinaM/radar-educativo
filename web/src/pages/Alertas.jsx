@@ -27,7 +27,7 @@ export default function Alertas() {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
         <div>
           <h2 style={{ fontSize: 22, fontWeight: 700, marginBottom: 4 }}>Alertas</h2>
-          <p style={{ color: 'var(--text-muted)', fontSize: 14, marginBottom: 6 }}>Sistema de alerta temprana basado en datos 2025</p>
+          <p style={{ color: 'var(--text-muted)', fontSize: 14, marginBottom: 6 }}>Sistema de alerta temprana — datos base 2025, gestión 2026</p>
           <div style={{ fontSize: 11, color: 'var(--text-muted)', lineHeight: 1.6, maxWidth: 600 }}>
             Las alertas se generan automáticamente al detectar indicadores fuera de rango:
             asistencia bajo el umbral del SLEP, tasa de retiro mayor a 5%, aprobación bajo 85%, o microescuelas con menos de 30 alumnos.

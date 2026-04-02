@@ -309,7 +309,7 @@ export default function ENEPPanel({ fullPage = false }) {
             )}
           </div>
           <p style={{ fontSize: 12, color: 'var(--text-muted)', margin: 0 }}>
-            SLEP {slep} · {ee} establecimientos · {matricula.toLocaleString('es-CL')} alumnos · Datos {anio}
+            SLEP {slep} · {ee} establecimientos · {matricula.toLocaleString('es-CL')} alumnos · Datos base {anio}, gestión 2026
           </p>
         </div>
         {!fullPage && (

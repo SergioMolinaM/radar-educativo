@@ -51,7 +51,7 @@ export default function Ranking() {
     <div className="animate-fade-in">
       <h2 style={{ fontSize: 22, fontWeight: 700, marginBottom: 4 }}>Comparador de brechas entre establecimientos</h2>
       <p style={{ color: 'var(--text-muted)', fontSize: 14, marginBottom: 24 }}>
-        {ranking.length} establecimientos &middot; Datos 2025
+        {ranking.length} establecimientos &middot; Datos base 2025 &middot; Gestión 2026
       </p>
 
       {/* Metric selector */}

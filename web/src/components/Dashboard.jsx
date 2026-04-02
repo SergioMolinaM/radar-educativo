@@ -12,6 +12,7 @@ import ENEPPanel from './dashboard/ENEPPanel';
 import TimelineNormativa from './dashboard/TimelineNormativa';
 import BrechaAcumulada from './dashboard/BrechaAcumulada';
 import SemaforoCruzado from './dashboard/SemaforoCruzado';
+import BriefingDiario from './dashboard/BriefingDiario';
 
 const PIE_COLORS = ['var(--alert-red)', 'var(--alert-orange)', 'var(--alert-green)'];
 
@@ -21,6 +22,7 @@ export default function Dashboard() {
   const [tendencia, setTendencia] = useState(null);
   const [alertas, setAlertas] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [showBriefing, setShowBriefing] = useState(true);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -75,6 +77,9 @@ export default function Dashboard() {
 
   return (
     <div className="animate-fade-in">
+      {/* Briefing diario — popup al entrar */}
+      {showBriefing && <BriefingDiario kpis={kpis} alertas={alertas} onClose={() => setShowBriefing(false)} />}
+
       {/* Header operativo */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 16 }}>
         <div>
@@ -161,17 +166,17 @@ export default function Dashboard() {
           tooltip={{ text: 'Porcentaje del presupuesto anual del SLEP ejecutado a la fecha. Este dato se actualizará con la integración al sistema financiero del SLEP (en desarrollo).', fuente: 'Estimación interna', periodo: 'Q1 2026' }} />
       </div>
 
-      {/* ENEP — Objetivos Estratégicos con alertas */}
-      <ENEPPanel />
-
-      {/* Semáforo cruzado — EE con problemas en múltiples áreas */}
+      {/* Semáforo cruzado — EE con problemas en múltiples áreas (va primero: acción inmediata) */}
       <SemaforoCruzado />
 
       {/* Proyección y calendario en 2 columnas */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 0 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 24 }}>
         <BrechaAcumulada />
         <TimelineNormativa />
       </div>
+
+      {/* ENEP — Objetivos Estratégicos con alertas */}
+      <ENEPPanel />
 
       {/* Fila principal: Compromisos + Alertas urgentes */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 24 }}>
