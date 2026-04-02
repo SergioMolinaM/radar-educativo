@@ -132,8 +132,8 @@ export default function BriefingDiario({ kpis, alertas, onClose }) {
 
       {/* Panel briefing */}
       <div style={{
-        position: 'fixed', top: '50%', left: '50%',
-        transform: 'translate(-50%, -50%)',
+        position: 'fixed', top: 20, left: '50%',
+        transform: 'translateX(-50%)',
         zIndex: 9999,
         width: '90%', maxWidth: 580, maxHeight: '85vh',
         overflowY: 'auto',

@@ -348,7 +348,7 @@ export default function ENEPPanel({ fullPage = false }) {
           <strong>Verde</strong> = Sobre la meta o dentro del rango
         </span>
         <span style={{ display: 'flex', alignItems: 'center', gap: 6, color: '#64748b' }}>
-          Haz clic en <AlertTriangle size={11} style={{ color: '#ef4444' }} /> para ver detalle y accion sugerida
+          Haz clic en <AlertTriangle size={11} style={{ color: '#ef4444' }} /> para ver detalle y acci\u00f3n sugerida
         </span>
       </div>
 

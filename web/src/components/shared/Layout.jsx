@@ -13,14 +13,14 @@ import RadarLogo from './RadarLogo';
 const NAV_MODULES = [
   {
     id: 'gestion',
-    label: 'Gestión',
+    label: 'Gesti\u00f3n',
     icon: LayoutDashboard,
     color: '#3b82f6',
     items: [
       { to: '/dashboard', icon: LayoutDashboard, label: 'Panel general' },
+      { to: '/dashboard/alertas', icon: AlertTriangle, label: 'Alertas' },
       { to: '/dashboard/establecimientos', icon: School, label: 'Establecimientos' },
       { to: '/dashboard/indicadores', icon: TrendingUp, label: 'Rendimiento y SIMCE' },
-      { to: '/dashboard/alertas', icon: AlertTriangle, label: 'Alertas' },
     ],
   },
   {
@@ -39,18 +39,18 @@ const NAV_MODULES = [
     icon: ClipboardCheck,
     color: '#8b5cf6',
     items: [
-      { to: '/dashboard/enep', icon: Target, label: 'ENEP — Objetivos' },
-      { to: '/dashboard/plan-anual', icon: ClipboardCheck, label: 'Avance PAL' },
+      { to: '/dashboard/enep', icon: Target, label: 'ENEP' },
+      { to: '/dashboard/plan-anual', icon: ClipboardCheck, label: 'Avance PAL 2026' },
       { to: '/dashboard/mi-slep', icon: Building2, label: 'Compromisos CGE' },
     ],
   },
   {
     id: 'finanzas',
-    label: 'Administración y Finanzas',
+    label: 'Administraci\u00f3n y Finanzas',
     icon: DollarSign,
     color: '#f59e0b',
     items: [
-      { to: '/dashboard/financiero', icon: DollarSign, label: 'Ejecución presupuestaria' },
+      { to: '/dashboard/financiero', icon: DollarSign, label: 'Ejecuci\u00f3n presupuestaria' },
     ],
   },
   {
